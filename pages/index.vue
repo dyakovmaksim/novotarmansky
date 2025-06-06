@@ -1,11 +1,13 @@
 <template>
   <NuxtLayout name="page-layout">
-    Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit aut non
-    nemo illo pariatur voluptatem est sapiente, asperiores quas quo placeat
-    dolore nam repellat autem expedita exercitationem facilis laborum quia!
+    <LocationSection />
+    <AboutUs />
   </NuxtLayout>
 </template>
 
-<script setup></script>
+<script setup>
+import LocationSection from "~/components/LocationSection.vue";
+import AboutUs from "~/components/AboutUs.vue";
+</script>
 
 <style scoped lang="scss"></style>
