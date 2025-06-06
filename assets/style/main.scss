@@ -1,0 +1,14 @@
+@import "../style/font.scss";
+@import "../style/var.scss";
+
+* {
+  font-family: Unageo;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
