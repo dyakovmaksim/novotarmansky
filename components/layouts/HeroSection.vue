@@ -91,14 +91,14 @@
     text-decoration: none;
     border: none;
     cursor: pointer;
-    transition: background 0.18s;
+    transition: 0.3s;
 
     &--white {
       background: var(--primary);
       color: white;
       border: 2px solid white;
       &:hover {
-        background: #f8f3ed;
+        scale: 1.05;
       }
     }
     &--beige {
@@ -106,7 +106,7 @@
       color: var(--primary);
       border: 2px solid var(--primary);
       &:hover {
-        background: #a68b6a;
+        scale: 1.05;
       }
     }
   }
