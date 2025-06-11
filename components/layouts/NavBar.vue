@@ -22,14 +22,14 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 22px 48px 18px 48px;
+    padding: 18px 0px 18px 0px;
     width: 1200px;
     margin: 0 auto;
 
     &__logo {
       color: #fff;
       font-weight: 600;
-      font-size: 36px;
+      font-size: 24px;
       letter-spacing: 0.5px;
     }
 
@@ -40,7 +40,7 @@
 
       li a {
         color: #fff;
-        font-size: 24px;
+        font-size: 16px;
         text-decoration: none;
         font-weight: 500;
         transition: opacity 0.2s;

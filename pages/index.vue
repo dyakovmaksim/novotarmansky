@@ -1,9 +1,9 @@
 <template>
   <NuxtLayout name="page-layout">
-    <LocationSection />
-    <BookingSection />
     <AboutUs />
     <CarouselSection />
+    <LocationSection />
+    <BookingSection />
   </NuxtLayout>
 </template>
 

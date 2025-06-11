@@ -19,16 +19,16 @@
 .footer {
   width: 100%;
   background-color: white;
-  padding: 32px 0;
+  padding: 20px 0;
   box-sizing: border-box;
 }
 
 .footer-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 32px 48px;
-  border: 5px solid var(--primary);
-  border-radius: 36px;
+  padding: 16px 32px;
+  border: 3px solid var(--primary);
+  border-radius: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -36,7 +36,7 @@
 }
 
 .footer-logo {
-  font-size: 36px;
+  font-size: 24px;
   color: var(--primary);
 }
 
@@ -54,7 +54,7 @@
 }
 
 .footer-links a {
-  font-size: 26px;
+  font-size: 16px;
   color: var(--primary);
   text-decoration: none; /* Убираем подчеркивание */
   position: relative;

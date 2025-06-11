@@ -110,11 +110,12 @@ function submit() {
 
 <style lang="scss" scoped>
 .booking-section {
-  border: 5px solid var(--primary);
+  border: 4px solid var(--primary);
   border-radius: 30px;
-  padding: 48px;
+  padding: 24px;
   display: flex;
   justify-content: center;
+  margin-bottom: 40px;
 
   &__content {
     display: flex;
@@ -236,6 +237,5 @@ function submit() {
 
 .booking-calendar {
   min-width: 320px;
-  padding: 8px 0;
 }
 </style>
