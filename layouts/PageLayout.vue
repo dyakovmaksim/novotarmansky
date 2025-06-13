@@ -61,9 +61,40 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 main {
-  width: 1200px;
+  max-width: 1200px; /* Устанавливаем максимальную ширину */
+  width: 90%; /* Используем процентную ширину для адаптивности */
   margin: 0 auto;
-  margin-top: 200px;
+  margin-top: 180px; /* Отступ сверху по умолчанию */
+  box-sizing: border-box; /* Важно для padding */
+  padding: 0 16px; /* Базовый padding для всех разрешений */
+}
+
+/* Media Queries для main в layout */
+
+/* Для экранов 1280px и меньше */
+@media (max-width: 1280px) {
+  main {
+    width: 90%; /* Отступы по бокам */
+    padding: 0 20px; /* Немного больший отступ */
+  }
+}
+
+/* Для экранов 720px и меньше (планшеты) */
+@media (max-width: 720px) {
+  main {
+    margin-top: 100px; /* Уменьшаем отступ сверху, учитывая изменения в HeroSection */
+    width: 95%; /* Чуть больше ширина, меньше отступы */
+    padding: 0 15px; /* Уменьшаем отступ */
+  }
+}
+
+/* Для экранов 375px и меньше (мобильные телефоны) */
+@media (max-width: 375px) {
+  main {
+    margin-top: 80px; /* Еще уменьшаем отступ */
+    width: 95%; /* Сохраняем ширину */
+    padding: 0 10px; /* Еще уменьшаем отступ */
+  }
 }
 
 .scroll-to-top-button {
@@ -82,12 +113,26 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-
   transition: background-color 0.2s, transform 0.2s;
 
   &:hover {
     background-color: #bd9e7e;
     transform: translateY(-3px);
+  }
+
+  /* Адаптивность для кнопки "Наверх" */
+  @media (max-width: 720px) {
+    width: 45px;
+    height: 45px;
+    bottom: 20px;
+    right: 20px;
+  }
+
+  @media (max-width: 375px) {
+    width: 40px;
+    height: 40px;
+    bottom: 15px;
+    right: 15px;
   }
 }
 

@@ -235,7 +235,7 @@ onBeforeUnmount(() => {
     &-dropdown {
       position: absolute;
       left: -2px;
-      top: 55px;
+      top: 65px;
       background: #fff;
       border: 2px solid var(--primary);
       border-radius: 12px;
