@@ -4,14 +4,13 @@
       <NuxtLink to="/">
         <div class="footer-logo">novotarmanskiy house</div>
       </NuxtLink>
-
-      <ul class="footer-links">
-        <li><NuxtLink to="/booking">Бронирование</NuxtLink></li>
-        <li><NuxtLink to="/aboutus">О нас</NuxtLink></li>
-        <li><NuxtLink to="/photos">Фото</NuxtLink></li>
-        <li><NuxtLink to="/promotion">Акции</NuxtLink></li>
-        <li><NuxtLink to="/contacts">Контакты</NuxtLink></li>
-      </ul>
+      <div class="footer-nav">
+        <NuxtLink to="/booking">Бронирование</NuxtLink>
+        <NuxtLink to="/aboutus">О нас</NuxtLink>
+        <NuxtLink to="/photos">Фото</NuxtLink>
+        <NuxtLink to="/promotion">Акции</NuxtLink>
+        <NuxtLink to="/contacts">Контакты</NuxtLink>
+      </div>
     </div>
   </footer>
 </template>
@@ -21,20 +20,26 @@
 <style scoped>
 .footer {
   width: 100%;
-  background-color: white;
-  padding: 20px 0;
+  margin-top: auto;
   box-sizing: border-box;
+  background-color: transparent;
 }
 
 .footer-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 16px 32px;
-  border: 3px solid var(--primary);
-  border-radius: 24px;
+  padding: 16px 40px;
+  background-color: white;
+  border-top: 4px solid var(--primary);
+  border-left: 4px solid var(--primary);
+  border-right: 4px solid var(--primary);
+  border-bottom: none;
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 48px;
   box-sizing: border-box;
 }
 
@@ -43,32 +48,27 @@
   color: var(--primary);
 }
 
-.footer-links {
-  display: flex;
+.footer-nav {
   gap: 24px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
+  display: flex;
 }
 
-.footer-links li {
-  margin: 0;
-  padding: 0;
-}
-
-.footer-links a {
+.footer-nav > a {
   font-size: 16px;
   color: var(--primary);
   text-decoration: none;
   position: relative;
   transition: color 0.2s ease;
+  justify-content: end;
 }
 
-.footer-links a:hover {
+.footer-nav > a:hover {
   color: var(--primary);
 }
 
-.footer-links a.router-link-exact-active::after {
-  display: none;
+/* Стиль для активной ссылки (как "О нас" на изображении) */
+.footer-nav > a.router-link-exact-active {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 </style>

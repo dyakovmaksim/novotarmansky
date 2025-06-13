@@ -50,7 +50,7 @@ export default {
 .location-text p {
   margin: 0;
   line-height: 1.5;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .map-container {

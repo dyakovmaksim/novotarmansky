@@ -4,9 +4,9 @@
     <div class="hero__content">
       <div class="hero__card">
         <div class="hero__text">
-          Добро пожаловать в Novotarmanskiy house <br />
-          – ваш идеальный выбор для аренды уютного дома в живописном
-          уголке Тюмени!
+          Добро пожаловать в Novotarmanskiy house <br />
+          – ваш идеальный выбор для аренды уютного дома в живописном уголке
+          Тюмени!
         </div>
         <div class="hero__buttons">
           <NuxtLink to="/#photos" class="hero__btn hero__btn--white"
@@ -59,7 +59,7 @@
     bottom: -140px;
     z-index: 2;
     background: var(--primary);
-    border-radius: 20px;
+    border-radius: 30px;
     padding: 24px;
     box-shadow: 0 4px 32px rgba(0, 0, 0, 0.07);
     display: flex;
