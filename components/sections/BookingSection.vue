@@ -19,14 +19,46 @@
             {{ checkout ? formatDate(checkout) : "Отъезд" }}
           </button>
         </div>
-        <div class="booking-form__guests">
-          <input
-            class="booking-form__input"
-            type="text"
-            v-model="guestsText"
-            readonly
+        <div class="booking-form__guests" ref="guestsRef">
+          <div
+            class="booking-form__guests-trigger"
             @click="showGuests = !showGuests"
-          />
+          >
+            <input
+              class="booking-form__input"
+              type="text"
+              v-model="guestsText"
+              readonly
+              style="
+                pointer-events: none;
+                background: transparent;
+                border: none;
+                box-shadow: none;
+              "
+            />
+
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              style="
+                position: absolute;
+                right: 16px;
+                top: 50%;
+                transform: translateY(-50%);
+              "
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 8L10 13L15 8"
+                stroke="#a68b6a"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
           <div v-if="showGuests" class="booking-form__guests-dropdown">
             <div>
               <span>Взрослые:</span>
@@ -59,16 +91,17 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import Calendar from "../Calendar.vue";
 
-// Состояния формы
 const checkin = ref(null);
 const checkout = ref(null);
 const selecting = ref("checkin");
 const showGuests = ref(false);
 const adults = ref(1);
 const children = ref(0);
+
+const guestsRef = ref(null);
 
 const guestsText = computed(
   () =>
@@ -85,10 +118,11 @@ function formatDate(date) {
 function onSelectDate(date) {
   if (selecting.value === "checkin") {
     checkin.value = date;
-    if (checkout.value && checkout.value <= date) checkout.value = null;
+
+    if (checkout.value && checkout.value < date) checkout.value = null;
     selecting.value = "checkout";
   } else {
-    if (checkin.value && date > checkin.value) {
+    if (checkin.value && date >= checkin.value) {
       checkout.value = date;
       selecting.value = "";
     } else {
@@ -106,6 +140,19 @@ function submit() {
     )}\nОтъезд: ${formatDate(checkout.value)}\nГостей: ${guestsText.value}`
   );
 }
+
+function handleClickOutside(event) {
+  if (guestsRef.value && !guestsRef.value.contains(event.target)) {
+    showGuests.value = false;
+  }
+}
+
+onMounted(() => {
+  document.addEventListener("mousedown", handleClickOutside);
+});
+onBeforeUnmount(() => {
+  document.removeEventListener("mousedown", handleClickOutside);
+});
 </script>
 
 <style lang="scss" scoped>
@@ -121,7 +168,7 @@ function submit() {
     display: flex;
     gap: 48px;
     justify-content: center;
-    align-items: start;
+    align-items: flex-start;
   }
 }
 
@@ -161,15 +208,33 @@ function submit() {
 
   &__guests {
     position: relative;
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+
+    &-trigger {
+      position: relative;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      width: 100%;
+    }
 
     input.booking-form__input {
       cursor: pointer;
       user-select: none;
+      width: 100%;
+      background: #fff;
+      border: 2px solid var(--primary);
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 20px;
+      outline: none;
+      transition: 0.3s;
     }
 
     &-dropdown {
       position: absolute;
-      left: 0;
+      left: -2px;
       top: 55px;
       background: #fff;
       border: 2px solid var(--primary);

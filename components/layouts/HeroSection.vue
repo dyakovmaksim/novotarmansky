@@ -28,16 +28,16 @@
   height: 360px;
   background: #fff;
   border-bottom-right-radius: 48px;
-  overflow: visible;
   display: flex;
   align-items: flex-end;
 
   &__bg {
     position: absolute;
     top: 0;
-    left: 0;
-    width: 100%;
+    left: -2px;
+    width: auto;
     height: 100%;
+    min-width: 100%;
     object-fit: cover;
     object-position: center 55%;
     border-radius: 0 0 161px 161px;
@@ -46,10 +46,12 @@
 
   &__content {
     position: relative;
-    width: 1200px;
+    width: 100%; /* расширить на всю ширину */
+    max-width: 1200px;
     margin: 0 auto;
     display: flex;
     z-index: 1;
+    padding: 0 16px; /* добавить внутренние отступы для адаптивности */
   }
 
   &__card {
