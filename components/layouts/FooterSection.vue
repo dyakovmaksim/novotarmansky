@@ -1,13 +1,16 @@
 <template>
   <footer class="footer">
     <div class="footer-container">
-      <div class="footer-logo">novotarmanskiy house</div>
+      <NuxtLink to="/">
+        <div class="footer-logo">novotarmanskiy house</div>
+      </NuxtLink>
+
       <ul class="footer-links">
-        <li><NuxtLink to="/#booking">Бронирование</NuxtLink></li>
-        <li><NuxtLink to="/#aboutus">О нас</NuxtLink></li>
-        <li><NuxtLink to="/#photos">Фото</NuxtLink></li>
-        <li><NuxtLink to="/#promotion">Акции</NuxtLink></li>
-        <li><NuxtLink to="/#contacts">Контакты</NuxtLink></li>
+        <li><NuxtLink to="/booking">Бронирование</NuxtLink></li>
+        <li><NuxtLink to="/aboutus">О нас</NuxtLink></li>
+        <li><NuxtLink to="/photos">Фото</NuxtLink></li>
+        <li><NuxtLink to="/promotion">Акции</NuxtLink></li>
+        <li><NuxtLink to="/contacts">Контакты</NuxtLink></li>
       </ul>
     </div>
   </footer>
@@ -56,7 +59,7 @@
 .footer-links a {
   font-size: 16px;
   color: var(--primary);
-  text-decoration: none; /* Убираем подчеркивание */
+  text-decoration: none;
   position: relative;
   transition: color 0.2s ease;
 }
@@ -65,7 +68,6 @@
   color: var(--primary);
 }
 
-/* Убираем подчеркивание для активной ссылки */
 .footer-links a.router-link-exact-active::after {
   display: none;
 }

@@ -1,13 +1,16 @@
 <template>
   <nav class="navbar">
     <div class="nav-container">
-      <div class="nav-container__logo">novotarmanskiy house</div>
+      <NuxtLink to="/">
+        <div class="nav-container__logo">novotarmanskiy house</div>
+      </NuxtLink>
+
       <ul class="nav-container__links">
-        <li><NuxtLink to="/#booking">Бронирование</NuxtLink></li>
-        <li><NuxtLink to="/#aboutus">О нас</NuxtLink></li>
-        <li><NuxtLink to="/#photos">Фото</NuxtLink></li>
-        <li><NuxtLink to="/#promotion">Акции</NuxtLink></li>
-        <li><NuxtLink to="/#contacts">Контакты</NuxtLink></li>
+        <li><NuxtLink to="/booking">Бронирование</NuxtLink></li>
+        <li><NuxtLink to="/aboutus">О нас</NuxtLink></li>
+        <li><NuxtLink to="/photos">Фото</NuxtLink></li>
+        <li><NuxtLink to="/promotion">Акции</NuxtLink></li>
+        <li><NuxtLink to="/contacts">Контакты</NuxtLink></li>
       </ul>
     </div>
   </nav>
