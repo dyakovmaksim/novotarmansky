@@ -4,7 +4,7 @@
     <div class="hero__content">
       <div class="hero__card">
         <div class="hero__text">
-          Добро пожаловать в Novotarmanskiy house <br />
+          Добро пожаловать в Novotarmanskiy house<br />
           – ваш идеальный выбор для аренды уютного дома в живописном уголке
           Тюмени!
         </div>
@@ -25,92 +25,156 @@
 .hero {
   position: relative;
   width: 100%;
-  height: 360px;
+  min-height: 280px;
   background: #fff;
   border-bottom-right-radius: 48px;
   display: flex;
   align-items: flex-end;
+}
 
-  &__bg {
-    position: absolute;
-    top: 0;
-    left: -2px;
+.hero__bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 55%;
+  border-radius: 0 0 161px 161px;
+  z-index: 0;
+}
+
+.hero__content {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+  z-index: 1;
+  display: flex;
+}
+
+.hero__card {
+  position: absolute;
+  left: 50%;
+  bottom: -60px;
+  transform: translateX(-50%);
+  background: var(--primary);
+  border-radius: 30px;
+  padding: 12px;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: calc(100% - 32px);
+  max-width: 320px;
+  z-index: 2;
+}
+
+.hero__text {
+  color: #fff;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.hero__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.hero__btn {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  transition: transform 0.3s;
+}
+
+.hero__btn:hover {
+  transform: scale(1.05);
+}
+
+.hero__btn--white {
+  background: var(--primary);
+  color: #fff;
+  border: 2px solid #fff;
+}
+
+.hero__btn--beige {
+  background: #fff;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+@media (min-width: 576px) {
+  .hero {
+    min-height: 200px;
+  }
+
+  .hero__bg {
+    border-radius: 0 0 60px 60px;
+  }
+
+  .hero__card {
+    bottom: -80px;
+    padding: 16px;
+    max-width: 480px;
+  }
+  .hero__text {
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+  .hero__buttons {
+    flex-direction: row;
+    gap: 12px;
     width: auto;
-    height: 100%;
-    min-width: 100%;
-    object-fit: cover;
-    object-position: center 55%;
-    border-radius: 0 0 161px 161px;
-    z-index: 0;
+  }
+  .hero__btn {
+    width: auto;
+    font-size: 16px;
+    padding: 8px 16px;
+  }
+}
+
+@media (min-width: 768px) {
+  .hero {
+    min-height: 420px;
   }
 
-  &__content {
-    position: relative;
-    width: 100%; /* расширить на всю ширину */
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    z-index: 1;
-    padding: 0 16px; /* добавить внутренние отступы для адаптивности */
+  .hero__card {
+    bottom: -100px;
+    padding: 20px;
+    max-width: 600px;
   }
+  .hero__text {
+    font-size: 24px;
+  }
+  .hero__btn {
+    font-size: 18px;
+    padding: 10px 20px;
+  }
+}
 
-  &__card {
-    position: absolute;
-    left: 0;
-    right: 0;
+@media (min-width: 1024px) {
+  .hero {
+    min-height: 480px;
+  }
+  .hero__card {
     bottom: -140px;
-    z-index: 2;
-    background: var(--primary);
-    border-radius: 30px;
     padding: 24px;
-    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.07);
-    display: flex;
-    width: fit-content;
-    flex-direction: column;
-    align-items: flex-start;
-
     max-width: 830px;
-    min-width: 320px;
   }
-
-  &__text {
-    color: #fff;
+  .hero__text {
     font-size: 32px;
-    font-weight: 400;
-    margin-bottom: 20px;
   }
-
-  &__buttons {
-    display: flex;
-    gap: 16px;
-  }
-
-  &__btn {
-    padding: 10px 16px;
-    border-radius: 16px;
+  .hero__btn {
     font-size: 20px;
-    font-weight: 500;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: 0.3s;
-
-    &--white {
-      background: var(--primary);
-      color: white;
-      border: 2px solid white;
-      &:hover {
-        scale: 1.05;
-      }
-    }
-    &--beige {
-      background: white;
-      color: var(--primary);
-      border: 2px solid var(--primary);
-      &:hover {
-        scale: 1.05;
-      }
-    }
+    padding: 12px 24px;
   }
 }
 </style>

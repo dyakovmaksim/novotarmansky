@@ -66,7 +66,6 @@
   color: var(--primary);
 }
 
-/* Стиль для активной ссылки (как "О нас" на изображении) */
 .footer-nav > a.router-link-exact-active {
   text-decoration: underline;
   text-underline-offset: 4px;
