@@ -1,5 +1,5 @@
 <template>
-  <section class="hero">
+  <section class="hero" role="region" aria-label="Главный баннер">
     <img src="/images/house.jpg" alt="Дом" class="hero__bg" />
     <div class="hero__content">
       <div class="hero__card">
@@ -9,12 +9,12 @@
           Тюмени!
         </div>
         <div class="hero__buttons">
-          <NuxtLink to="/#photos" class="hero__btn hero__btn--white"
-            >Смотреть фото</NuxtLink
-          >
-          <NuxtLink to="/#booking" class="hero__btn hero__btn--beige"
-            >Бронировать</NuxtLink
-          >
+          <NuxtLink to="/#photos" class="hero__btn hero__btn--white">
+            Смотреть фото
+          </NuxtLink>
+          <NuxtLink to="/#booking" class="hero__btn hero__btn--beige">
+            Бронировать
+          </NuxtLink>
         </div>
       </div>
     </div>
@@ -25,200 +25,198 @@
 .hero {
   position: relative;
   width: 100%;
-  height: 360px; // Default height for larger screens
+  height: 300px;
   background: #fff;
-  border-bottom-right-radius: 48px;
+  border-bottom-right-radius: 30px;
   display: flex;
   align-items: flex-end;
+  overflow: visible;
+
+  /* Градиент */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 0 0 60px 60px;
+    background: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0.2) 70%,
+      rgba(0, 0, 0, 0) 100%
+    );
+    z-index: 1;
+    pointer-events: none;
+  }
 
   &__bg {
     position: absolute;
-    top: 0;
-    left: -2px; // Adjusted for minor visual offset
-    width: auto;
+    inset: 0;
+    width: 100%;
     height: 100%;
-    min-width: 100%;
     object-fit: cover;
     object-position: center 55%;
-    border-radius: 0 0 161px 161px; // Default large border-radius
+    border-radius: 0 0 60px 60px;
     z-index: 0;
+    user-select: none;
   }
 
   &__content {
-    position: relative; // Essential for z-index
+    position: relative;
     width: 100%;
-    max-width: 1200px; // Aligns with your navbar max-width
+    max-width: 1200px;
     margin: 0 auto;
     display: flex;
-    z-index: 1;
-    padding: 0 16px; // Padding for sides on all resolutions, adjusted in media queries
-    justify-content: flex-start; // Align content to the left
+    z-index: 2;
+    padding: 0 20px;
+    justify-content: flex-start;
+    box-sizing: border-box;
   }
 
   &__card {
     position: absolute;
-    // We'll adjust left/right for responsiveness in media queries
-    bottom: -140px; // Default positioning
-    z-index: 2;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
     background: var(--primary);
-    border-radius: 30px;
-    padding: 24px; // Default padding
+    border-radius: 20px;
+    padding: 20px;
     box-shadow: 0 4px 32px rgba(0, 0, 0, 0.07);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    width: fit-content; // Allows card to shrink if text/buttons are small
-    max-width: 830px; // Retain max width
-    min-width: 320px; // Retain min width
-    left: 16px; // Default for larger screens, adjusted in media queries
-    right: auto; // Reset right positioning for consistent left alignment
+    width: 100%;
+    max-width: 800px;
+    min-width: 280px;
+    box-sizing: border-box;
   }
 
   &__text {
     color: #fff;
-    font-size: 32px; // Default font size
+    font-size: 24px;
     font-weight: 400;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    line-height: 1.3;
+    user-select: none;
   }
 
   &__buttons {
     display: flex;
-    gap: 16px; // Default gap
-    flex-wrap: wrap; // Allow buttons to wrap on smaller screens
+    gap: 12px;
+    flex-wrap: wrap;
+    width: 100%;
   }
 
   &__btn {
-    padding: 10px 16px;
-    border-radius: 16px;
-    font-size: 20px; // Default font size
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 16px;
     font-weight: 500;
     text-decoration: none;
     border: none;
     cursor: pointer;
-    transition: 0.3s;
-    white-space: nowrap; // Prevent button text from wrapping
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    white-space: nowrap;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 2px;
+    }
 
     &--white {
       background: var(--primary);
-      color: white;
-      border: 2px solid white;
-      &:hover {
-        transform: scale(1.05); // Use transform for better performance
+      color: #fff;
+      border: 2px solid #fff;
+
+      &:hover,
+      &:focus {
+        transform: scale(1.05);
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
       }
     }
+
     &--beige {
-      background: white;
+      background: #fff;
       color: var(--primary);
       border: 2px solid var(--primary);
-      &:hover {
-        transform: scale(1.05); // Use transform for better performance
+
+      &:hover,
+      &:focus {
+        transform: scale(1.05);
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
       }
     }
   }
-}
 
-// ---
-// Media Queries for Responsiveness
+  /* ========= АДАПТИВ ========= */
 
-// For screens 1280px and below (e.g., typical desktop widths, smaller laptops)
-@media (max-width: 1280px) {
-  .hero {
-    height: 400px; // Slightly increase height to give more room
+  @media (max-width: 1024px) {
+    height: 260px;
+
+    &__text {
+      font-size: 20px;
+    }
+
+    &__btn {
+      font-size: 15px;
+      padding: 10px 18px;
+    }
   }
 
-  .hero__content {
-    max-width: 90%; // Adjust content width to leave some padding
-    padding: 0 20px;
+  @media (max-width: 768px) {
+    height: 220px;
+
+    &__text {
+      font-size: 18px;
+    }
+
+    &__btn {
+      font-size: 14px;
+      padding: 10px 16px;
+    }
+
+    /* Уменьшаем bottom на мобильных */
+    &__card {
+      bottom: -60px; /* Поднимем карточку */
+      left: auto;
+      transform: none;
+      inset-inline: 20px; /* одинаковые поля слева/справа */
+      max-width: none;
+    }
   }
 
-  .hero__card {
-    left: 20px; // Maintain consistent left padding
-    right: 20px; // Allow card to fill space up to right padding
-    width: auto; // Let width be determined by left/right
-    max-width: calc(100% - 40px); // Ensure card doesn't exceed content width
-    min-width: unset; // Allow card to shrink below 320px if necessary
-  }
-}
+  @media (max-width: 480px) {
+    height: 200px;
 
-// For screens 720px and below (e.g., tablets in portrait mode, some smaller laptops)
-@media (max-width: 720px) {
-  .hero {
-    height: 300px; // Reduce hero section height for smaller screens
-    border-bottom-right-radius: 30px; // Reduce border-radius for consistency
-  }
+    &__text {
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
 
-  .hero__bg {
-    border-radius: 0 0 80px 80px; // Adjust background image border-radius
-    object-position: center 65%; // Adjust object position for better focus on mobile
-  }
+    &__card {
+      max-width: 300px;
+      padding: 12px;
+      border-radius: 16px;
+      bottom: -40px; /* Поднимаем карточку еще выше */
+    }
 
-  .hero__content {
-    padding: 0 15px; // Adjust padding
-  }
+    &__btn {
+      width: 100px;
+      height: 10px;
+      border-radius: 8px;
+      font-size: 10px;
+      padding: 10px 0;
+      text-align: center;
+      white-space: normal;
+    }
 
-  .hero__card {
-    bottom: -100px; // Adjust card position higher
-    padding: 20px; // Reduce card padding
-    left: 15px; // Adjust left padding
-    right: 15px; // Adjust right padding
-    max-width: calc(100% - 30px); // Ensure card fits within new padding
-  }
-
-  .hero__text {
-    font-size: 24px; // Reduce font size for main text
-    margin-bottom: 15px;
-  }
-
-  .hero__buttons {
-    flex-direction: column; // Stack buttons vertically
-    gap: 10px; // Reduce gap between stacked buttons
-    width: 100%; // Make buttons take full width when stacked
-  }
-
-  .hero__btn {
-    width: 100%; // Full width for stacked buttons
-    text-align: center; // Center text in full-width buttons
-    font-size: 18px; // Reduce button font size
-    padding: 12px; // Increase padding for easier tapping
-  }
-}
-
-// For screens 375px and below (e.g., mobile phones)
-@media (max-width: 375px) {
-  .hero {
-    height: 250px; // Further reduce hero section height
-    border-bottom-right-radius: 20px; // Even smaller border-radius
-  }
-
-  .hero__bg {
-    border-radius: 0 0 50px 50px; // Smallest border-radius for background
-    object-position: center 70%; // Fine-tune background position
-  }
-
-  .hero__content {
-    padding: 0 10px; // Smallest padding
-  }
-
-  .hero__card {
-    bottom: -80px; // Move card even higher
-    padding: 15px; // Smallest card padding
-    left: 10px; // Smallest left padding
-    right: 10px; // Smallest right padding
-    max-width: calc(100% - 20px); // Fit within new padding
-  }
-
-  .hero__text {
-    font-size: 18px; // Smallest font size for main text
-    margin-bottom: 10px;
-  }
-
-  .hero__buttons {
-    gap: 8px; // Smallest gap for stacked buttons
-  }
-
-  .hero__btn {
-    font-size: 16px; // Smallest font size for buttons
-    padding: 10px; // Smallest padding for buttons
+    .hero__buttons {
+      display: flex;
+      gap: 6px;
+    }
   }
 }
 </style>

@@ -1,11 +1,17 @@
 <template>
-  <nav class="navbar">
+  <nav class="navbar" role="navigation" aria-label="Главное меню">
     <div class="nav-container">
-      <NuxtLink to="/">
-        <div class="nav-container__logo">novotarmanskiy house</div>
-      </NuxtLink>
+      <NuxtLink to="/" class="nav-logo">novotarmanskiy house</NuxtLink>
 
-      <ul class="nav-container__links">
+      <!-- Кнопка-бургер -->
+      <button class="burger" @click="toggleMenu" aria-label="Меню">
+        <span :class="{ open: isOpen }"></span>
+        <span :class="{ open: isOpen }"></span>
+        <span :class="{ open: isOpen }"></span>
+      </button>
+
+      <!-- Навигация (снова внутри контейнера) -->
+      <ul class="nav-links" :class="{ active: isOpen }">
         <li><NuxtLink to="/booking">Бронирование</NuxtLink></li>
         <li><NuxtLink to="/aboutus">О нас</NuxtLink></li>
         <li><NuxtLink to="/photos">Фото</NuxtLink></li>
@@ -16,99 +22,129 @@
   </nav>
 </template>
 
+<script setup>
+import { ref } from "vue";
+const isOpen = ref(false);
+const toggleMenu = () => (isOpen.value = !isOpen.value);
+</script>
+
 <style lang="scss" scoped>
+/* --- Основные стили --- */
 .navbar {
   width: 100%;
   background: var(--primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1000;
+}
 
-  .nav-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 0px 18px 0px;
-    width: 1200px; // Default for larger screens (e.g., 1280px and above)
-    margin: 0 auto;
+.nav-container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center; /* выравнивание по вертикали */
+  justify-content: space-between;
+  box-sizing: border-box;
+}
 
-    &__logo {
-      color: #fff;
-      font-weight: 600;
-      font-size: 24px;
-      letter-spacing: 0.5px;
-    }
+.nav-logo {
+  color: #fff;
+  font-weight: 600;
+  font-size: 24px;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  user-select: none;
+}
 
-    &__links {
-      display: flex;
-      gap: 48px;
-      list-style: none;
+/* --- Бургер --- */
+.burger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
 
-      li a {
-        color: #fff;
-        font-size: 16px;
-        text-decoration: none;
-        font-weight: 500;
-        transition: opacity 0.2s;
-        &:hover {
-          opacity: 0.7;
-        }
-      }
+  span {
+    display: block;
+    height: 3px;
+    width: 100%;
+    background: #fff;
+    border-radius: 2px;
+    transition: 0.3s;
+  }
+
+  span.open:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+  span.open:nth-child(2) {
+    opacity: 0;
+  }
+  span.open:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+}
+
+.nav-links {
+  display: flex;
+  gap: 48px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li a {
+    color: #fff;
+    font-size: 16px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.2s ease;
+    user-select: none;
+
+    &:hover,
+    &:focus {
+      opacity: 0.7;
+      outline: none;
     }
   }
 }
 
-// ---
-// Media Queries for Responsiveness
-
-// For screens 1280px and below (e.g., typical desktop widths, smaller laptops)
-@media (max-width: 1280px) {
-  .navbar .nav-container {
-    width: 90%; /* Adjust width to leave some padding on the sides */
-    padding: 18px 20px; /* Add horizontal padding for consistency */
-  }
-}
-
-// For screens 720px and below (e.g., tablets in portrait mode, some smaller laptops)
+/* --- Адаптив --- */
 @media (max-width: 720px) {
-  .navbar .nav-container {
-    flex-direction: column; /* Stack logo and links vertically */
-    gap: 15px; /* Add some space between stacked items */
-    padding: 15px 20px; /* Adjust padding for smaller screens */
-    align-items: flex-start; /* Align items to the start when stacked */
+  .nav-container {
+    max-height: 50px;
   }
 
-  .navbar .nav-container__logo {
-    font-size: 20px; /* Slightly reduce font size for logo */
+  .nav-logo {
+    font-size: 24px;
   }
 
-  .navbar .nav-container__links {
-    flex-direction: column; /* Stack navigation links vertically */
-    gap: 10px; /* Reduce gap between vertical links */
-    width: 100%; /* Make links take full width */
-    align-items: flex-start; /* Align links to the start */
+  .burger {
+    display: flex;
   }
 
-  .navbar .nav-container__links li a {
-    font-size: 15px; /* Slightly reduce font size for links */
-    padding: 5px 0; /* Add some vertical padding for clickable area */
-  }
-}
-
-// For screens 375px and below (e.g., mobile phones)
-@media (max-width: 375px) {
-  .navbar .nav-container {
-    padding: 10px 15px; /* Further reduce padding for very small screens */
-    gap: 10px;
-  }
-
-  .navbar .nav-container__logo {
-    font-size: 18px; /* Further reduce logo font size */
+  .nav-links {
+    position: absolute;
+    top: 100%; /* теперь меню открывается под шапкой */
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    gap: 15px;
+    padding: 0 20px;
+    background: #b9946e;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
   }
 
-  .navbar .nav-container__links {
-    gap: 8px; /* Further reduce gap between links */
-  }
-
-  .navbar .nav-container__links li a {
-    font-size: 14px; /* Further reduce link font size */
+  .nav-links.active {
+    max-height: 300px; /* меню раскрывается вниз */
+    padding: 20px;
   }
 }
 </style>

@@ -31,8 +31,9 @@ export default {
   align-items: center;
   background-color: var(--primary);
   border-radius: 30px;
-  padding: 16px 16px 16px 24px;
+  padding: 16px 24px;
   margin-bottom: 40px;
+  gap: 20px; /* Обеспечиваем пространство между текстом и картой */
 }
 
 .location-text {
@@ -53,6 +54,7 @@ export default {
   font-size: 16px;
 }
 
+/* Карта */
 .map-container {
   flex: 1;
   max-width: 900px;
@@ -66,5 +68,64 @@ export default {
   width: 100%;
   height: 100%;
   border: none;
+}
+
+/* ========= АДАПТИВ ========= */
+
+@media (max-width: 1024px) {
+  .location-component {
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .location-text h2 {
+    font-size: 28px; /* Уменьшаем заголовок */
+  }
+
+  .location-text p {
+    font-size: 14px; /* Уменьшаем текст */
+  }
+
+  .map-container {
+    height: 200px; /* Уменьшаем высоту карты */
+  }
+}
+
+@media (max-width: 768px) {
+  .location-component {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .location-text h2 {
+    font-size: 24px; /* Еще больше уменьшаем заголовок */
+  }
+
+  .location-text p {
+    font-size: 14px; /* Еще меньше текст */
+  }
+
+  .map-container {
+    height: 100px; /* Уменьшаем высоту карты */
+  }
+}
+
+@media (max-width: 480px) {
+  .location-component {
+    padding: 20px;
+    gap: 12px;
+  }
+
+  .location-text h2 {
+    font-size: 20px; /* Уменьшаем заголовок еще больше */
+  }
+
+  .location-text p {
+    font-size: 12px; /* Уменьшаем текст еще больше */
+  }
+
+  .map-container {
+    height: 150px; /* Уменьшаем высоту карты */
+  }
 }
 </style>
