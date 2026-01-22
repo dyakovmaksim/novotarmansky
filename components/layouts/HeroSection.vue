@@ -75,7 +75,7 @@
   &__card {
     position: absolute;
     bottom: -100px;
-    left: 50%;
+    left: 35%;
     transform: translateX(-50%);
     background: var(--primary);
     border-radius: 20px;
@@ -83,7 +83,6 @@
     box-shadow: 0 4px 32px rgba(0, 0, 0, 0.07);
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     width: 100%;
     max-width: 800px;
     min-width: 280px;
@@ -201,6 +200,11 @@
       padding: 12px;
       border-radius: 16px;
       bottom: -40px; /* Поднимаем карточку еще выше */
+      left: 5%;
+    }
+
+    &__bg {
+      border-radius: 0px 0px 50px 50px;
     }
 
     &__btn {

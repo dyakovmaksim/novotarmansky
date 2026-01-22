@@ -348,8 +348,14 @@ onBeforeUnmount(() => {
   }
 
   .booking-form {
-    width: 100%;
-    max-width: 100%;
+    width: 325px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    h2 {
+      font-size: 20px;
+    }
   }
 
   .booking-form__input {
