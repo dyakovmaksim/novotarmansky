@@ -86,6 +86,15 @@
                   </div>
                 </div>
               </div>
+              <div>
+                <input
+                  type="checkbox"
+                  id="sauna"
+                  value="sauna"
+                  v-model="checkedSauna"
+                />
+                <label for="sauna">Вам нужна баня?</label>
+              </div>
 
               <button
                 class="booking-form__submit"
@@ -115,7 +124,6 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
-// Убедитесь, что файл Calendar.vue лежит в папке components
 import Calendar from "@/components/Calendar.vue";
 
 const checkin = ref(null);
@@ -161,8 +169,8 @@ function submit() {
   if (!checkin.value || !checkout.value) return;
   alert(
     `Бронирование:\n${formatDate(checkin.value)} - ${formatDate(
-      checkout.value
-    )}\nГости: ${guestsText.value}`
+      checkout.value,
+    )}\nГости: ${guestsText.value}\n Баня ${sauna.value}`,
   );
 }
 
@@ -174,12 +182,11 @@ const handleClickOutside = (event) => {
 
 onMounted(() => document.addEventListener("mousedown", handleClickOutside));
 onBeforeUnmount(() =>
-  document.removeEventListener("mousedown", handleClickOutside)
+  document.removeEventListener("mousedown", handleClickOutside),
 );
 </script>
 
 <style lang="scss" scoped>
-// Используем ваши переменные из проекта
 :root {
   --primary: #d8b48b;
   --dark: #5e4e3b;

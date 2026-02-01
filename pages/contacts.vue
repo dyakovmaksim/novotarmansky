@@ -14,7 +14,9 @@
                 <span class="icon">📍</span>
                 <div>
                   <strong>Адрес:</strong>
-                  <p>Тюменская область, пос. Новотарманский, ул. Лесная, 15</p>
+                  <p>
+                    Тюменская область, пос. Новотарманский, ул. Янтарная, 143
+                  </p>
                 </div>
               </div>
 
@@ -35,7 +37,6 @@
               </div>
 
               <div class="social-links">
-                <a href="#" class="social-btn">WhatsApp</a>
                 <a href="#" class="social-btn">Telegram</a>
                 <a href="#" class="social-btn">VK</a>
               </div>
@@ -47,7 +48,7 @@
                 Мы принимаем гостей круглосуточно по предварительному
                 бронированию.
               </p>
-              <p><strong>Заезд:</strong> после 14:00</p>
+              <p><strong>Заезд:</strong> после 15:00</p>
               <p><strong>Выезд:</strong> до 12:00</p>
             </div>
           </div>
@@ -57,7 +58,7 @@
               <iframe
                 src="https://yandex.ru/map-widget/v1/?um=constructor%3AВАШ_УНИКАЛЬНЫЙ_ID&amp;source=constructor"
                 width="100%"
-                height="550"
+                height="620"
                 frameborder="0"
                 allowfullscreen="true"
                 loading="lazy"
@@ -159,7 +160,7 @@ h2 {
 }
 
 .map-container {
-  height: 550px; /* Фиксированная высота для карты */
+  height: 615px; /* Фиксированная высота для карты */
   border-radius: 30px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
