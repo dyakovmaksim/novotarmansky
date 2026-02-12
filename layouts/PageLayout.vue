@@ -65,41 +65,47 @@ onUnmounted(() => {
 <style scoped lang="scss">
 /* Основные стили для main */
 main {
-  max-width: 1200px; /* Максимальная ширина для больших экранов */
-  width: 90%; /* Процентная ширина для адаптивности */
+  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
-  margin-top: 180px; /* Отступ сверху для десктопа */
+  /* Убираем гигантский margin-top, оставляем минимальный 
+     зазор под вылетающей карточкой Hero */
+  margin-top: 100px; 
+  display: flex;
+  flex-direction: column;
+  /* Устанавливаем ОДИНАКОВОЕ расстояние между всеми секциями */
+  gap: 40px; 
+  padding: 0 20px;
   box-sizing: border-box;
-  padding: 0 16px;
 }
 
-/* Для экранов 1280px и меньше */
-@media (max-width: 1280px) {
+/* Для средних экранов (Планшеты) */
+@media (max-width: 1024px) {
   main {
-    width: 90%;
-    padding: 0 20px;
+    margin-top: 90px;
+    gap: 60px;
   }
 }
 
-/* Планшеты: экраны 720px и меньше */
-@media (max-width: 720px) {
+/* Экраны 720px и меньше */
+@media (max-width: 768px) {
   main {
-    margin-top: 100px; /* Уменьшаем отступ сверху */
-    width: 95%;
-    padding: 0 15px;
+    margin-top: 90px;
+    gap: 30px; /* Чуть плотнее на мобилках */
+    padding: 0 16px;
   }
 }
 
-/* Мобильные телефоны: экраны 375px и меньше */
-@media (max-width: 375px) {
+/* Мобильные телефоны: экраны 480px и меньше */
+@media (max-width: 480px) {
   main {
-    margin-top: 80px;
-    width: 95%;
-    padding: 0 10px;
+    margin-top: 90px;
+    padding: 0 12px;
+    gap: 40px;
   }
 }
 
-/* Кнопка "Наверх" */
+/* Кнопка "Наверх" — добавляем прозрачность, чтобы не перекрывала контент намертво */
 .scroll-to-top-button {
   position: fixed;
   bottom: 30px;
@@ -112,22 +118,21 @@ main {
   color: white;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
+  opacity: 0.8;
 
-  &:hover,
-  &:focus {
+  &:hover {
+    opacity: 1;
     background-color: #bd9e7e;
-    transform: translateY(-3px);
-    outline: none;
+    transform: translateY(-5px);
   }
 }
 
-/* Адаптивность кнопки для планшетов */
-@media (max-width: 720px) {
+@media (max-width: 480px) {
   .scroll-to-top-button {
     width: 45px;
     height: 45px;
@@ -136,24 +141,12 @@ main {
   }
 }
 
-/* Адаптивность кнопки для мобильных */
-@media (max-width: 375px) {
-  .scroll-to-top-button {
-    width: 40px;
-    height: 40px;
-    bottom: 15px;
-    right: 15px;
-  }
+/* Плавная анимация fade */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s, transform 0.3s;
 }
-
-/* Плавное появление и скрытие кнопки */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
+.fade-enter-from, .fade-leave-to {
   opacity: 0;
+  transform: translateY(20px);
 }
 </style>

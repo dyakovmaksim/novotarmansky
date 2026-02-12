@@ -31,6 +31,7 @@
   display: flex;
   align-items: flex-end;
   overflow: visible;
+  margin-bottom: 120px;
 
   /* Градиент */
   &::after {
@@ -150,77 +151,91 @@
     }
   }
 
-  /* ========= АДАПТИВ ========= */
+ /* ========= АДАПТИВ (Исправленный) ========= */
 
-  @media (max-width: 1024px) {
-    height: 260px;
+@media (max-width: 1024px) {
+  height: 320px; // Немного увеличим высоту фона для баланса
 
-    &__text {
-      font-size: 20px;
-    }
-
-    &__btn {
-      font-size: 15px;
-      padding: 10px 18px;
-    }
+  &__card {
+    max-width: 700px;
+    left: 50%; // Центрируем для порядка
+    transform: translateX(-50%);
   }
 
-  @media (max-width: 768px) {
-    height: 220px;
+  &__text {
+    font-size: 20px;
+  }
+}
 
-    &__text {
-      font-size: 18px;
-    }
+@media (max-width: 768px) {
+  height: 280px;
+  margin-bottom: 120px;
 
-    &__btn {
-      font-size: 14px;
-      padding: 10px 16px;
-    }
-
-    /* Уменьшаем bottom на мобильных */
-    &__card {
-      bottom: -60px; /* Поднимем карточку */
-      left: auto;
-      transform: none;
-      inset-inline: 20px; /* одинаковые поля слева/справа */
-      max-width: none;
-    }
+  &::after, &__bg {
+    border-radius: 0 0 40px 40px; // Смягчаем радиус
   }
 
-  @media (max-width: 480px) {
-    height: 200px;
-
-    &__text {
-      font-size: 12px;
-      margin-bottom: 8px;
-    }
-
-    &__card {
-      max-width: 300px;
-      padding: 12px;
-      border-radius: 16px;
-      bottom: -40px; /* Поднимаем карточку еще выше */
-      left: 5%;
-    }
-
-    &__bg {
-      border-radius: 0px 0px 50px 50px;
-    }
-
-    &__btn {
-      width: 100px;
-      height: 10px;
-      border-radius: 8px;
-      font-size: 10px;
-      padding: 10px 0;
-      text-align: center;
-      white-space: normal;
-    }
-
-    .hero__buttons {
-      display: flex;
-      gap: 6px;
-    }
+  &__card {
+    bottom: -80px;
+    width: calc(100% - 40px); // Оставляем поля по бокам
+    max-width: 600px;
+    padding: 20px;
   }
+
+  &__text {
+    font-size: 18px;
+    br { display: none; } // Убираем перенос строки из HTML на мобильных
+  }
+
+  &__btn {
+    flex: 1; // Кнопки делят пространство поровну
+    font-size: 15px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  height: 240px;
+  margin-bottom: 120px;
+
+  &::after, &__bg {
+    border-radius: 0 0 30px 30px;
+  }
+
+  &__card {
+    bottom: -70px;
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  &__text {
+    font-size: 15px; // 12px было слишком мелко
+    margin-bottom: 12px;
+    text-align: center; // Центровка текста для красоты
+  }
+
+  &__buttons {
+    gap: 8px;
+    flex-direction: column; // На совсем узких экранах кнопки лучше ставить друг под друга
+  }
+
+  &__btn {
+    width: 100%; // Кнопки на всю ширину карточки
+    height: auto; // Убрал фиксированные 10px
+    font-size: 14px;
+    padding: 10px 0;
+  }
+}
+
+/* Фикс для очень маленьких экранов (iPhone SE) */
+@media (max-width: 350px) {
+  &__text {
+    font-size: 14px;
+  }
+  
+  &__card {
+    bottom: -85px; // Чуть ниже, так как текст может занять больше строк
+  }
+}
 }
 </style>

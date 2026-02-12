@@ -3,14 +3,12 @@
     <div class="nav-container">
       <NuxtLink to="/" class="nav-logo">novotarmanskiy house</NuxtLink>
 
-      <!-- Кнопка-бургер -->
       <button class="burger" @click="toggleMenu" aria-label="Меню">
         <span :class="{ open: isOpen }"></span>
         <span :class="{ open: isOpen }"></span>
         <span :class="{ open: isOpen }"></span>
       </button>
 
-      <!-- Навигация (снова внутри контейнера) -->
       <ul class="nav-links" :class="{ active: isOpen }">
         <li><NuxtLink to="/booking">Бронирование</NuxtLink></li>
         <li><NuxtLink to="/aboutus">О нас</NuxtLink></li>
@@ -29,7 +27,6 @@ const toggleMenu = () => (isOpen.value = !isOpen.value);
 </script>
 
 <style lang="scss" scoped>
-/* --- Основные стили --- */
 .navbar {
   width: 100%;
   background: var(--primary);
@@ -44,7 +41,7 @@ const toggleMenu = () => (isOpen.value = !isOpen.value);
   margin: 0 auto;
   padding: 18px 20px;
   display: flex;
-  align-items: center; /* выравнивание по вертикали */
+  align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
 }
@@ -56,9 +53,9 @@ const toggleMenu = () => (isOpen.value = !isOpen.value);
   letter-spacing: 0.5px;
   text-decoration: none;
   user-select: none;
+  white-space: nowrap;
 }
 
-/* --- Бургер --- */
 .burger {
   display: none;
   flex-direction: column;
@@ -114,37 +111,64 @@ const toggleMenu = () => (isOpen.value = !isOpen.value);
   }
 }
 
-/* --- Адаптив --- */
-@media (max-width: 720px) {
-  .nav-container {
-    max-height: 50px;
+@media (max-width: 1024px) {
+  .nav-links {
+    gap: 20px; 
   }
+}
 
-  .nav-logo {
-    font-size: 24px;
-  }
-
+@media (max-width: 850px) {
   .burger {
     display: flex;
   }
 
   .nav-links {
     position: absolute;
-    top: 100%; /* теперь меню открывается под шапкой */
+    top: 100%; 
     left: 0;
     right: 0;
     flex-direction: column;
-    gap: 15px;
+    gap: 0; 
     padding: 0 20px;
-    background: #b9946e;
+    background: #b9946e; 
     overflow: hidden;
     max-height: 0;
-    transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+    transition: max-height 0.4s ease-in-out;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+
+    &.active {
+      max-height: 400px; 
+      padding-bottom: 20px;
+    }
+
+    li {
+      width: 100%;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      
+      &:last-child { border: none; }
+
+      a {
+        display: block;
+        padding: 15px 0;
+        font-size: 18px; 
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-container {
+    padding: 15px 20px; 
   }
 
-  .nav-links.active {
-    max-height: 300px; /* меню раскрывается вниз */
-    padding: 20px;
+  .nav-logo {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 320px) {
+  .nav-logo {
+    font-size: 16px;
   }
 }
 </style>

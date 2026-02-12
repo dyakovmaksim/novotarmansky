@@ -147,11 +147,13 @@ function selectDate(day) {
 .calendar {
   border: 2px solid #d2b28a;
   border-radius: 12px;
-  padding: 12px 18px;
-  width: 300px;
+  padding: 12px 15px; // Чуть меньше паддинги по бокам
+  width: 100%;        // Резиновая ширина
+  max-width: 350px;   // Но не шире 350px, чтобы не растягивался на десктопе
   background: #fff;
   box-sizing: border-box;
   user-select: none;
+  margin: 0 auto;     // Центровка
 
   &__header {
     display: flex;
@@ -160,31 +162,33 @@ function selectDate(day) {
     margin-bottom: 12px;
     font-weight: 600;
     color: #3d2c17;
+    
     .calendar__nav {
       background: none;
       border: none;
       cursor: pointer;
       color: #a68b6a;
-      font-size: 1.2rem;
+      font-size: 1.5rem; // Увеличили стрелки для мобилок
+      padding: 5px 10px; // Увеличили область клика стрелок
     }
   }
 
   &__grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    column-gap: 0; // Убираем зазоры между колонками для слияния
+    column-gap: 0;
     row-gap: 4px;
   }
 
   &__weekday {
     text-align: center;
     color: #b0a79c;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     padding-bottom: 8px;
   }
 
   &__day {
-    height: 38px;
+    aspect-ratio: 1 / 1; // Делаем ячейки идеально квадратными!
     width: 100%;
     border: none;
     background: none;
@@ -196,38 +200,36 @@ function selectDate(day) {
     position: relative;
     color: #3d2c17;
     z-index: 1;
+    padding: 0;
 
-    // --- СОСТОЯНИЕ 1: Выбрана одна точка (нет диапазона) ---
+    // --- СОСТОЯНИЕ 1: Выбрана одна точка ---
     &.is-selected:not(.has-range) {
       background-color: #a68b6a;
       color: #fff;
-      border-radius: 50%; // Чистая точка
-      width: 38px;
-      margin: 0 auto;
+      border-radius: 50%;
+      // На мобилках лучше не ограничивать ширину в px, 
+      // а использовать scale или небольшие инсеты
+      transform: scale(0.9); 
     }
 
-    // --- СОСТОЯНИЕ 2: Выбран диапазон (линия) ---
+    // --- СОСТОЯНИЕ 2: Выбран диапазон ---
     &.has-range {
-      // Общий фон для всей линии (заезд, выезд и дни между ними)
       &.is-selected,
       &.is-range {
-        background-color: #d2b28a;
+        background-color: gainsboro;
         color: #fff;
-        border-radius: 0; // Сбрасываем круги для слияния
+        border-radius: 0;
       }
 
-      // Сами точки заезда/выезда делаем чуть темнее
       &.is-selected {
-        background-color: #a68b6a;
+        background-color: gainsboro;
       }
 
-      // Скругляем начало линии
       &.is-checkin {
         border-top-left-radius: 50%;
         border-bottom-left-radius: 50%;
       }
 
-      // Скругляем конец линии
       &.is-checkout {
         border-top-right-radius: 50%;
         border-bottom-right-radius: 50%;
@@ -237,12 +239,28 @@ function selectDate(day) {
     &.is-today:not(.is-selected):not(.is-range) {
       border: 1.5px solid #d2b28a;
       border-radius: 50%;
+      transform: scale(0.9);
     }
 
     &.is-disabled {
       color: #ccc;
       cursor: not-allowed;
       background: none !important;
+    }
+  }
+}
+
+/* Корректировка для совсем маленьких экранов (iPhone SE) */
+@media (max-width: 350px) {
+  .calendar {
+    padding: 8px 10px;
+    
+    &__day {
+      font-size: 0.9rem;
+    }
+    
+    &__month {
+      font-size: 0.95rem;
     }
   }
 }

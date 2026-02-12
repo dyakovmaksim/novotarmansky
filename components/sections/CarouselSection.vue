@@ -255,136 +255,99 @@ Media Queries для адаптивности
 /* Для экранов 1280px и меньше */
 @media (max-width: 1280px) {
   .carousel-section {
-    padding: 30px 20px; /* Немного уменьшаем отступы */
+    padding: 30px 0;
   }
 
   .carousel {
-    max-width: 90%; /* Занимаем больше ширины экрана */
-    gap: 30px; /* Уменьшаем отступ между основной и боковой частью */
-  }
-
-  .carousel__main {
-    border-radius: 25px; /* Немного уменьшаем радиус */
-  }
-
-  .carousel__main-img {
-    border-radius: 28px; /* Соответствует основному */
-  }
-
-  .carousel__side {
-    width: 300px; /* Уменьшаем ширину боковой панели */
+    max-width: 95%;
     gap: 20px;
   }
 
-  .carousel__side-img-wrap {
-    border-radius: 20px;
-  }
-
-  .carousel__side-img {
-    border-radius: 20px;
+  .carousel__side {
+    width: 250px; /* Уменьшаем, чтобы дать больше места главному фото */
+    gap: 15px;
   }
 }
 
-/* Для экранов 720px и меньше (планшеты и мобильные) */
-@media (max-width: 720px) {
+@media (max-width: 992px) {
+  /* Переходный момент: когда боковые фото еще есть, но уже тесно */
+  .carousel__side {
+    width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
   .carousel-section {
-    padding: 20px 15px; /* Еще уменьшаем отступы */
+    padding: 10px 0; /* Минимальный отступ, чтобы не "съедать" экран */
   }
 
   .carousel {
-    flex-direction: column; /* Элементы карусели располагаются вертикально */
-    gap: 0; /* Убираем отступ между основной частью и боковой (которая будет скрыта) */
-    max-width: 100%; /* Занимаем всю доступную ширину */
-    padding: 0; /* Убираем внутренний padding на самом carousel, он будет на carousel-section */
+    flex-direction: column;
+    gap: 0;
+    max-width: 100%;
+    /* Убираем лишние отступы, чтобы фото было крупнее */
+    padding: 0 10px; 
   }
 
   .carousel__main {
-    width: 100%; /* Основное изображение занимает всю ширину */
-    aspect-ratio: 4 / 3; /* Более вертикальное соотношение сторон для мобильных */
-    border-radius: 20px; /* Уменьшаем радиус */
-    box-shadow: none; /* Убираем тень для более легкого вида */
-  }
-
-  .carousel__main-img {
-    border-radius: 20px; /* Соответствует основному контейнеру */
+    flex: none; /* Отключаем flex-grow, чтобы не схлопнулась */
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3; /* Фиксируем пропорции, чтобы не исчезала */
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   }
 
   .carousel__side {
-    display: none; /* Скрываем боковую панель на мобильных устройствах */
+    /* Вместо полного скрытия, можно превратить их в маленькие превью снизу 
+       или скрыть совсем, но убедиться, что главный блок занимает всё место */
+    display: none; 
   }
 
+  /* Улучшаем навигацию для пальцев */
   .carousel__arrow {
-    width: 40px; /* Уменьшаем размер стрелок */
-    height: 40px;
-    background: rgba(255, 255, 255, 0.7); /* Чуть более непрозрачный фон */
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.9); /* Делаем заметнее */
+    
+    &--prev { left: 5px; }
+    &--next { right: 5px; }
 
     svg {
-      width: 28px; /* Уменьшаем размер иконок SVG */
-      height: 28px;
-    }
-
-    &--prev {
-      left: 10px; /* Уменьшаем отступ */
-    }
-
-    &--next {
-      right: 10px; /* Уменьшаем отступ */
+      width: 24px;
+      height: 24px;
     }
   }
 
   .carousel__pagination {
-    bottom: 10px; /* Перемещаем пагинацию выше */
-    gap: 8px; /* Уменьшаем отступ между точками */
+    bottom: 12px;
+    /* Делаем точки крупнее, чтобы по ним было легче попадать */
+    gap: 12px;
   }
 
   .carousel__dot {
-    width: 10px; /* Уменьшаем размер точек */
+    width: 10px;
     height: 10px;
-    border-width: 1px; /* Уменьшаем толщину границы */
+    border-width: 1.5px;
   }
 }
 
-/* Для экранов 375px и меньше (очень маленькие мобильные) */
-@media (max-width: 375px) {
-  .carousel-section {
-    padding: 15px 10px; /* Минимальные отступы */
-  }
-
+@media (max-width: 480px) {
   .carousel__main {
-    aspect-ratio: 1 / 1; /* Квадратное соотношение сторон для очень маленьких экранов */
-    border-radius: 15px; /* Еще уменьшаем радиус */
-  }
-
-  .carousel__main-img {
+    aspect-ratio: 1.1 / 1; /* Делаем чуть выше на узких экранах */
     border-radius: 15px;
   }
-
+  
+  /* Прячем стрелки на очень маленьких экранах, если они мешают фото,
+     но только если есть пагинация (точки) */
   .carousel__arrow {
-    width: 35px; /* Еще уменьшаем размер стрелок */
-    height: 35px;
-
-    svg {
-      width: 24px; /* Еще уменьшаем размер иконок SVG */
-      height: 24px;
-    }
-
-    &--prev {
-      left: 5px; /* Минимальный отступ */
-    }
-
-    &--next {
-      right: 5px; /* Минимальный отступ */
-    }
-  }
-
-  .carousel__pagination {
-    bottom: 5px; /* Минимальный отступ снизу */
-    gap: 6px; /* Минимальный отступ между точками */
+    background: rgba(255, 255, 255, 0.7);
+    transform: translateY(-50%) scale(0.8);
   }
 
   .carousel__dot {
-    width: 8px; /* Минимальный размер точек */
-    height: 8px;
+    width: 10px;
+    height: 10px;
   }
 }
 </style>

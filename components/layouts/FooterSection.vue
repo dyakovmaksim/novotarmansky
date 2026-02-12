@@ -1,7 +1,7 @@
 <template>
   <footer class="footer">
     <div class="footer-container">
-      <NuxtLink to="/">
+      <NuxtLink to="/" class="logo-link">
         <div class="footer-logo">novotarmanskiy house</div>
       </NuxtLink>
       <div class="footer-nav">
@@ -15,136 +15,112 @@
   </footer>
 </template>
 
-<script setup>
-// В Vue 3 с <script setup>, здесь нет необходимости в дополнительном JavaScript для этого компонента.
-// Все логика адаптивности находится в CSS.
-</script>
-
 <style scoped>
-/* Убедитесь, что переменная --primary определена где-то в вашем глобальном CSS,
-   например, в файле main.css или App.vue, иначе используйте запасное значение. */
-:root {
-  --primary: #5e4e3b; /* Пример запасного цвета, если не определен глобально */
-}
-
 .footer {
+  --primary-color: var(--primary, #5e4e3b);
   width: 100%;
   margin-top: auto;
   box-sizing: border-box;
   background-color: transparent;
+  padding: 0 10px;
 }
 
 .footer-container {
-  max-width: 1200px; /* Default max-width for larger screens */
+  max-width: 1200px; 
   margin: 0 auto;
-  padding: 16px 40px; /* Default padding for larger screens */
+  padding: 24px 40px; 
   background-color: white;
-  border-top: 4px solid var(--primary);
-  border-left: 4px solid var(--primary);
-  border-right: 4px solid var(--primary);
+  border: 4px solid var(--primary-color);
   border-bottom: none;
   border-top-left-radius: 30px;
   border-top-right-radius: 30px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 48px; /* Default gap for larger screens */
+  gap: 32px; 
   box-sizing: border-box;
 }
 
+.logo-link {
+  text-decoration: none;
+}
+
 .footer-logo {
-  font-size: 24px; /* Default font size */
-  color: var(--primary);
-  text-decoration: none; /* Ensure link underline is removed */
+  font-size: 24px; 
+  color: var(--primary-color);
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .footer-nav {
   display: flex;
-  gap: 24px; /* Default gap for navigation links */
-  flex-wrap: wrap; /* Allow links to wrap to the next line if needed */
-  justify-content: flex-end; /* Align links to the end (right) */
+  gap: 24px; 
+  flex-wrap: wrap; 
+  justify-content: flex-end;
 }
 
 .footer-nav > a {
-  font-size: 16px; /* Default font size */
-  color: var(--primary);
+  font-size: 16px;
+  color: var(--primary-color);
   text-decoration: none;
-  position: relative;
-  transition: opacity 0.2s ease; /* Changed from color to opacity for consistency */
+  font-weight: 500;
+  transition: opacity 0.2s ease; 
 }
 
 .footer-nav > a:hover {
-  opacity: 0.7; /* Hover effect remains */
+  opacity: 0.7; 
 }
 
-/* Стиль для активной ссылки (как "О нас" на изображении) */
-/* Для NuxtLink, класс router-link-exact-active будет добавлен автоматически */
 .footer-nav > a.router-link-exact-active {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
 
-/* ---
-Media Queries for Responsiveness
---- */
-
-/* For screens 1280px and below */
-@media (max-width: 1280px) {
+@media (max-width: 1024px) {
   .footer-container {
-    max-width: 90%; /* Adjust width to leave some padding on the sides */
-    padding: 16px 20px; /* Adjust horizontal padding */
-    gap: 32px; /* Slightly reduce gap */
+    padding: 20px 30px;
+    gap: 24px;
+  }
+  
+  .footer-nav {
+    justify-content: center;
   }
 }
 
-/* For screens 720px and below (tablets in portrait mode, some smaller laptops) */
 @media (max-width: 720px) {
   .footer-container {
-    flex-direction: column; /* Stack logo and nav vertically */
-    align-items: center; /* Center items when stacked */
-    padding: 20px; /* Adjust padding for more breathing room */
-    border-top-left-radius: 20px; /* Reduce border-radius */
-    border-top-right-radius: 20px; /* Reduce border-radius */
-    gap: 20px; /* Smaller gap between stacked logo and nav */
-  }
-
-  .footer-logo {
-    font-size: 22px; /* Slightly reduce font size for logo */
-    margin-bottom: 10px; /* Add space below logo */
+    flex-direction: column;
+    text-align: center;
+    padding: 30px 20px;
+    border-width: 3px;
+    gap: 24px;
   }
 
   .footer-nav {
-    flex-direction: column; /* Stack navigation links vertically */
-    gap: 12px; /* Smaller gap between vertical links */
-    align-items: center; /* Center links when stacked */
-    width: 100%; /* Make links take full width */
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
   }
 
-  .footer-nav > a {
-    font-size: 15px; /* Slightly reduce font size for links */
-    padding: 5px 0; /* Add vertical padding for clickable area */
+  .footer-logo {
+    font-size: 20px;
   }
 }
 
-/* For screens 375px and below (mobile phones) */
 @media (max-width: 375px) {
   .footer-container {
-    padding: 15px; /* Further reduce padding for very small screens */
-    border-top-left-radius: 15px; /* Further reduce border-radius */
-    border-top-right-radius: 15px; /* Further reduce border-radius */
-    gap: 15px; /* Smaller gap */
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding: 25px 15px;
   }
 
   .footer-logo {
-    font-size: 18px; /* Further reduce logo font size */
-  }
-
-  .footer-nav {
-    gap: 10px; /* Further reduce gap between links */
+    font-size: 18px;
   }
 
   .footer-nav > a {
-    font-size: 14px; /* Further reduce link font size */
+    font-size: 15px;
   }
 }
 </style>

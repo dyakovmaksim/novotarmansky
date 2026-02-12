@@ -78,12 +78,10 @@ export default {
     min-height: 200px;
     border-radius: 25px;
   }
-
   .text-container {
     padding: 20px;
     max-width: 75%;
   }
-
   .text-container h2 {
     font-size: 32px;
   }
@@ -91,64 +89,52 @@ export default {
 
 @media (max-width: 720px) {
   .about-component {
-    min-height: 18px;
+    min-height: 250px; /* Исправил с 18px на адекватную высоту */
     border-radius: 20px;
   }
 
   .gradient-overlay {
+    /* Делаем градиент темнее и плотнее, чтобы текст читался на фоне фото */
     background: linear-gradient(
       to right,
-      rgba(0, 0, 0, 0.7) 0%,
-      rgba(0, 0, 0, 0.5) 40%,
-      rgba(0, 0, 0, 0) 100%
+      rgba(0, 0, 0, 0.8) 0%,
+      rgba(0, 0, 0, 0.4) 100%
     );
   }
 
   .text-container {
-    padding: 16px; /* Еще уменьшаем отступы */
-    max-width: 90%; /* Почти полная ширина */
+    padding: 20px;
+    max-width: 100%; /* На мобильных используем всю ширину */
   }
 
   .text-container h2 {
-    font-size: 20px; /* Значительно уменьшаем заголовок */
-    margin-bottom: 8px; /* Уменьшаем отступ под заголовком */
+    font-size: 24px; /* Читабельный размер */
+    margin-bottom: 8px;
   }
 
   .text-container p {
-    font-size: 10px; /* Уменьшаем размер текста */
-    margin: 6px 0;
+    font-size: 14px; /* Минимально рекомендуемый размер */
+    margin: 8px 0;
   }
 }
 
-/* Для экранов 375px и меньше (мобильные телефоны) */
-@media (max-width: 375px) {
+@media (max-width: 480px) {
   .about-component {
-    min-height: 160px; /* Минимальная высота для мобильных */
-    border-radius: 15px; /* Еще меньше радиус */
-  }
-
-  .gradient-overlay {
-    background: linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0.7) 0%,
-      rgba(0, 0, 0, 0.5) 40%,
-      rgba(0, 0, 0, 0) 100%
-    );
+    min-height: 280px; /* Увеличиваем высоту, так как текст займет больше строк */
+    background-position: 25% center; /* Сдвигаем фото, чтобы лицо/дом на фоне не перекрывались текстом */
   }
 
   .text-container {
-    padding: 24px; /* Максимально уменьшаем отступы */
-    max-width: 95%; /* Почти полная ширина */
+    padding: 16px;
   }
 
   .text-container h2 {
-    font-size: 8px; /* Минимальный размер заголовка */
-    margin-bottom: 6px;
+    font-size: 20px;
   }
 
   .text-container p {
-    font-size: 6px; /* Минимальный размер текста */
-    margin: 4px 0;
+    font-size: 14px; 
+    line-height: 1.4;
   }
 }
 </style>

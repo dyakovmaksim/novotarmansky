@@ -17,8 +17,10 @@ export default {
   name: "LocationMap",
   mounted() {
     const script = document.createElement("script");
+    // ВАЖНО: API конструктора Яндекса часто игнорирует внешние стили. 
+    // Если карта все равно будет широкой, лучше использовать тип "iframe" вместо "script"
     script.src =
-      "https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3A6b6abf998c508a3928ec2bde98c8011f402be7e5a6b1f8cdfeede9111f737bc6&width=900&height=250&lang=ru_RU&scroll=true";
+      "https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3A6b6abf998c508a3928ec2bde98c8011f402be7e5a6b1f8cdfeede9111f737bc6&width=100%25&height=250&lang=ru_RU&scroll=true";
     script.async = true;
     this.$refs.mapContainer.appendChild(script);
   },
@@ -29,103 +31,113 @@ export default {
 .location-component {
   display: flex;
   align-items: center;
-  background-color: var(--primary);
+  background-color: var(--primary, #5e4e3b);
   border-radius: 30px;
-  padding: 16px 24px;
-  margin-bottom: 40px;
-  gap: 20px; /* Обеспечиваем пространство между текстом и картой */
+  padding: 32px; /* Увеличил паддинг для солидности */
+  gap: 30px;
 }
 
 .location-text {
   flex: 1;
   color: #fff;
-  max-width: 520px;
 }
 
 .location-text h2 {
   font-size: 36px;
   font-weight: 400;
-  margin-bottom: 4px;
+  margin-bottom: 12px;
 }
 
 .location-text p {
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
   font-size: 16px;
 }
 
-/* Карта */
 .map-container {
   flex: 1;
-  max-width: 900px;
   width: 100%;
   height: 250px;
   border-radius: 30px;
   overflow: hidden;
+  position: relative;
+  background: #eee; /* Цвет заглушки до загрузки */
 }
 
-.map-container iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
+.map-container :deep(ymaps) {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+/* Глубокий селектор для того, чтобы заставить Яндекс.Карту быть резиновой */
+.map-container :deep(id^="ymaps") {
+  width: 100% !important;
 }
 
 /* ========= АДАПТИВ ========= */
 
 @media (max-width: 1024px) {
   .location-component {
-    padding: 20px;
-    gap: 16px;
+    padding: 24px;
+    gap: 20px;
   }
 
-  .location-text h2 {
-    font-size: 28px; /* Уменьшаем заголовок */
+  .location-text h2 { font-size: 28px; }
+  .map-container { height: 250px; }
+}
+
+@media (max-width: 850px) {
+  .location-component {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
   }
 
-  .location-text p {
-    font-size: 14px; /* Уменьшаем текст */
+  .location-text {
+    max-width: 100%;
+  }
+
+  .location-text br {
+    display: none; /* Текст в одну строку на средних экранах */
   }
 
   .map-container {
-    height: 200px; /* Уменьшаем высоту карты */
+    height: 250px;
+    width: 100%;
   }
 }
 
 @media (max-width: 768px) {
   .location-component {
     flex-direction: column;
-    align-items: stretch;
-  }
-
-  .location-text h2 {
-    font-size: 24px; /* Еще больше уменьшаем заголовок */
-  }
-
-  .location-text p {
-    font-size: 14px; /* Еще меньше текст */
+    padding: 20px;
   }
 
   .map-container {
-    height: 100px; /* Уменьшаем высоту карты */
+    height: 200px; /* Фиксированная высота для мобилок */
+    max-width: 100%;
   }
 }
 
 @media (max-width: 480px) {
   .location-component {
-    padding: 20px;
-    gap: 12px;
+    padding: 20px 16px;
+    border-radius: 20px;
+    gap: 16px;
   }
 
   .location-text h2 {
-    font-size: 20px; /* Уменьшаем заголовок еще больше */
+    font-size: 24px;
   }
 
   .location-text p {
-    font-size: 12px; /* Уменьшаем текст еще больше */
+    font-size: 14px;
+    line-height: 1.5;
   }
 
   .map-container {
-    height: 150px; /* Уменьшаем высоту карты */
+    height: 200px; /* Оптимальная высота для мобильного */
+    border-radius: 15px;
   }
 }
 </style>
