@@ -1,35 +1,22 @@
 <template>
-  <nav class="navbar">
+  <nav class="navbar" role="navigation" aria-label="Главное меню">
     <div class="nav-container">
-      <NuxtLink to="/" class="nav-container__logo"
-        >novotarmanskiy house</NuxtLink
-      >
-      <button
-        class="nav-container__burger"
-        @click="isOpen = !isOpen"
-        :aria-expanded="isOpen"
-        aria-label="Toggle menu"
-      >
+      <NuxtLink to="/" class="nav-logo">novotarmanskiy house</NuxtLink>
+
+      <!-- Кнопка-бургер -->
+      <button class="burger" @click="toggleMenu" aria-label="Меню">
         <span :class="{ open: isOpen }"></span>
         <span :class="{ open: isOpen }"></span>
         <span :class="{ open: isOpen }"></span>
       </button>
-      <ul class="nav-container__links" :class="{ open: isOpen }">
-        <li>
-          <NuxtLink to="/booking" @click="isOpen = false"
-            >Бронирование</NuxtLink
-          >
-        </li>
-        <li>
-          <NuxtLink to="/aboutus" @click="isOpen = false">О нас</NuxtLink>
-        </li>
-        <li><NuxtLink to="/photos" @click="isOpen = false">Фото</NuxtLink></li>
-        <li>
-          <NuxtLink to="/promotion" @click="isOpen = false">Акции</NuxtLink>
-        </li>
-        <li>
-          <NuxtLink to="/contacts" @click="isOpen = false">Контакты</NuxtLink>
-        </li>
+
+      <!-- Навигация (снова внутри контейнера) -->
+      <ul class="nav-links" :class="{ active: isOpen }">
+        <li><NuxtLink to="/booking">Бронирование</NuxtLink></li>
+        <li><NuxtLink to="/aboutus">О нас</NuxtLink></li>
+        <li><NuxtLink to="/photos">Фото</NuxtLink></li>
+        <li><NuxtLink to="/promotion">Акции</NuxtLink></li>
+        <li><NuxtLink to="/contacts">Контакты</NuxtLink></li>
       </ul>
     </div>
   </nav>
@@ -38,154 +25,126 @@
 <script setup>
 import { ref } from "vue";
 const isOpen = ref(false);
+const toggleMenu = () => (isOpen.value = !isOpen.value);
 </script>
 
 <style lang="scss" scoped>
+/* --- Основные стили --- */
 .navbar {
-  background: var(--primary);
   width: 100%;
+  background: var(--primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1000;
 }
 
 .nav-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px;
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center; /* выравнивание по вертикали */
+  justify-content: space-between;
+  box-sizing: border-box;
 }
 
-.nav-container__logo {
+.nav-logo {
   color: #fff;
   font-weight: 600;
-  font-size: 20px;
+  font-size: 24px;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  user-select: none;
 }
 
-.nav-container__burger {
-  background: none;
-  border: none;
+/* --- Бургер --- */
+.burger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
   width: 24px;
   height: 18px;
-  padding: 0;
-  position: relative;
-  z-index: 10;
+  background: none;
+  border: none;
   cursor: pointer;
+  padding: 0;
+  z-index: 1001;
 
   span {
     display: block;
+    height: 3px;
     width: 100%;
-    height: 2px;
     background: #fff;
-    margin-bottom: 5px;
-    transition: transform 0.3s, opacity 0.3s;
+    border-radius: 2px;
+    transition: 0.3s;
   }
-  span:last-child {
-    margin-bottom: 0;
-  }
+
   span.open:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
+    transform: rotate(45deg) translate(5px, 5px);
   }
   span.open:nth-child(2) {
     opacity: 0;
   }
   span.open:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
+    transform: rotate(-45deg) translate(5px, -5px);
   }
 }
 
-.nav-container__links {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: var(--primary);
-  list-style: none;
+.nav-links {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0;
+  gap: 48px;
+  list-style: none;
   margin: 0;
-  overflow: hidden;
-  max-height: 0;
-  opacity: 0;
-  transition: max-height 0.4s ease, opacity 0.4s ease;
-  z-index: 9;
+  padding: 0;
 
-  &.open {
-    max-height: 500px;
-    opacity: 1;
-    padding-top: 16px;
-    padding-bottom: 16px;
-  }
+  li a {
+    color: #fff;
+    font-size: 16px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.2s ease;
+    user-select: none;
 
-  li {
-    margin: 8px 0;
-    width: 100%;
-    text-align: center;
-
-    a {
-      color: #fff;
-      font-size: 16px;
-      text-decoration: none;
-      font-weight: 500;
-      display: block;
-      width: 100%;
-      transition: opacity 0.2s;
-      &:hover {
-        opacity: 0.7;
-      }
+    &:hover,
+    &:focus {
+      opacity: 0.7;
+      outline: none;
     }
   }
 }
 
-@media (min-width: 576px) {
+/* --- Адаптив --- */
+@media (max-width: 720px) {
   .nav-container {
-    padding: 18px 20px;
+    max-height: 50px;
   }
-  .nav-container__logo {
-    font-size: 22px;
-  }
-}
 
-@media (min-width: 768px) {
-  .nav-container {
-    padding: 18px 30px;
+  .nav-logo {
+    font-size: 24px;
   }
-  .nav-container__burger {
-    display: none;
-  }
-  .nav-container__links {
-    position: static;
-    max-height: none;
-    opacity: 1;
-    overflow: visible;
+
+  .burger {
     display: flex;
-    flex-direction: row;
-    gap: 24px;
-    background: transparent;
-    padding: 0;
-    margin: 0;
-
-    li {
-      margin: 0;
-      a {
-        font-size: 15px;
-      }
-    }
   }
-}
 
-@media (min-width: 1024px) {
-  .nav-container {
-    padding: 18px 0;
-    max-width: 1200px;
+  .nav-links {
+    position: absolute;
+    top: 100%; /* теперь меню открывается под шапкой */
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    gap: 15px;
+    padding: 0 20px;
+    background: #b9946e;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
   }
-  .nav-container__links {
-    gap: 48px;
-    li a {
-      font-size: 16px;
-    }
+
+  .nav-links.active {
+    max-height: 300px; /* меню раскрывается вниз */
+    padding: 20px;
   }
 }
 </style>

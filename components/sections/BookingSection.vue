@@ -36,7 +36,6 @@
                 box-shadow: none;
               "
             />
-
             <svg
               width="20"
               height="20"
@@ -163,12 +162,16 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: center;
   margin-bottom: 40px;
+  flex-wrap: wrap; /* Добавляем перенос для мобильных устройств */
 
   &__content {
     display: flex;
     gap: 48px;
     justify-content: center;
     align-items: flex-start;
+    flex-wrap: wrap; /* Добавляем перенос */
+    width: 100%;
+    max-width: 1200px; /* Ограничиваем максимальную ширину */
   }
 }
 
@@ -235,7 +238,7 @@ onBeforeUnmount(() => {
     &-dropdown {
       position: absolute;
       left: -2px;
-      top: 55px;
+      top: 65px;
       background: #fff;
       border: 2px solid var(--primary);
       border-radius: 12px;
@@ -302,5 +305,65 @@ onBeforeUnmount(() => {
 
 .booking-calendar {
   min-width: 320px;
+  max-width: 100%; /* Делаем календарь гибким */
+  display: flex;
+  justify-content: center; /* Центрируем календарь */
+}
+
+/* ========= АДАПТИВ ========= */
+
+@media (max-width: 1024px) {
+  .booking-section {
+    padding: 16px;
+  }
+
+  .booking-form {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .booking-form__input {
+    font-size: 18px;
+  }
+
+  .booking-form__submit {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .booking-form__dates {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .booking-calendar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .booking-section {
+    padding: 20px;
+  }
+
+  .booking-form {
+    width: 325px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    h2 {
+      font-size: 20px;
+    }
+  }
+
+  .booking-form__input {
+    font-size: 16px;
+  }
+
+  .booking-form__submit {
+    font-size: 16px;
+  }
 }
 </style>
