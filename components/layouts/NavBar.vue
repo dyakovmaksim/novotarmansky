@@ -1,174 +1,228 @@
 <template>
-  <nav class="navbar" role="navigation" aria-label="Главное меню">
-    <div class="nav-container">
-      <NuxtLink to="/" class="nav-logo">novotarmanskiy house</NuxtLink>
+  <nav class="nav" :class="{ 'nav--scrolled': isScrolled }" role="navigation">
+    <div class="nav__container">
+      <NuxtLink to="/" class="nav__logo">
+        novotarmanskiy<span>house</span>
+      </NuxtLink>
 
-      <button class="burger" @click="toggleMenu" aria-label="Меню">
-        <span :class="{ open: isOpen }"></span>
-        <span :class="{ open: isOpen }"></span>
-        <span :class="{ open: isOpen }"></span>
-      </button>
-
-      <ul class="nav-links" :class="{ active: isOpen }">
-        <li><NuxtLink to="/booking">Бронирование</NuxtLink></li>
-        <li><NuxtLink to="/aboutus">О нас</NuxtLink></li>
-        <li><NuxtLink to="/photos">Фото</NuxtLink></li>
-        <li><NuxtLink to="/promotion">Акции</NuxtLink></li>
-        <li><NuxtLink to="/contacts">Контакты</NuxtLink></li>
+      <ul class="nav__menu">
+        <li v-for="link in links" :key="link.path">
+          <NuxtLink :to="link.path" class="nav__link">{{ link.name }}</NuxtLink>
+        </li>
       </ul>
+
+      <div class="nav__actions">
+        <NuxtLink to="/booking" class="nav__cta-btn">Бронировать</NuxtLink>
+        
+        <button 
+          class="nav__burger" 
+          @click="toggleMenu" 
+          :class="{ 'is-active': isOpen }"
+          aria-label="Открыть меню"
+        >
+          <span></span>
+          <span></span>
+        </button>
+      </div>
     </div>
+
+    <transition name="menu-fade">
+      <div v-if="isOpen" class="nav__mobile-overlay" @click.self="toggleMenu">
+        <div class="nav__mobile-content">
+          <ul class="nav__mobile-links">
+            <li v-for="link in links" :key="link.path" @click="isOpen = false">
+              <NuxtLink :to="link.path">{{ link.name }}</NuxtLink>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </transition>
   </nav>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
+
 const isOpen = ref(false);
+const isScrolled = ref(false);
+
+const links = [
+  { name: "О нас", path: "/aboutus" },
+  { name: "Фото", path: "/photos" },
+  { name: "Акции", path: "/promotion" },
+  { name: "Контакты", path: "/contacts" },
+];
+
 const toggleMenu = () => (isOpen.value = !isOpen.value);
+
+const handleScroll = () => {
+  isScrolled.value = window.scrollY > 50;
+};
+
+onMounted(() => window.addEventListener("scroll", handleScroll));
+onUnmounted(() => window.removeEventListener("scroll", handleScroll));
 </script>
 
 <style lang="scss" scoped>
-.navbar {
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  background: var(--primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: relative;
   z-index: 1000;
-}
+  padding: 24px 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
-.nav-container {
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 18px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-sizing: border-box;
-}
+  // Состояние при скролле
+  &--scrolled {
+    padding: 12px 0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 
-.nav-logo {
-  color: #fff;
-  font-weight: 600;
-  font-size: 24px;
-  letter-spacing: 0.5px;
-  text-decoration: none;
-  user-select: none;
-  white-space: nowrap;
-}
-
-.burger {
-  display: none;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 24px;
-  height: 18px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  z-index: 1001;
-
-  span {
-    display: block;
-    height: 3px;
-    width: 100%;
-    background: #fff;
-    border-radius: 2px;
-    transition: 0.3s;
+    .nav__logo, .nav__link { color: #3d2c17; }
+    .nav__burger span { background: #3d2c17; }
   }
 
-  span.open:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
-  }
-  span.open:nth-child(2) {
-    opacity: 0;
-  }
-  span.open:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -5px);
-  }
-}
-
-.nav-links {
-  display: flex;
-  gap: 48px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-
-  li a {
-    color: #fff;
-    font-size: 16px;
-    text-decoration: none;
-    font-weight: 500;
-    transition: opacity 0.2s ease;
-    user-select: none;
-
-    &:hover,
-    &:focus {
-      opacity: 0.7;
-      outline: none;
-    }
-  }
-}
-
-@media (max-width: 1024px) {
-  .nav-links {
-    gap: 20px; 
-  }
-}
-
-@media (max-width: 850px) {
-  .burger {
+  &__container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 24px;
     display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
-  .nav-links {
-    position: absolute;
-    top: 100%; 
-    left: 0;
-    right: 0;
+  &__logo {
+    font-size: 22px;
+    font-weight: 700;
+    text-decoration: none;
+    color: #fff;
+    letter-spacing: -0.5px;
+    transition: color 0.3s;
+
+    span { font-weight: 300; opacity: 0.8; }
+  }
+
+  &__menu {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+
+    @media (max-width: 850px) { display: none; }
+  }
+
+  &__link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    position: relative;
+    padding: 8px 0;
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary, #5e4e3b);
+      transition: width 0.3s ease;
+    }
+
+    &:hover::after { width: 100%; }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  &__cta-btn {
+    background: var(--primary, #5e4e3b);
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: transform 0.3s ease;
+
+    &:hover { transform: scale(1.05); }
+
+    @media (max-width: 480px) { display: none; }
+  }
+
+  &__burger {
+    display: none;
     flex-direction: column;
-    gap: 0; 
-    padding: 0 20px;
-    background: #b9946e; 
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.4s ease-in-out;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
 
-    &.active {
-      max-height: 400px; 
-      padding-bottom: 20px;
+    span {
+      width: 28px;
+      height: 2px;
+      background: #fff;
+      transition: all 0.3s ease;
     }
 
-    li {
-      width: 100%;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      
-      &:last-child { border: none; }
+    &.is-active {
+      span:nth-child(1) { transform: translateY(4px) rotate(45deg); }
+      span:nth-child(2) { transform: translateY(-4px) rotate(-45deg); }
+    }
 
-      a {
-        display: block;
-        padding: 15px 0;
-        font-size: 18px; 
-      }
+    @media (max-width: 850px) { display: flex; }
+  }
+
+  /* Мобильное меню */
+  &__mobile-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    z-index: 999;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  &__mobile-content {
+    width: 80%;
+    max-width: 300px;
+    background: #fff;
+    height: 100%;
+    padding: 80px 40px;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+  }
+
+  &__mobile-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+
+    a {
+      text-decoration: none;
+      color: #3d2c17;
+      font-size: 20px;
+      font-weight: 600;
     }
   }
 }
 
-@media (max-width: 480px) {
-  .nav-container {
-    padding: 15px 20px; 
-  }
-
-  .nav-logo {
-    font-size: 18px;
-  }
+// Анимации
+.menu-fade-enter-active, .menu-fade-leave-active {
+  transition: opacity 0.3s ease;
+  .nav__mobile-content { transition: transform 0.3s ease; }
 }
 
-@media (max-width: 320px) {
-  .nav-logo {
-    font-size: 16px;
-  }
+.menu-fade-enter-from, .menu-fade-leave-to {
+  opacity: 0;
+  .nav__mobile-content { transform: translateX(100%); }
 }
 </style>

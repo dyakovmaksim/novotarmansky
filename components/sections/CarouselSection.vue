@@ -1,72 +1,63 @@
 <template>
-  <section class="carousel-section">
-    <div class="carousel">
-      <div class="carousel__main">
-        <Transition name="fade" mode="out-in">
-          <img
-            :key="images[activeIndex]"
-            :src="images[activeIndex]"
-            alt=""
-            class="carousel__main-img"
-          />
-        </Transition>
-
-        <button class="carousel__arrow carousel__arrow--prev" @click="prev">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M15 18L9 12L15 6"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
-        </button>
-        <button class="carousel__arrow carousel__arrow--next" @click="next">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M9 18L15 12L9 6"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
-        </button>
-
-        <div class="carousel__pagination">
-          <span
-            v-for="(img, i) in images"
-            :key="i"
-            :class="['carousel__dot', { active: i === activeIndex }]"
-            @click="goTo(i)"
-          ></span>
-        </div>
-      </div>
-
-      <div class="carousel__side">
-        <div
-          v-for="n in 2"
-          :key="n"
-          class="carousel__side-img-wrap"
-          :style="{ opacity: images[getSideImageIndex(n)] ? 1 : 0 }"
-          @click="goTo(getSideImageIndex(n))"
+  <section class="gallery">
+    <div class="gallery__container">
+      <div class="gallery__layout">
+        
+        <div 
+          class="gallery__main" 
+          @mouseenter="stopTimer" 
+          @mouseleave="startTimer"
         >
-          <img
-            v-if="images[getSideImageIndex(n)]"
-            :key="images[getSideImageIndex(n)]"
-            :src="images[getSideImageIndex(n)]"
-            alt=""
-            class="carousel__side-img"
-          />
+          <div class="gallery__slider-viewport">
+            <transition :name="slideDirection">
+              <div :key="activeIndex" class="gallery__slide">
+                <img :src="images[activeIndex]" alt="Интерьер" class="gallery__img" />
+                <div class="gallery__overlay"></div>
+                <div class="gallery__info">
+                  <span class="gallery__tag">Интерьер</span>
+                  <h3 class="gallery__caption">Уют и премиальный комфорт</h3>
+                </div>
+              </div>
+            </transition>
+          </div>
+
+          <div class="gallery__nav-overlay">
+            <button class="gallery__arrow" @click="prev" aria-label="Назад">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M15 18l-6-6 6-6" /></svg>
+            </button>
+            <button class="gallery__arrow" @click="next" aria-label="Вперед">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 18l6 6-6-6" /></svg>
+            </button>
+          </div>
+
+          <div class="gallery__pagination">
+            <div v-for="(img, i) in images" :key="i" class="gallery__bar-bg" @click="goTo(i)">
+              <div class="gallery__bar-fill" :class="{ 'is-active': i === activeIndex }"></div>
+            </div>
+          </div>
         </div>
+
+        <div class="gallery__side">
+          <div class="gallery__side-top">
+            <span class="gallery__counter">
+              <span class="gallery__current">{{ activeIndex + 1 }}</span>
+              <span class="gallery__total">/ {{ images.length }}</span>
+            </span>
+          </div>
+          <div class="gallery__side-preview" @click="next">
+            <div class="gallery__side-label">Далее</div>
+            <img :src="images[(activeIndex + 1) % images.length]" alt="Next" />
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 
-const activeIndex = ref(0);
 const images = [
   "/images/carousel/carousel1.jpg",
   "/images/carousel/carousel2.jpg",
@@ -75,279 +66,196 @@ const images = [
   "/images/carousel/carousel5.jpg",
 ];
 
-function goTo(idx) {
-  activeIndex.value = idx;
-}
+const activeIndex = ref(0);
+const slideDirection = ref("slide-left");
+let timer = null;
 
-function next() {
+const startTimer = () => {
+  stopTimer();
+  timer = setInterval(next, 5000);
+};
+
+const stopTimer = () => clearInterval(timer);
+
+const next = () => {
+  slideDirection.value = "slide-left";
   activeIndex.value = (activeIndex.value + 1) % images.length;
-}
+};
 
-function prev() {
+const prev = () => {
+  slideDirection.value = "slide-right";
   activeIndex.value = (activeIndex.value - 1 + images.length) % images.length;
-}
+};
 
-function getSideImageIndex(offset) {
-  return (activeIndex.value + offset) % images.length;
-}
+const goTo = (i) => {
+  slideDirection.value = i > activeIndex.value ? "slide-left" : "slide-right";
+  activeIndex.value = i;
+};
+
+onMounted(startTimer);
+onUnmounted(stopTimer);
 </script>
 
 <style lang="scss" scoped>
-/* Убедитесь, что переменная --primary определена где-то в вашем глобальном CSS,
-   например, в файле main.css или App.vue, иначе используйте запасное значение. */
-:root {
-  --primary: #5e4e3b; /* Пример запасного цвета, если не определен глобально */
-}
-
-.carousel-section {
-  width: 100%;
-  padding: 36px 0; /* Отступ по умолчанию */
+.gallery {
+  padding: 60px 0;
   background: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
-.carousel {
-  display: flex;
-  gap: 40px; /* Отступ по умолчанию */
-  width: 100%;
-  max-width: 1200px; /* Ограничиваем максимальную ширину карусели */
-  box-sizing: border-box; /* Важно для padding */
-}
-
-.carousel__main {
-  position: relative;
-  flex: 1 1 0; /* Занимает доступное пространство */
-  min-width: 0; /* Позволяет элементу сжиматься */
-  background: #f9f9f9;
-  border-radius: 30px; /* Радиус по умолчанию */
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  aspect-ratio: 16 / 10; /* Соотношение сторон по умолчанию */
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.05);
-}
-
-.carousel__main-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 32px; /* Радиус по умолчанию */
-  display: block;
-}
-
-.carousel__pagination {
-  position: absolute;
-  left: 50%;
-  bottom: 18px; /* Отступ снизу по умолчанию */
-  transform: translateX(-50%);
-  display: flex;
-  gap: 10px; /* Отступ между точками по умолчанию */
-  z-index: 2;
-}
-
-.carousel__dot {
-  width: 14px; /* Размер точки по умолчанию */
-  height: 14px;
-  border-radius: 50%;
-  border: 2px solid var(--primary);
-  opacity: 0.5;
-  cursor: pointer;
-  transition: 0.3s;
-
-  &.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    opacity: 1;
-  }
-}
-
-.carousel__side {
-  display: flex; /* По умолчанию отображается */
-  flex-direction: column;
-  gap: 24px;
-  width: 400px; /* Фиксированная ширина по умолчанию */
-  justify-content: flex-start;
-}
-
-.carousel__side-img-wrap {
-  border-radius: 24px;
-  overflow: hidden;
-  background: #919191;
-  aspect-ratio: 1.6 / 1;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
-  transition: opacity 0.3s;
-  position: relative;
-  cursor: pointer;
-
-  &:hover {
-    filter: brightness(0.85);
-  }
-}
-
-.carousel__side-img {
-  width: 100%;
-  height: 100%;
-  opacity: 0.5;
-  object-fit: cover;
-  border-radius: 24px;
-  transition: filter 0.3s;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-.fade-enter-to,
-.fade-leave-from {
-  opacity: 1;
-}
-
-/* Стили для стрелок навигации */
-.carousel__arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  width: 48px; /* Размер стрелки по умолчанию */
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 3;
-  transition: 0.3s;
-  outline: none;
-
-  &:hover {
-    background: var(--primary);
-
-    svg {
-      stroke: white;
-    }
+  &__container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
   }
 
-  &--prev {
-    left: 20px; /* Отступ по умолчанию */
-  }
-
-  &--next {
-    right: 20px; /* Отступ по умолчанию */
-  }
-
-  svg {
-    stroke: var(--primary);
-    transition: stroke 0.3s;
-  }
-}
-
-/* ---
-Media Queries для адаптивности
---- */
-
-/* Для экранов 1280px и меньше */
-@media (max-width: 1280px) {
-  .carousel-section {
-    padding: 30px 0;
-  }
-
-  .carousel {
-    max-width: 95%;
+  &__layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
     gap: 20px;
+    @media (max-width: 992px) { grid-template-columns: 1fr; }
   }
 
-  .carousel__side {
-    width: 250px; /* Уменьшаем, чтобы дать больше места главному фото */
-    gap: 15px;
-  }
-}
-
-@media (max-width: 992px) {
-  /* Переходный момент: когда боковые фото еще есть, но уже тесно */
-  .carousel__side {
-    width: 200px;
-  }
-}
-
-@media (max-width: 768px) {
-  .carousel-section {
-    padding: 10px 0; /* Минимальный отступ, чтобы не "съедать" экран */
+  &__main {
+    position: relative;
+    border-radius: 30px;
+    background: #000;
+    overflow: hidden; // Маскирует вылетающие картинки
+    aspect-ratio: 16 / 9;
   }
 
-  .carousel {
-    flex-direction: column;
-    gap: 0;
-    max-width: 100%;
-    /* Убираем лишние отступы, чтобы фото было крупнее */
-    padding: 0 10px; 
-  }
-
-  .carousel__main {
-    flex: none; /* Отключаем flex-grow, чтобы не схлопнулась */
+  &__slider-viewport {
+    position: relative;
     width: 100%;
-    height: auto;
-    aspect-ratio: 4 / 3; /* Фиксируем пропорции, чтобы не исчезала */
-    border-radius: 20px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    overflow: hidden;
   }
 
-  .carousel__side {
-    /* Вместо полного скрытия, можно превратить их в маленькие превью снизу 
-       или скрыть совсем, но убедиться, что главный блок занимает всё место */
-    display: none; 
+  &__slide {
+    position: absolute; // Слайды лежат друг на друге
+    inset: 0;
+    width: 100%;
+    height: 100%;
   }
 
-  /* Улучшаем навигацию для пальцев */
-  .carousel__arrow {
-    width: 44px;
-    height: 44px;
-    background: rgba(255, 255, 255, 0.9); /* Делаем заметнее */
-    
-    &--prev { left: 5px; }
-    &--next { right: 5px; }
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
-    svg {
-      width: 24px;
-      height: 24px;
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+  }
+
+  &__nav-overlay {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    pointer-events: none; // Чтобы клики проходили сквозь контейнер
+    z-index: 10;
+  }
+
+  &__arrow {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    cursor: pointer;
+    pointer-events: auto; // А кнопки кликабельны
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+    svg { width: 20px; height: 20px; }
+    &:hover { background: #fff; color: #000; }
+  }
+
+  &__pagination {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    gap: 4px;
+    padding: 0 4px 4px;
+    z-index: 15;
+  }
+
+  &__bar-bg {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.2);
+    cursor: pointer;
+    border-radius: 2px;
+  }
+
+  &__bar-fill {
+    height: 100%;
+    width: 0;
+    background: #fff;
+    border-radius: 2px;
+    &.is-active {
+      width: 100%;
+      transition: width 5s linear;
     }
   }
 
-  .carousel__pagination {
-    bottom: 12px;
-    /* Делаем точки крупнее, чтобы по ним было легче попадать */
-    gap: 12px;
+  &__side {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    @media (max-width: 992px) { display: none; }
   }
 
-  .carousel__dot {
-    width: 10px;
-    height: 10px;
-    border-width: 1.5px;
+  &__counter {
+    font-size: 32px;
+    font-weight: 200;
+    color: #ccc;
+    .gallery__current { color: #5e4e3b; font-weight: 700; }
+  }
+
+  &__side-preview {
+    position: relative;
+    flex: 1;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #000;
+    img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; transition: 0.4s; }
+    &:hover img { opacity: 0.9; transform: scale(1.05); }
+  }
+
+  &__side-label {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 2;
+    color: #fff;
+    font-size: 12px;
+    text-transform: uppercase;
+    background: rgba(0,0,0,0.3);
+    padding: 4px 10px;
+    border-radius: 10px;
   }
 }
 
-@media (max-width: 480px) {
-  .carousel__main {
-    aspect-ratio: 1.1 / 1; /* Делаем чуть выше на узких экранах */
-    border-radius: 15px;
-  }
-  
-  /* Прячем стрелки на очень маленьких экранах, если они мешают фото,
-     но только если есть пагинация (точки) */
-  .carousel__arrow {
-    background: rgba(255, 255, 255, 0.7);
-    transform: translateY(-50%) scale(0.8);
-  }
+/* Фикс анимаций: используем transform для плавности */
+.slide-left-enter-from { transform: translateX(100%); }
+.slide-left-leave-to { transform: translateX(-100%); }
 
-  .carousel__dot {
-    width: 10px;
-    height: 10px;
-  }
+.slide-right-enter-from { transform: translateX(-100%); }
+.slide-right-leave-to { transform: translateX(100%); }
+
+.slide-left-enter-active, .slide-left-leave-active,
+.slide-right-enter-active, .slide-right-leave-active {
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>

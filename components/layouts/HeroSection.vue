@@ -1,18 +1,24 @@
 <template>
-  <section class="hero" role="region" aria-label="Главный баннер">
-    <img src="/images/house.jpg" alt="Дом" class="hero__bg" />
-    <div class="hero__content">
-      <div class="hero__card">
-        <div class="hero__text">
-          Добро пожаловать в Novotarmanskiy house <br />
-          – ваш идеальный выбор для аренды уютного дома в живописном уголке
-          Тюмени!
-        </div>
-        <div class="hero__buttons">
-          <NuxtLink to="/#photos" class="hero__btn hero__btn--white">
+  <section class="hero-block">
+    <div class="hero-block__bg">
+      <img src="/images/house.jpg" alt="House" class="hero-block__img" />
+      <div class="hero-block__overlay"></div>
+    </div>
+
+    <div class="hero-block__container">
+      <div class="hero-block__card">
+        <h1 class="hero-block__title">
+          Добро пожаловать в <br>
+          <span class="hero-block__brand">Novotarmanskiy house</span>
+        </h1>
+        <p class="hero-block__subtitle">
+          Ваш идеальный выбор для аренды уютного дома в живописном уголке Тюмени
+        </p>
+        <div class="hero-block__actions">
+          <NuxtLink to="/#photos" class="hero-block__btn hero-block__btn--white">
             Смотреть фото
           </NuxtLink>
-          <NuxtLink to="/#booking" class="hero__btn hero__btn--beige">
+          <NuxtLink to="/#booking" class="hero-block__btn hero-block__btn--primary">
             Бронировать
           </NuxtLink>
         </div>
@@ -22,220 +28,98 @@
 </template>
 
 <style lang="scss" scoped>
-.hero {
-  position: relative;
-  width: 100%;
-  height: 300px;
-  background: #fff;
-  border-bottom-right-radius: 30px;
-  display: flex;
-  align-items: flex-end;
-  overflow: visible;
-  margin-bottom: 120px;
-
-  /* Градиент */
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 0 0 60px 60px;
-    background: linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0.4) 0%,
-      rgba(0, 0, 0, 0.2) 70%,
-      rgba(0, 0, 0, 0) 100%
-    );
-    z-index: 1;
-    pointer-events: none;
-  }
-
-  &__bg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 55%;
-    border-radius: 0 0 60px 60px;
-    z-index: 0;
-    user-select: none;
-  }
-
-  &__content {
+// Используем максимально специфичные селекторы через теги, чтобы перебить main.scss
+html body {
+  .hero-block {
     position: relative;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
+    min-height: 85vh;
     display: flex;
-    z-index: 2;
-    padding: 0 20px;
-    justify-content: flex-start;
-    box-sizing: border-box;
-  }
-
-  &__card {
-    position: absolute;
-    bottom: -100px;
-    left: 35%;
-    transform: translateX(-50%);
-    background: var(--primary);
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.07);
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 800px;
-    min-width: 280px;
-    box-sizing: border-box;
-  }
-
-  &__text {
-    color: #fff;
-    font-size: 24px;
-    font-weight: 400;
-    margin-bottom: 15px;
-    line-height: 1.3;
-    user-select: none;
-  }
-
-  &__buttons {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    width: 100%;
-  }
-
-  &__btn {
-    padding: 12px 20px;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 500;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    white-space: nowrap;
-    user-select: none;
-    display: inline-flex;
     align-items: center;
-    justify-content: center;
+    padding: 100px 0 60px;
+    overflow: hidden;
 
-    &:focus-visible {
-      outline: 3px solid #fff;
-      outline-offset: 2px;
-    }
-
-    &--white {
-      background: var(--primary);
-      color: #fff;
-      border: 2px solid #fff;
-
-      &:hover,
-      &:focus {
-        transform: scale(1.05);
-        box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+    &__bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        border-radius: 0 0 40px 40px;
       }
     }
 
-    &--beige {
-      background: #fff;
-      color: var(--primary);
-      border: 2px solid var(--primary);
+    &__overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 0 0 40px 40px;
+    }
 
-      &:hover,
-      &:focus {
-        transform: scale(1.05);
-        box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+    &__container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    &__card {
+      max-width: 580px;
+      // ВАЖНО: Принудительная прозрачность даже на мобильных
+      background: rgba(255, 255, 255, 0.15) !important;
+      backdrop-filter: blur(15px) saturate(150%) !important;
+      -webkit-backdrop-filter: blur(15px) saturate(150%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      padding: 40px;
+      border-radius: 30px;
+      color: #ffffff !important;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    &__title { font-size: 32px; line-height: 1.2; margin-bottom: 15px; }
+    &__brand { font-weight: 700; }
+    &__subtitle { font-size: 17px; margin-bottom: 30px; opacity: 0.9; }
+
+    &__actions {
+      display: flex;
+      gap: 15px;
+    }
+
+    &__btn {
+      flex: 1;
+      padding: 16px;
+      border-radius: 100px !important; // Овальные кнопки
+      text-align: center;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.3s;
+
+      &--white {
+        background: #fff !important;
+        color: #3d2c17 !important;
+      }
+      &--primary {
+        background: #b9946e !important;
+        color: #fff !important;
       }
     }
   }
 
- /* ========= АДАПТИВ (Исправленный) ========= */
-
-@media (max-width: 1024px) {
-  height: 320px; // Немного увеличим высоту фона для баланса
-
-  &__card {
-    max-width: 700px;
-    left: 50%; // Центрируем для порядка
-    transform: translateX(-50%);
+  // Адаптив для маленьких экранов
+  @media (max-width: 768px) {
+    .hero-block {
+      padding-top: 80px;
+      &__card {
+        padding: 30px 20px;
+        margin: 0 10px;
+        // Если хочешь оставить прозрачность и на мобилках:
+        background: rgba(0, 0, 0, 0.4) !important; 
+      }
+      &__actions { flex-direction: column; }
+      &__btn { width: 100%; }
+    }
   }
-
-  &__text {
-    font-size: 20px;
-  }
-}
-
-@media (max-width: 768px) {
-  height: 280px;
-  margin-bottom: 120px;
-
-  &::after, &__bg {
-    border-radius: 0 0 40px 40px; // Смягчаем радиус
-  }
-
-  &__card {
-    bottom: -80px;
-    width: calc(100% - 40px); // Оставляем поля по бокам
-    max-width: 600px;
-    padding: 20px;
-  }
-
-  &__text {
-    font-size: 18px;
-    br { display: none; } // Убираем перенос строки из HTML на мобильных
-  }
-
-  &__btn {
-    flex: 1; // Кнопки делят пространство поровну
-    font-size: 15px;
-    padding: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  height: 240px;
-  margin-bottom: 120px;
-
-  &::after, &__bg {
-    border-radius: 0 0 30px 30px;
-  }
-
-  &__card {
-    bottom: -70px;
-    padding: 16px;
-    border-radius: 16px;
-  }
-
-  &__text {
-    font-size: 15px; // 12px было слишком мелко
-    margin-bottom: 12px;
-    text-align: center; // Центровка текста для красоты
-  }
-
-  &__buttons {
-    gap: 8px;
-    flex-direction: column; // На совсем узких экранах кнопки лучше ставить друг под друга
-  }
-
-  &__btn {
-    width: 100%; // Кнопки на всю ширину карточки
-    height: auto; // Убрал фиксированные 10px
-    font-size: 14px;
-    padding: 10px 0;
-  }
-}
-
-/* Фикс для очень маленьких экранов (iPhone SE) */
-@media (max-width: 350px) {
-  &__text {
-    font-size: 14px;
-  }
-  
-  &__card {
-    bottom: -85px; // Чуть ниже, так как текст может занять больше строк
-  }
-}
 }
 </style>
