@@ -1,5 +1,9 @@
 <template>
-  <nav class="nav" :class="{ 'nav--scrolled': isScrolled }" role="navigation">
+  <nav
+    class="nav"
+    :class="{ 'nav--scrolled': isScrolled || route.path !== '/' }"
+    role="navigation"
+  >
     <div class="nav__container">
       <NuxtLink to="/" class="nav__logo">
         novotarmanskiy<span>house</span>
@@ -13,10 +17,10 @@
 
       <div class="nav__actions">
         <NuxtLink to="/booking" class="nav__cta-btn">Бронировать</NuxtLink>
-        
-        <button 
-          class="nav__burger" 
-          @click="toggleMenu" 
+
+        <button
+          class="nav__burger"
+          @click="toggleMenu"
           :class="{ 'is-active': isOpen }"
           aria-label="Открыть меню"
         >
@@ -42,7 +46,9 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
+import { useRoute } from "vue-router";
 
+const route = useRoute();
 const isOpen = ref(false);
 const isScrolled = ref(false);
 
@@ -59,8 +65,14 @@ const handleScroll = () => {
   isScrolled.value = window.scrollY > 50;
 };
 
-onMounted(() => window.addEventListener("scroll", handleScroll));
-onUnmounted(() => window.removeEventListener("scroll", handleScroll));
+onMounted(() => {
+  window.addEventListener("scroll", handleScroll);
+  handleScroll(); // Проверяем состояние при загрузке страницы
+});
+
+onUnmounted(() => {
+  window.removeEventListener("scroll", handleScroll);
+});
 </script>
 
 <style lang="scss" scoped>
@@ -73,16 +85,32 @@ onUnmounted(() => window.removeEventListener("scroll", handleScroll));
   padding: 24px 0;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
-  // Состояние при скролле
+  // Стандартный вид (белый текст для Hero на главной)
+  .nav__logo,
+  .nav__link {
+    color: #fff;
+  }
+  .nav__burger span {
+    background: #fff;
+  }
+
+  // Состояние при скролле ИЛИ на внутренних страницах
   &--scrolled {
     padding: 12px 0;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 
-    .nav__logo, .nav__link { color: #3d2c17; }
-    .nav__burger span { background: #3d2c17; }
+    // Темный текст для читаемости на белом фоне
+    .nav__logo,
+    .nav__link {
+      color: #3d2c17;
+    }
+    .nav__burger span {
+      background: #3d2c17;
+    }
   }
 
   &__container {
@@ -98,11 +126,13 @@ onUnmounted(() => window.removeEventListener("scroll", handleScroll));
     font-size: 22px;
     font-weight: 700;
     text-decoration: none;
-    color: #fff;
     letter-spacing: -0.5px;
     transition: color 0.3s;
 
-    span { font-weight: 300; opacity: 0.8; }
+    span {
+      font-weight: 300;
+      opacity: 0.8;
+    }
   }
 
   &__menu {
@@ -110,16 +140,18 @@ onUnmounted(() => window.removeEventListener("scroll", handleScroll));
     gap: 32px;
     list-style: none;
 
-    @media (max-width: 850px) { display: none; }
+    @media (max-width: 850px) {
+      display: none;
+    }
   }
 
   &__link {
-    color: #fff;
     text-decoration: none;
     font-size: 15px;
     font-weight: 500;
     position: relative;
     padding: 8px 0;
+    transition: color 0.3s;
 
     &::after {
       content: "";
@@ -132,7 +164,13 @@ onUnmounted(() => window.removeEventListener("scroll", handleScroll));
       transition: width 0.3s ease;
     }
 
-    &:hover::after { width: 100%; }
+    &:hover::after {
+      width: 100%;
+    }
+
+    &.router-link-active::after {
+      width: 100%;
+    }
   }
 
   &__actions {
@@ -143,17 +181,22 @@ onUnmounted(() => window.removeEventListener("scroll", handleScroll));
 
   &__cta-btn {
     background: var(--primary, #5e4e3b);
-    color: #fff;
+    color: #fff !important;
     padding: 10px 24px;
     border-radius: 100px;
     text-decoration: none;
     font-weight: 600;
     font-size: 14px;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
 
-    &:hover { transform: scale(1.05); }
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(94, 78, 59, 0.3);
+    }
 
-    @media (max-width: 480px) { display: none; }
+    @media (max-width: 480px) {
+      display: none;
+    }
   }
 
   &__burger {
@@ -164,23 +207,30 @@ onUnmounted(() => window.removeEventListener("scroll", handleScroll));
     border: none;
     cursor: pointer;
     padding: 5px;
+    z-index: 1001;
 
     span {
       width: 28px;
       height: 2px;
-      background: #fff;
       transition: all 0.3s ease;
     }
 
     &.is-active {
-      span:nth-child(1) { transform: translateY(4px) rotate(45deg); }
-      span:nth-child(2) { transform: translateY(-4px) rotate(-45deg); }
+      span:nth-child(1) {
+        transform: translateY(4px) rotate(45deg);
+        background: #3d2c17 !important;
+      }
+      span:nth-child(2) {
+        transform: translateY(-4px) rotate(-45deg);
+        background: #3d2c17 !important;
+      }
     }
 
-    @media (max-width: 850px) { display: flex; }
+    @media (max-width: 850px) {
+      display: flex;
+    }
   }
 
-  /* Мобильное меню */
   &__mobile-overlay {
     position: fixed;
     inset: 0;
@@ -197,7 +247,7 @@ onUnmounted(() => window.removeEventListener("scroll", handleScroll));
     background: #fff;
     height: 100%;
     padding: 80px 40px;
-    box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
   }
 
   &__mobile-links {
@@ -215,14 +265,19 @@ onUnmounted(() => window.removeEventListener("scroll", handleScroll));
   }
 }
 
-// Анимации
-.menu-fade-enter-active, .menu-fade-leave-active {
+.menu-fade-enter-active,
+.menu-fade-leave-active {
   transition: opacity 0.3s ease;
-  .nav__mobile-content { transition: transform 0.3s ease; }
+  .nav__mobile-content {
+    transition: transform 0.3s ease;
+  }
 }
 
-.menu-fade-enter-from, .menu-fade-leave-to {
+.menu-fade-enter-from,
+.menu-fade-leave-to {
   opacity: 0;
-  .nav__mobile-content { transform: translateX(100%); }
+  .nav__mobile-content {
+    transform: translateX(100%);
+  }
 }
 </style>

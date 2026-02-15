@@ -2,16 +2,19 @@
   <section class="gallery">
     <div class="gallery__container">
       <div class="gallery__layout">
-        
-        <div 
-          class="gallery__main" 
-          @mouseenter="stopTimer" 
+        <div
+          class="gallery__main"
+          @mouseenter="stopTimer"
           @mouseleave="startTimer"
         >
           <div class="gallery__slider-viewport">
             <transition :name="slideDirection">
               <div :key="activeIndex" class="gallery__slide">
-                <img :src="images[activeIndex]" alt="Интерьер" class="gallery__img" />
+                <img
+                  :src="images[activeIndex]"
+                  alt="Интерьер"
+                  class="gallery__img"
+                />
                 <div class="gallery__overlay"></div>
                 <div class="gallery__info">
                   <span class="gallery__tag">Интерьер</span>
@@ -22,17 +25,51 @@
           </div>
 
           <div class="gallery__nav-overlay">
-            <button class="gallery__arrow" @click="prev" aria-label="Назад">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M15 18l-6-6 6-6" /></svg>
+            <button
+              class="gallery__arrow gallery__arrow--prev"
+              @click="prev"
+              aria-label="Назад"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
             </button>
-            <button class="gallery__arrow" @click="next" aria-label="Вперед">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 18l6 6-6-6" /></svg>
+            <button
+              class="gallery__arrow gallery__arrow--next"
+              @click="next"
+              aria-label="Вперед"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
             </button>
           </div>
 
           <div class="gallery__pagination">
-            <div v-for="(img, i) in images" :key="i" class="gallery__bar-bg" @click="goTo(i)">
-              <div class="gallery__bar-fill" :class="{ 'is-active': i === activeIndex }"></div>
+            <div
+              v-for="(img, i) in images"
+              :key="i"
+              class="gallery__bar-bg"
+              @click="goTo(i)"
+            >
+              <div
+                class="gallery__bar-fill"
+                :class="{ 'is-active': i === activeIndex }"
+              ></div>
             </div>
           </div>
         </div>
@@ -49,7 +86,6 @@
             <img :src="images[(activeIndex + 1) % images.length]" alt="Next" />
           </div>
         </div>
-
       </div>
     </div>
   </section>
@@ -111,7 +147,9 @@ onUnmounted(stopTimer);
     display: grid;
     grid-template-columns: 1fr 300px;
     gap: 20px;
-    @media (max-width: 992px) { grid-template-columns: 1fr; }
+    @media (max-width: 992px) {
+      grid-template-columns: 1fr;
+    }
   }
 
   &__main {
@@ -145,7 +183,7 @@ onUnmounted(stopTimer);
   &__overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
   }
 
   &__nav-overlay {
@@ -165,9 +203,9 @@ onUnmounted(stopTimer);
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     color: #fff;
     cursor: pointer;
     pointer-events: auto; // А кнопки кликабельны
@@ -175,8 +213,14 @@ onUnmounted(stopTimer);
     align-items: center;
     justify-content: center;
     transition: 0.3s;
-    svg { width: 20px; height: 20px; }
-    &:hover { background: #fff; color: #000; }
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+    &:hover {
+      background: #fff;
+      color: #000;
+    }
   }
 
   &__pagination {
@@ -192,7 +236,7 @@ onUnmounted(stopTimer);
   &__bar-bg {
     flex: 1;
     height: 4px;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     cursor: pointer;
     border-radius: 2px;
   }
@@ -212,14 +256,19 @@ onUnmounted(stopTimer);
     display: flex;
     flex-direction: column;
     gap: 15px;
-    @media (max-width: 992px) { display: none; }
+    @media (max-width: 992px) {
+      display: none;
+    }
   }
 
   &__counter {
     font-size: 32px;
     font-weight: 200;
     color: #ccc;
-    .gallery__current { color: #5e4e3b; font-weight: 700; }
+    .gallery__current {
+      color: #5e4e3b;
+      font-weight: 700;
+    }
   }
 
   &__side-preview {
@@ -229,8 +278,17 @@ onUnmounted(stopTimer);
     overflow: hidden;
     cursor: pointer;
     background: #000;
-    img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; transition: 0.4s; }
-    &:hover img { opacity: 0.9; transform: scale(1.05); }
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.6;
+      transition: 0.4s;
+    }
+    &:hover img {
+      opacity: 0.9;
+      transform: scale(1.05);
+    }
   }
 
   &__side-label {
@@ -241,21 +299,31 @@ onUnmounted(stopTimer);
     color: #fff;
     font-size: 12px;
     text-transform: uppercase;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     padding: 4px 10px;
     border-radius: 10px;
   }
 }
 
 /* Фикс анимаций: используем transform для плавности */
-.slide-left-enter-from { transform: translateX(100%); }
-.slide-left-leave-to { transform: translateX(-100%); }
+.slide-left-enter-from {
+  transform: translateX(100%);
+}
+.slide-left-leave-to {
+  transform: translateX(-100%);
+}
 
-.slide-right-enter-from { transform: translateX(-100%); }
-.slide-right-leave-to { transform: translateX(100%); }
+.slide-right-enter-from {
+  transform: translateX(-100%);
+}
+.slide-right-leave-to {
+  transform: translateX(100%);
+}
 
-.slide-left-enter-active, .slide-left-leave-active,
-.slide-right-enter-active, .slide-right-leave-active {
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>

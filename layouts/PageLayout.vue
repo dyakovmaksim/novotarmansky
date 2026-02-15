@@ -61,16 +61,13 @@ onUnmounted(() => window.removeEventListener("scroll", handleScroll));
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 80px 20px;
   display: flex;
   flex-direction: column;
-  gap: 80px;
 
   &.pt-inner { padding-top: 140px; } // Увеличил отступ для страницы "О нас"
 
   @media (max-width: 768px) {
-    padding: 40px 16px;
-    gap: 50px;
+
     &.pt-inner { padding-top: 100px; }
   }
 }

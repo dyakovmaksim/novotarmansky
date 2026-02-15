@@ -2,19 +2,36 @@
   <footer class="footer">
     <div class="footer__container">
       <div class="footer__grid">
-        
         <div class="footer__col footer__col--main">
           <NuxtLink to="/" class="footer__logo">
             novotarmanskiy<span>house</span>
           </NuxtLink>
           <p class="footer__text">
-            Сдаем не просто дом, а атмосферу спокойствия и уюта в 20 минутах от города. 
-            Ваш идеальный отдых начинается здесь.
+            Сдаем не просто дом, а атмосферу спокойствия и уюта в 20 минутах от
+            города. Ваш идеальный отдых начинается здесь.
           </p>
           <div class="footer__socials">
-            <a href="https://wa.me/..." target="_blank" class="footer__social-link" title="WhatsApp">WA</a>
-            <a href="https://t.me/..." target="_blank" class="footer__social-link" title="Telegram">TG</a>
-            <a href="#" target="_blank" class="footer__social-link" title="ВКонтакте">VK</a>
+            <a
+              href="https://wa.me/..."
+              target="_blank"
+              class="footer__social-link"
+              title="WhatsApp"
+              >WA</a
+            >
+            <a
+              href="https://t.me/..."
+              target="_blank"
+              class="footer__social-link"
+              title="Telegram"
+              >TG</a
+            >
+            <a
+              href="#"
+              target="_blank"
+              class="footer__social-link"
+              title="ВКонтакте"
+              >VK</a
+            >
           </div>
         </div>
 
@@ -41,34 +58,35 @@
         <div class="footer__col">
           <h4 class="footer__title">Связаться с нами</h4>
           <div class="footer__contacts">
-            <a href="tel:+79990000000" class="footer__phone">+7 (999) 000-00-00</a>
-            <p class="footer__address">п. Новотарманский, <br>ул. Лесная, д. 10</p>
+            <a href="tel:+79990000000" class="footer__phone"
+              >+7 (999) 000-00-00</a
+            >
+            <p class="footer__address">
+              п. Новотарманский, <br />ул. Лесная, д. 10
+            </p>
             <p class="footer__worktime">Прием звонков: 09:00 — 22:00</p>
           </div>
         </div>
-
       </div>
 
       <div class="footer__divider"></div>
 
       <div class="footer__legal">
         <div class="footer__legal-left">
-          <p>© {{ new Date().getFullYear() }} Novotarmanskiy House. Все права защищены.</p>
+          <p>
+            © {{ new Date().getFullYear() }} Novotarmanskiy House. Все права
+            защищены.
+          </p>
           <div class="footer__policy-links">
             <NuxtLink to="/privacy">Политика конфиденциальности</NuxtLink>
-            <NuxtLink to="/personal-data">Обработка персональных данных</NuxtLink>
+            <NuxtLink to="/personal-data"
+              >Обработка персональных данных</NuxtLink
+            >
           </div>
         </div>
         <div class="footer__legal-right">
           <p>ИП Иванов Иван Иванович</p>
           <p>ИНН: 720000000000 | ОГРНИП: 320000000000000</p>
-        </div>
-      </div>
-
-      <div class="footer__payment">
-        <span class="footer__payment-label">Принимаем к оплате:</span>
-        <div class="footer__payment-icons">
-          <span>МИР / VISA / MASTERCARD / СБП</span>
         </div>
       </div>
     </div>
@@ -110,7 +128,9 @@
     text-decoration: none;
     display: block;
     margin-bottom: 20px;
-    span { font-weight: 300; }
+    span {
+      font-weight: 300;
+    }
   }
 
   &__text {
@@ -123,7 +143,9 @@
   &__socials {
     display: flex;
     gap: 10px;
-    @media (max-width: 600px) { justify-content: center; }
+    @media (max-width: 600px) {
+      justify-content: center;
+    }
   }
 
   &__social-link {
@@ -167,7 +189,9 @@
         color: #666;
         font-size: 15px;
         transition: color 0.2s;
-        &:hover { color: #5e4e3b; }
+        &:hover {
+          color: #5e4e3b;
+        }
       }
     }
   }
@@ -181,7 +205,8 @@
     margin-bottom: 15px;
   }
 
-  &__address, &__worktime {
+  &__address,
+  &__worktime {
     font-size: 14px;
     color: #666;
     line-height: 1.5;
@@ -216,16 +241,10 @@
     margin-top: 5px;
     a {
       color: #999;
-      &:hover { color: #666; }
+      &:hover {
+        color: #666;
+      }
     }
-  }
-
-  &__payment {
-    margin-top: 30px;
-    text-align: center;
-    font-size: 12px;
-    color: #bbb;
-    &-label { display: block; margin-bottom: 10px; }
   }
 }
 </style>

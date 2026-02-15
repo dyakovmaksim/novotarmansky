@@ -3,53 +3,65 @@
     <div class="about-page">
       <section class="reveal section-header">
         <h1 class="title-primary">О нашем <span>пространстве</span></h1>
-        <p class="subtitle">Тишина лесов и уют домашнего очага в п. Новотарманский</p>
+        <p class="subtitle">
+          Тишина лесов и уют домашнего очага в п. Новотарманский
+        </p>
       </section>
 
       <div class="bento-grid">
-        
-        <div class="grid-item accent-card brand-card reveal">
-          <div class="card-content">
-            <h2 class="brand-name">Novotarmansky <span>house</span></h2>
-            <div class="tag-list">
-              <span class="tag">2 Комнаты</span>
-              <span class="tag">Русская Баня</span>
-              <span class="tag">BBQ Зона</span>
-            </div>
+        <div class="grid-item brand-card reveal" style="grid-area: brand">
+          <h2 class="brand-name">Novotarmansky <span>house</span></h2>
+          <div class="tag-list">
+            <span class="tag">2 Комнаты</span>
+            <span class="tag">Русская Баня</span>
+            <span class="tag">BBQ Зона</span>
           </div>
         </div>
 
-        <div class="grid-item image-card reveal">
+        <div class="grid-item image-card reveal" style="grid-area: house-img">
           <img src="/images/house.png" alt="Наш гостевой дом" />
         </div>
 
-        <div class="grid-item wide-card reveal">
-          <img src="/images/interior-wide.png" alt="Интерьер гостиной" />
-          <div class="glass-overlay">
-            <p>Добро пожаловать в тихий уголок, где время замедляется. Мы создали это место для тех, кто ценит уединение, запах дерева и шум леса за окном.</p>
+        <div
+          class="grid-item image-card tall-img reveal"
+          style="grid-area: interior-img"
+        >
+          <img src="/images/interior-wide.png" alt="Интерьер" />
+          <div class="dark-overlay">
+            <p>Уют и тишина в каждой детали вашего отдыха.</p>
           </div>
         </div>
 
-        <div class="grid-item info-card reveal">
-          <div class="card-badge">Удобства</div>
-          <h3>Ваш комфорт — наш приоритет</h3>
-          <ul class="feature-list">
-            <li><strong>4 спальных места:</strong> Мастер-спальня и уютная детская/гостевая.</li>
-            <li><strong>Кухня-гостиная:</strong> Всё для кулинарных шедевров и душевных ужинов.</li>
-            <li><strong>Забота о мелочах:</strong> Свежие полотенца, гигиенические наборы и горячая вода 24/7.</li>
-          </ul>
-        </div>
-
-        <div class="grid-item image-card mini reveal">
-          <img src="/images/window-view.png" alt="Вид из окна" />
-        </div>
-
-        <div class="grid-item accent-card rest-card reveal">
+        <div class="grid-item rest-card reveal" style="grid-area: rest">
           <div class="card-badge">Отдых</div>
-          <h3>Перезагрузка тела и души</h3>
-          <p>Настоящая русская баня с ароматом хвои и благоустроенная мангальная зона для идеального шашлыка под звездным небом.</p>
+          <h3>Перезагрузка души</h3>
+          <p>
+            Настоящая русская баня с ароматом хвои и мангальная зона для
+            идеального вечера.
+          </p>
         </div>
 
+        <div class="grid-item info-card reveal" style="grid-area: info">
+          <div class="info-container">
+            <div class="info-title-group">
+              <div class="card-badge dark">Удобства</div>
+              <h3>Ваш комфорт — наш приоритет</h3>
+            </div>
+            <ul class="feature-list">
+              <li>
+                <strong>4 спальных места:</strong> Мастер-спальня и
+                детская/гостевая.
+              </li>
+              <li>
+                <strong>Кухня-гостиная:</strong> Всё для кулинарных шедевров.
+              </li>
+              <li>
+                <strong>Забота:</strong> Свежие полотенца и гигиенические
+                наборы.
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   </NuxtLayout>
@@ -57,40 +69,41 @@
 
 <style lang="scss" scoped>
 .about-page {
-  padding-bottom: 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
 }
 
 .section-header {
   text-align: center;
   margin-bottom: 60px;
-  
   .title-primary {
     font-size: clamp(32px, 5vw, 48px);
     color: #333;
-    font-weight: 300;
-    span { font-weight: 700; color: var(--primary, #5e4e3b); }
-  }
-  
-  .subtitle {
-    font-size: 18px;
-    color: #777;
-    margin-top: 10px;
+    span {
+      color: var(--primary);
+      font-weight: 700;
+    }
   }
 }
 
 .bento-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: 300px;
   gap: 24px;
-  
-  @media (max-width: 1024px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  @media (max-width: 768px) {
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "brand house-img"
+    "interior-img rest"
+    "info info";
+
+  @media (max-width: 850px) {
     grid-template-columns: 1fr;
-    grid-auto-rows: auto;
+    grid-template-areas:
+      "brand"
+      "house-img"
+      "interior-img"
+      "rest"
+      "info";
   }
 }
 
@@ -98,97 +111,136 @@
   border-radius: 32px;
   overflow: hidden;
   position: relative;
-  background: #f9f9f9;
-  
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-card {
+  background: var(--primary, #d8b48b);
+  color: white;
+  padding: 40px;
+  justify-content: center;
+  min-height: 320px;
+  .brand-name {
+    font-family: "Unageo", sans-serif;
+    font-size: 32px;
+    span {
+      display: block;
+      font-family: "Unageo", sans-serif;
+      font-size: 56px;
+      font-weight: 800;
+      line-height: 1;
+    }
+  }
+}
+
+.rest-card {
+  background: #f4efe9;
+  padding: 40px;
+  justify-content: center;
+  h3 {
+    color: var(--primary);
+    font-size: 26px;
+    margin: 15px 0;
+  }
+  p {
+    color: #666;
+    line-height: 1.6;
+  }
+}
+
+.info-card {
+  background: #fff;
+  padding: 40px 60px;
+  @media (max-width: 768px) {
+    padding: 30px;
+  }
+
+  .info-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+    @media (max-width: 900px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  h3 {
+    font-size: 28px;
+    color: #333;
+    margin-top: 15px;
+  }
+}
+
+.image-card {
+  height: 320px;
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
   }
-  
-  &:hover img { transform: scale(1.05); }
-}
 
-// Стили карточек
-.accent-card {
-  background-color: var(--primary, #5e4e3b);
-  color: white;
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.brand-card {
-  grid-column: span 1;
-  .brand-name {
-    font-size: 32px;
-    line-height: 1;
-    span { display: block; font-size: 56px; margin-top: 5px; }
+  &.tall-img {
+    height: 400px;
   }
-}
 
-.wide-card {
-  grid-column: span 2;
-  @media (max-width: 768px) { grid-column: span 1; height: 400px; }
-}
-
-.info-card, .rest-card {
-  padding: 40px;
-  background: #fff;
-  border: 1px solid #eee;
-  h3 { margin: 20px 0; font-size: 24px; color: #333; }
-}
-
-.rest-card {
-  background-color: #f4efe9; // Мягкий беж для разнообразия
-  border: none;
-}
-
-.glass-overlay {
-  position: absolute;
-  bottom: 24px;
-  left: 24px;
-  right: 24px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  padding: 24px;
-  border-radius: 20px;
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  .dark-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+    display: flex;
+    align-items: flex-end;
+    padding: 30px;
+    p {
+      color: white;
+      font-size: 16px;
+      font-weight: 500;
+    }
+  }
 }
 
 .card-badge {
-  background: var(--primary, #5e4e3b);
-  color: white;
+  background: #e6ded3;
+  color: var(--primary);
   padding: 6px 16px;
   border-radius: 100px;
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
   width: fit-content;
+
+  &.dark {
+    background: var(--primary);
+    color: white;
+  }
 }
 
 .tag-list {
   display: flex;
   gap: 8px;
   margin-top: 24px;
-  flex-wrap: wrap;
   .tag {
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 4px 12px;
     border-radius: 100px;
-    font-size: 14px;
+    font-size: 13px;
   }
 }
 
 .feature-list {
   list-style: none;
   padding: 0;
+  display: grid;
+  gap: 12px;
   li {
-    margin-bottom: 12px;
-    padding-left: 24px;
+    font-size: 15px;
+    padding-left: 25px;
     position: relative;
-    color: #555;
     &::before {
       content: "✓";
       position: absolute;
