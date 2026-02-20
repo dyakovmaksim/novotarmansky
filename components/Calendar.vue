@@ -2,19 +2,35 @@
   <div class="calendar">
     <div class="calendar__header">
       <button class="calendar__nav" @click="prevMonth">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
           <path d="M15 18l-6-6 6-6" />
         </svg>
       </button>
-      
+
       <div class="calendar__month-wrapper">
         <transition name="slide-fade" mode="out-in">
-          <span :key="monthLabel" class="calendar__month">{{ monthLabel }}</span>
+          <span :key="monthLabel" class="calendar__month">{{
+            monthLabel
+          }}</span>
         </transition>
       </div>
 
       <button class="calendar__nav" @click="nextMonth">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
           <path d="M9 18l6-6-6-6" />
         </svg>
       </button>
@@ -26,7 +42,7 @@
           <div v-for="d in weekDays" :key="d" class="calendar__weekday">
             {{ d }}
           </div>
-          
+
           <div
             v-for="n in firstDayOffset"
             :key="'empty' + n"
@@ -42,8 +58,10 @@
               'is-selected': isSelected(day),
               'is-range': isInRange(day),
               'is-disabled': isDisabled(day),
-              'is-checkin': props.checkin && day.getTime() === props.checkin.getTime(),
-              'is-checkout': props.checkout && day.getTime() === props.checkout.getTime(),
+              'is-checkin':
+                props.checkin && day.getTime() === props.checkin.getTime(),
+              'is-checkout':
+                props.checkout && day.getTime() === props.checkout.getTime(),
               'has-range': props.checkin && props.checkout,
             }"
             :disabled="isDisabled(day)"
@@ -67,37 +85,58 @@ const props = defineProps({
 const emit = defineEmits(["select"]);
 
 const monthNames = [
-  "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-  "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
+  "Январь",
+  "Февраль",
+  "Март",
+  "Апрель",
+  "Май",
+  "Июнь",
+  "Июль",
+  "Август",
+  "Сентябрь",
+  "Октябрь",
+  "Ноябрь",
+  "Декабрь",
 ];
 const weekDays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
 const today = new Date();
-const viewMonth = ref(props.checkin ? props.checkin.getMonth() : today.getMonth());
-const viewYear = ref(props.checkin ? props.checkin.getFullYear() : today.getFullYear());
+const viewMonth = ref(
+  props.checkin ? props.checkin.getMonth() : today.getMonth(),
+);
+const viewYear = ref(
+  props.checkin ? props.checkin.getFullYear() : today.getFullYear(),
+);
 const transitionName = ref("slide-next");
 
-watch(() => props.checkin, (val) => {
-  if (val) {
-    viewMonth.value = val.getMonth();
-    viewYear.value = val.getFullYear();
-  }
-});
+watch(
+  () => props.checkin,
+  (val) => {
+    if (val) {
+      viewMonth.value = val.getMonth();
+      viewYear.value = val.getFullYear();
+    }
+  },
+);
 
-const daysInMonth = computed(() => new Date(viewYear.value, viewMonth.value + 1, 0).getDate());
+const daysInMonth = computed(() =>
+  new Date(viewYear.value, viewMonth.value + 1, 0).getDate(),
+);
 const firstDayOffset = computed(() => {
   const jsDay = new Date(viewYear.value, viewMonth.value, 1).getDay();
-  return jsDay === 0 ? 6 : jsDay - 1; // Адаптация под неделю с Понедельника
+  return jsDay === 0 ? 6 : jsDay - 1;
 });
 
 const days = computed(() => {
   return Array.from(
     { length: daysInMonth.value },
-    (_, i) => new Date(viewYear.value, viewMonth.value, i + 1)
+    (_, i) => new Date(viewYear.value, viewMonth.value, i + 1),
   );
 });
 
-const monthLabel = computed(() => `${monthNames[viewMonth.value]} ${viewYear.value}`);
+const monthLabel = computed(
+  () => `${monthNames[viewMonth.value]} ${viewYear.value}`,
+);
 
 function prevMonth() {
   transitionName.value = "slide-prev";
@@ -125,12 +164,19 @@ function isToday(day) {
 }
 
 function isSelected(day) {
-  return (props.checkin && day.getTime() === props.checkin.getTime()) ||
-         (props.checkout && day.getTime() === props.checkout.getTime());
+  return (
+    (props.checkin && day.getTime() === props.checkin.getTime()) ||
+    (props.checkout && day.getTime() === props.checkout.getTime())
+  );
 }
 
 function isInRange(day) {
-  return props.checkin && props.checkout && day > props.checkin && day < props.checkout;
+  return (
+    props.checkin &&
+    props.checkout &&
+    day > props.checkin &&
+    day < props.checkout
+  );
 }
 
 function isDisabled(day) {
@@ -150,11 +196,11 @@ function selectDate(day) {
   border-radius: 24px;
   padding: 20px;
   width: 100%;
-  max-width: 360px;
+  max-width: none;
   background: #fff;
   box-sizing: border-box;
   user-select: none;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 
   &__header {
     display: flex;
@@ -204,7 +250,8 @@ function selectDate(day) {
   &__grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    row-gap: 4px;
+    row-gap: 8px;
+    width: 100%;
   }
 
   &__weekday {
@@ -239,7 +286,7 @@ function selectDate(day) {
     &:hover:not(:disabled) {
       color: #fff;
       &::after {
-        content: '';
+        content: "";
         position: absolute;
         width: 80%;
         height: 80%;
@@ -253,13 +300,13 @@ function selectDate(day) {
     &.is-selected {
       color: #fff !important;
       &::before {
-        content: '';
+        content: "";
         position: absolute;
         inset: 0;
         background: var(--primary, #bd9e7e);
         z-index: 1;
       }
-      
+
       &:not(.has-range) {
         &::before {
           border-radius: 50%;
@@ -288,7 +335,7 @@ function selectDate(day) {
       font-weight: 700;
       color: var(--primary, #bd9e7e);
       &::after {
-        content: '';
+        content: "";
         position: absolute;
         bottom: 6px;
         width: 4px;
@@ -305,32 +352,61 @@ function selectDate(day) {
   }
 }
 
-.slide-next-enter-active, .slide-next-leave-active,
-.slide-prev-enter-active, .slide-prev-leave-active {
+.slide-next-enter-active,
+.slide-next-leave-active,
+.slide-prev-enter-active,
+.slide-prev-leave-active {
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.slide-next-enter-from { opacity: 0; transform: translateX(30px); }
-.slide-next-leave-to { opacity: 0; transform: translateX(-30px); }
+.slide-next-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
+}
+.slide-next-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
+}
 
-.slide-prev-enter-from { opacity: 0; transform: translateX(-30px); }
-.slide-prev-leave-to { opacity: 0; transform: translateX(30px); }
+.slide-prev-enter-from {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+.slide-prev-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
 
-.slide-fade-enter-active, .slide-fade-leave-active {
+.slide-fade-enter-active,
+.slide-fade-leave-active {
   transition: all 0.25s ease;
 }
-.slide-fade-enter-from { opacity: 0; transform: translateY(10px); }
-.slide-fade-leave-to { opacity: 0; transform: translateY(-10px); }
+.slide-fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
 
 @keyframes pop {
-  0% { transform: scale(0.5); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @media (max-width: 400px) {
   .calendar {
     padding: 15px;
-    &__day { font-size: 0.85rem; }
+    &__day {
+      font-size: 0.85rem;
+    }
   }
 }
 </style>

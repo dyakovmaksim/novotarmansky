@@ -156,7 +156,7 @@ onUnmounted(stopTimer);
     position: relative;
     border-radius: 30px;
     background: #000;
-    overflow: hidden; // Маскирует вылетающие картинки
+    overflow: hidden;
     aspect-ratio: 16 / 9;
   }
 
@@ -168,7 +168,7 @@ onUnmounted(stopTimer);
   }
 
   &__slide {
-    position: absolute; // Слайды лежат друг на друге
+    position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
@@ -195,7 +195,7 @@ onUnmounted(stopTimer);
     display: flex;
     justify-content: space-between;
     padding: 0 20px;
-    pointer-events: none; // Чтобы клики проходили сквозь контейнер
+    pointer-events: none;
     z-index: 10;
   }
 
@@ -208,7 +208,7 @@ onUnmounted(stopTimer);
     border: 1px solid rgba(255, 255, 255, 0.3);
     color: #fff;
     cursor: pointer;
-    pointer-events: auto; // А кнопки кликабельны
+    pointer-events: auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -305,7 +305,25 @@ onUnmounted(stopTimer);
   }
 }
 
-/* Фикс анимаций: используем transform для плавности */
+@media (max-width: 850px) {
+  .gallery {
+    padding: 30px 0;
+
+    &__main {
+      aspect-ratio: 4 / 5;
+      border-radius: 20px;
+    }
+
+    &__layout {
+      gap: 15px;
+    }
+
+    &__side {
+      display: none;
+    }
+  }
+}
+
 .slide-left-enter-from {
   transform: translateX(100%);
 }

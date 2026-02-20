@@ -2,10 +2,9 @@
   <section class="booking">
     <div class="booking__container">
       <div class="booking__grid">
-        
         <div class="booking__form">
           <h2 class="booking__title">Бронирование</h2>
-          
+
           <div class="booking__field-group">
             <label class="booking__label">Даты проживания</label>
             <div class="booking__dates">
@@ -16,9 +15,11 @@
                 @click="selecting = 'checkin'"
               >
                 <span class="booking__date-label">Заезд</span>
-                <span class="booking__date-value">{{ checkin ? formatDate(checkin) : "Выбрать" }}</span>
+                <span class="booking__date-value">{{
+                  checkin ? formatDate(checkin) : "Выбрать"
+                }}</span>
               </button>
-              
+
               <div class="booking__dates-separator"></div>
 
               <button
@@ -28,7 +29,9 @@
                 @click="selecting = 'checkout'"
               >
                 <span class="booking__date-label">Отъезд</span>
-                <span class="booking__date-value">{{ checkout ? formatDate(checkout) : "Выбрать" }}</span>
+                <span class="booking__date-value">{{
+                  checkout ? formatDate(checkout) : "Выбрать"
+                }}</span>
               </button>
             </div>
           </div>
@@ -36,14 +39,26 @@
           <div class="booking__field-group" ref="guestsRef">
             <label class="booking__label">Количество гостей</label>
             <div class="booking__guests">
-              <button 
-                type="button" 
-                class="booking__guests-trigger" 
+              <button
+                type="button"
+                class="booking__guests-trigger"
                 @click="showGuests = !showGuests"
               >
                 <span class="booking__guests-text">{{ guestsSummary }}</span>
-                <svg :class="{ 'is-open': showGuests }" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M5 8L10 13L15 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <svg
+                  :class="{ 'is-open': showGuests }"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                >
+                  <path
+                    d="M5 8L10 13L15 8"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
                 </svg>
               </button>
 
@@ -55,19 +70,29 @@
                       <span class="guest-control__desc">от 12 лет</span>
                     </div>
                     <div class="guest-control__counter">
-                      <button @click="adults = Math.max(1, adults - 1)" :disabled="adults <= 1">-</button>
+                      <button
+                        @click="adults = Math.max(1, adults - 1)"
+                        :disabled="adults <= 1"
+                      >
+                        -
+                      </button>
                       <span>{{ adults }}</span>
                       <button @click="adults++">+</button>
                     </div>
                   </div>
-                  
+
                   <div class="guest-control">
                     <div class="guest-control__info">
                       <span class="guest-control__name">Дети</span>
                       <span class="guest-control__desc">до 12 лет</span>
                     </div>
                     <div class="guest-control__counter">
-                      <button @click="children = Math.max(0, children - 1)" :disabled="children <= 0">-</button>
+                      <button
+                        @click="children = Math.max(0, children - 1)"
+                        :disabled="children <= 0"
+                      >
+                        -
+                      </button>
                       <span>{{ children }}</span>
                       <button @click="children++">+</button>
                     </div>
@@ -77,8 +102,8 @@
             </div>
           </div>
 
-          <button 
-            class="booking__submit" 
+          <button
+            class="booking__submit"
             :disabled="!checkin || !checkout"
             @click="submit"
           >
@@ -94,7 +119,6 @@
             @select="onSelectDate"
           />
         </div>
-        
       </div>
     </div>
   </section>
@@ -113,8 +137,11 @@ const children = ref(0);
 const guestsRef = ref(null);
 
 const guestsSummary = computed(() => {
-  const aText = `${adults.value} ${adults.value === 1 ? 'взрослый' : 'взрослых'}`;
-  const cText = children.value > 0 ? `, ${children.value} ${children.value === 1 ? 'ребенок' : 'детей'}` : '';
+  const aText = `${adults.value} ${adults.value === 1 ? "взрослый" : "взрослых"}`;
+  const cText =
+    children.value > 0
+      ? `, ${children.value} ${children.value === 1 ? "ребенок" : "детей"}`
+      : "";
   return aText + cText;
 });
 
@@ -140,28 +167,35 @@ function onSelectDate(date) {
 }
 
 function submit() {
-  console.log("Submit:", { checkin: checkin.value, checkout: checkout.value, guests: guestsSummary.value });
+  console.log("Submit:", {
+    checkin: checkin.value,
+    checkout: checkout.value,
+    guests: guestsSummary.value,
+  });
   alert("Заявка успешно создана!");
 }
 
 const handleClickOutside = (e) => {
-  if (guestsRef.value && !guestsRef.value.contains(e.target)) showGuests.value = false;
+  if (guestsRef.value && !guestsRef.value.contains(e.target))
+    showGuests.value = false;
 };
 
 onMounted(() => document.addEventListener("mousedown", handleClickOutside));
-onBeforeUnmount(() => document.removeEventListener("mousedown", handleClickOutside));
+onBeforeUnmount(() =>
+  document.removeEventListener("mousedown", handleClickOutside),
+);
 </script>
 
 <style lang="scss" scoped>
 .booking {
   padding: 40px 0;
-  
+
   &__container {
     background: #fff;
     border: 1px solid #e8e1d9;
     border-radius: 40px;
     padding: 40px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.03);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
   }
 
   &__grid {
@@ -255,12 +289,16 @@ onBeforeUnmount(() => document.removeEventListener("mousedown", handleClickOutsi
     color: #3d2c17;
     transition: 0.3s;
 
-    &:hover { border-color: var(--primary); }
+    &:hover {
+      border-color: var(--primary);
+    }
 
     svg {
       color: var(--primary);
       transition: transform 0.3s;
-      &.is-open { transform: rotate(180deg); }
+      &.is-open {
+        transform: rotate(180deg);
+      }
     }
   }
 
@@ -273,7 +311,7 @@ onBeforeUnmount(() => document.removeEventListener("mousedown", handleClickOutsi
     border: 1px solid #e8e1d9;
     border-radius: 20px;
     padding: 20px;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
     z-index: 100;
   }
 
@@ -287,7 +325,9 @@ onBeforeUnmount(() => document.removeEventListener("mousedown", handleClickOutsi
     font-size: 18px;
     font-weight: 700;
     cursor: pointer;
-    transition: transform 0.2s, background 0.3s;
+    transition:
+      transform 0.2s,
+      background 0.3s;
 
     &:hover:not(:disabled) {
       background: #a68b6a;
@@ -307,10 +347,19 @@ onBeforeUnmount(() => document.removeEventListener("mousedown", handleClickOutsi
   align-items: center;
   padding: 10px 0;
 
-  &:not(:last-child) { border-bottom: 1px solid #f8f5f2; }
+  &:not(:last-child) {
+    border-bottom: 1px solid #f8f5f2;
+  }
 
-  &__name { display: block; font-weight: 600; color: #3d2c17; }
-  &__desc { font-size: 12px; color: #b0a79c; }
+  &__name {
+    display: block;
+    font-weight: 600;
+    color: #3d2c17;
+  }
+  &__desc {
+    font-size: 12px;
+    color: #b0a79c;
+  }
 
   &__counter {
     display: flex;
@@ -328,29 +377,58 @@ onBeforeUnmount(() => document.removeEventListener("mousedown", handleClickOutsi
       align-items: center;
       justify-content: center;
       font-size: 18px;
-      
-      &:hover:not(:disabled) { background: #fdfaf7; border-color: var(--primary); }
-      &:disabled { opacity: 0.3; }
+
+      &:hover:not(:disabled) {
+        background: #fdfaf7;
+        border-color: var(--primary);
+      }
+      &:disabled {
+        opacity: 0.3;
+      }
     }
 
-    span { font-weight: 600; min-width: 20px; text-align: center; }
+    span {
+      font-weight: 600;
+      min-width: 20px;
+      text-align: center;
+    }
   }
 }
 
-/* Анимация выпадашки */
-.fade-slide-enter-active, .fade-slide-leave-active { transition: all 0.3s ease; }
-.fade-slide-enter-from, .fade-slide-leave-to { opacity: 0; transform: translateY(-10px); }
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
 
-/* Адаптив */
 @media (max-width: 992px) {
-  .booking__grid { grid-template-columns: 1fr; gap: 40px; }
-  .booking__container { padding: 30px; }
+  .booking__grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .booking__container {
+    padding: 30px;
+  }
 }
 
 @media (max-width: 480px) {
-  .booking__container { border-radius: 0; border: none; padding: 20px; }
-  .booking__title { font-size: 24px; }
-  .booking__date-value { font-size: 16px; }
-  .booking__guests-trigger { font-size: 16px; }
+  .booking__container {
+    border-radius: 0;
+    border: none;
+    padding: 20px;
+  }
+  .booking__title {
+    font-size: 24px;
+  }
+  .booking__date-value {
+    font-size: 16px;
+  }
+  .booking__guests-trigger {
+    font-size: 16px;
+  }
 }
 </style>

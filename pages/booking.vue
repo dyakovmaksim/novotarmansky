@@ -260,7 +260,7 @@ onBeforeUnmount(() =>
   // Фиксируем колонки, чтобы не было дыры в центре
   grid-template-columns: minmax(400px, 600px) 420px;
   gap: 40px;
-  justify-content: center; // Центрируем всю сетку
+  justify-content: center;
   align-items: start;
 
   @media (max-width: 1024px) {
@@ -279,7 +279,6 @@ onBeforeUnmount(() =>
   font-weight: 700;
 }
 
-/* Календарь */
 .calendar-wrapper {
   background: white;
   padding: 35px;
@@ -314,7 +313,6 @@ onBeforeUnmount(() =>
   }
 }
 
-/* Карточка деталей */
 .booking-card {
   background: white;
   padding: 35px;

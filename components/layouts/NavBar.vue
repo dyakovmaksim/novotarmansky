@@ -30,27 +30,39 @@
       </div>
     </div>
 
-    <transition name="menu-fade">
-      <div v-if="isOpen" class="nav__mobile-overlay" @click.self="toggleMenu">
-        <div class="nav__mobile-content">
-          <ul class="nav__mobile-links">
-            <li v-for="link in links" :key="link.path" @click="isOpen = false">
-              <NuxtLink :to="link.path">{{ link.name }}</NuxtLink>
-            </li>
-          </ul>
+    <Teleport to="body">
+      <transition name="menu-fade">
+        <div v-if="isOpen" class="nav__mobile-overlay" @click.self="toggleMenu">
+          <div class="nav__mobile-content">
+            <ul class="nav__mobile-links">
+              <li
+                v-for="link in links"
+                :key="link.path"
+                @click="isOpen = false"
+              >
+                <NuxtLink :to="link.path">{{ link.name }}</NuxtLink>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
-    </transition>
+      </transition>
+    </Teleport>
   </nav>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
 const isOpen = ref(false);
 const isScrolled = ref(false);
+
+watch(isOpen, (newValue) => {
+  if (process.client) {
+    document.body.style.overflow = newValue ? "hidden" : "";
+  }
+});
 
 const links = [
   { name: "О нас", path: "/aboutus" },
@@ -67,7 +79,7 @@ const handleScroll = () => {
 
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
-  handleScroll(); // Проверяем состояние при загрузке страницы
+  handleScroll();
 });
 
 onUnmounted(() => {
@@ -85,7 +97,6 @@ onUnmounted(() => {
   padding: 24px 0;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
-  // Стандартный вид (белый текст для Hero на главной)
   .nav__logo,
   .nav__link {
     color: #fff;
@@ -94,7 +105,6 @@ onUnmounted(() => {
     background: #fff;
   }
 
-  // Состояние при скролле ИЛИ на внутренних страницах
   &--scrolled {
     padding: 12px 0;
     background: rgba(255, 255, 255, 0.9);
@@ -103,7 +113,6 @@ onUnmounted(() => {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 
-    // Темный текст для читаемости на белом фоне
     .nav__logo,
     .nav__link {
       color: #3d2c17;
@@ -208,6 +217,7 @@ onUnmounted(() => {
     cursor: pointer;
     padding: 5px;
     z-index: 1001;
+    position: relative;
 
     span {
       width: 28px;
@@ -233,10 +243,14 @@ onUnmounted(() => {
 
   &__mobile-overlay {
     position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(10px);
-    z-index: 999;
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 9999;
     display: flex;
     justify-content: flex-end;
   }
@@ -244,10 +258,13 @@ onUnmounted(() => {
   &__mobile-content {
     width: 80%;
     max-width: 300px;
-    background: #fff;
+    background: #ffffff;
     height: 100%;
-    padding: 80px 40px;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+    padding: 100px 40px 40px;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 10000;
   }
 
   &__mobile-links {
