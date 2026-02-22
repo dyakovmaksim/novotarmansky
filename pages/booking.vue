@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="booking-app-wrapper">
     <LayoutsNavBar />
 
     <main class="booking-page">
@@ -22,19 +22,12 @@
                 @select="onSelectDate"
               />
             </div>
-            <div class="calendar-legend">
-              <span class="legend-item"
-                ><i class="dot available"></i> Свободно</span
-              >
-              <span class="legend-item"
-                ><i class="dot selected"></i> Ваш выбор</span
-              >
-            </div>
           </section>
 
           <section class="details-wrapper reveal">
             <div class="booking-card">
               <div class="card-label">2. Детали проживания</div>
+
               <div class="date-display">
                 <div
                   class="date-box"
@@ -61,7 +54,7 @@
               <div class="guests-picker" ref="guestsRef">
                 <label>Количество гостей</label>
                 <div class="picker-trigger" @click="showGuests = !showGuests">
-                  <span>{{ guestsText }}</span>
+                  <span class="trigger-text">{{ guestsText }}</span>
                   <svg
                     :class="{ rotated: showGuests }"
                     width="12"
@@ -78,34 +71,25 @@
                   </svg>
                 </div>
 
-                <transition name="fade-slide">
+                <transition name="dropdown-slide">
                   <div v-if="showGuests" class="guests-dropdown">
-                    <div class="guest-row">
+                    <div
+                      class="guest-row"
+                      v-for="item in guestSettings"
+                      :key="item.type"
+                    >
                       <div class="guest-info">
-                        <strong>Взрослые</strong>
-                        <span>от 12 лет</span>
+                        <strong>{{ item.title }}</strong>
+                        <span>{{ item.sub }}</span>
                       </div>
                       <div class="counter">
-                        <button @click.stop="adults = Math.max(1, adults - 1)">
+                        <button @click.stop="updateGuestCount(item.type, -1)">
                           -
                         </button>
-                        <span>{{ adults }}</span>
-                        <button @click.stop="adults++">+</button>
-                      </div>
-                    </div>
-                    <div class="guest-row">
-                      <div class="guest-info">
-                        <strong>Дети</strong>
-                        <span>до 12 лет</span>
-                      </div>
-                      <div class="counter">
-                        <button
-                          @click.stop="children = Math.max(0, children - 1)"
-                        >
-                          -
+                        <span>{{ item.ref.value }}</span>
+                        <button @click.stop="updateGuestCount(item.type, 1)">
+                          +
                         </button>
-                        <span>{{ children }}</span>
-                        <button @click.stop="children++">+</button>
                       </div>
                     </div>
                   </div>
@@ -116,34 +100,107 @@
                 <label class="checkbox-container">
                   <input type="checkbox" v-model="hasSauna" />
                   <span class="checkmark"></span>
-                  <span class="text">Подготовить русскую баню к заезду</span>
+                  <span class="text"
+                    >Русская баня к заезду (+{{
+                      saunaPrice.toLocaleString()
+                    }}
+                    ₽)</span
+                  >
                 </label>
               </div>
 
-              <hr class="divider" />
-
-              <div class="booking-summary">
-                <div class="summary-line" v-if="checkin && checkout">
-                  <span>Длительность:</span>
-                  <strong
-                    >{{ nightsCount }} {{ getNightsWord(nightsCount) }}</strong
+              <div class="price-details-card" v-if="checkin && checkout">
+                <div class="price-row">
+                  <span
+                    >{{ basePrice.toLocaleString() }} ₽ × {{ nightsCount }}
+                    {{ getNightsWord(nightsCount) }}</span
+                  >
+                  <span
+                    >{{ (basePrice * nightsCount).toLocaleString() }} ₽</span
                   >
                 </div>
+                <div class="price-row" v-if="hasSauna">
+                  <span>Подготовка бани</span>
+                  <span>{{ saunaPrice.toLocaleString() }} ₽</span>
+                </div>
+                <div class="price-total">
+                  <span>Итого к оплате</span>
+                  <span class="total-amount"
+                    >{{ totalPrice.toLocaleString() }} ₽</span
+                  >
+                </div>
+              </div>
+
+              <div class="booking-footer">
                 <button
                   class="btn-primary-booking"
                   :disabled="!checkin || !checkout"
-                  @click="submit"
+                  @click="isModalOpen = true"
                 >
-                  Забронировать сейчас
+                  Оформить бронирование
                 </button>
-                <p class="hint">
-                  * Подтверждение бронирования придет в telegram
-                </p>
+                <p class="hint">Быстрое подтверждение через Telegram</p>
               </div>
             </div>
           </section>
         </div>
       </div>
+
+      <transition name="modal-zoom">
+        <div
+          v-if="isModalOpen"
+          class="modal-overlay"
+          @click.self="isModalOpen = false"
+        >
+          <div class="modal-container">
+            <button class="modal-close" @click="isModalOpen = false">×</button>
+            <h3 class="modal-title">Подтверждение</h3>
+            <p class="modal-subtitle">
+              Оставьте данные, и мы мгновенно свяжемся с вами
+            </p>
+
+            <div class="modal-form">
+              <input
+                v-model="userName"
+                type="text"
+                placeholder="Ваше имя"
+                class="custom-input"
+              />
+              <input
+                :value="userPhone"
+                @input="onPhoneInput"
+                type="tel"
+                placeholder="+7 (___) ___-__-__"
+                class="custom-input"
+              />
+            </div>
+
+            <div class="modal-check-summary">
+              <div class="check-item">
+                <span>Даты:</span>
+                <strong
+                  >{{ formatDate(checkin) }} —
+                  {{ formatDate(checkout) }}</strong
+                >
+              </div>
+              <div class="check-item">
+                <span>Гости:</span>
+                <strong>{{ guestsText }}</strong>
+              </div>
+              <div class="check-item final">
+                <span>К оплате:</span>
+                <strong class="gold"
+                  >{{ totalPrice.toLocaleString() }} ₽</strong
+                >
+              </div>
+            </div>
+
+            <button class="btn-primary-booking" @click="confirmBooking">
+              Отправить заявку
+            </button>
+          </div>
+        </div>
+      </transition>
     </main>
 
     <LayoutsFooterSection />
@@ -154,19 +211,38 @@
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import Calendar from "@/components/Calendar.vue";
 
+// ЦЕНОВАЯ ПОЛИТИКА
+const basePrice = 8500; // Цена за ночь
+const saunaPrice = 3000; // Разовая услуга
+
 const checkin = ref(null);
 const checkout = ref(null);
 const selecting = ref("checkin");
 const showGuests = ref(false);
 const adults = ref(1);
-const children = ref(2); // Для примера как на скрине
+const children = ref(0);
 const hasSauna = ref(false);
 const guestsRef = ref(null);
+const isModalOpen = ref(false);
+const userName = ref("");
+const userPhone = ref("");
+
+const guestSettings = [
+  { type: "adults", title: "Взрослые", sub: "От 12 лет", ref: adults },
+  { type: "children", title: "Дети", sub: "До 12 лет", ref: children },
+];
 
 const nightsCount = computed(() => {
   if (!checkin.value || !checkout.value) return 0;
-  const diffTime = Math.abs(checkout.value - checkin.value);
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return Math.ceil(
+    Math.abs(checkout.value - checkin.value) / (1000 * 60 * 60 * 24),
+  );
+});
+
+const totalPrice = computed(() => {
+  let total = nightsCount.value * basePrice;
+  if (hasSauna.value) total += saunaPrice;
+  return total;
 });
 
 const guestsText = computed(() => {
@@ -175,18 +251,20 @@ const guestsText = computed(() => {
   return text;
 });
 
+function updateGuestCount(type, val) {
+  if (type === "adults") adults.value = Math.max(1, adults.value + val);
+  else children.value = Math.max(0, children.value + val);
+}
+
 function getNightsWord(n) {
-  const forms = ["ночь", "ночи", "ночей"];
   const pr = new Intl.PluralRules("ru-RU");
   const rule = pr.select(n);
-  if (rule === "one") return forms[0];
-  if (rule === "few") return forms[1];
-  return forms[2];
+  return rule === "one" ? "ночь" : rule === "few" ? "ночи" : "ночей";
 }
 
 function formatDate(date) {
   return date
-    ? date.toLocaleDateString("ru-RU", { day: "numeric", month: "long" })
+    ? date.toLocaleDateString("ru-RU", { day: "numeric", month: "short" })
     : "";
 }
 
@@ -207,9 +285,22 @@ function onSelectDate(date) {
   }
 }
 
-function submit() {
-  const message = `Бронирование:\nС ${formatDate(checkin.value)} по ${formatDate(checkout.value)}\nГости: ${guestsText.value}\nБаня: ${hasSauna.value ? "Да" : "Нет"}`;
-  alert(message);
+function onPhoneInput(e) {
+  let v = e.target.value.replace(/\D/g, "").substring(0, 11);
+  if (v.startsWith("7") || v.startsWith("8")) v = v.substring(1);
+  let res = "+7 ";
+  if (v.length > 0) res += "(" + v.substring(0, 3);
+  if (v.length > 3) res += ") " + v.substring(3, 6);
+  if (v.length > 6) res += "-" + v.substring(6, 8);
+  if (v.length > 8) res += "-" + v.substring(8, 10);
+  userPhone.value = res;
+}
+
+function confirmBooking() {
+  if (!userName.value || userPhone.value.length < 18)
+    return alert("Заполните данные!");
+  alert("Заявка принята! Мы скоро свяжемся с вами.");
+  isModalOpen.value = false;
 }
 
 const handleClickOutside = (e) => {
@@ -225,9 +316,12 @@ onBeforeUnmount(() =>
 
 <style lang="scss" scoped>
 .booking-page {
-  padding: 60px 0 100px;
-  background: #fcfbf9;
+  padding: 80px 0 120px;
+  background: #fdfbf9;
   min-height: 100vh;
+  // ПРИНУДИТЕЛЬНЫЙ ИДЕАЛЬНЫЙ ШРИФТ
+  font-family: "Unageo", sans-serif !important;
+  -webkit-font-smoothing: antialiased;
 }
 
 .container {
@@ -238,139 +332,112 @@ onBeforeUnmount(() =>
 
 .page-header {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 60px;
   .page-title {
-    font-size: clamp(32px, 5vw, 48px);
+    font-size: clamp(36px, 6vw, 56px);
     color: #2c231a;
     font-weight: 300;
+    letter-spacing: -0.02em;
     span {
-      color: var(--primary, #d8b48b);
-      font-weight: 700;
+      color: #d8b48b;
+      font-weight: 600;
     }
   }
   .page-subtitle {
     color: #8c7d6d;
-    margin-top: 10px;
     font-size: 18px;
+    margin-top: 15px;
   }
 }
 
 .booking-grid {
   display: grid;
-  // Фиксируем колонки, чтобы не было дыры в центре
-  grid-template-columns: minmax(400px, 600px) 420px;
-  gap: 40px;
-  justify-content: center;
+  grid-template-columns: 1.2fr 420px;
+  gap: 50px;
   align-items: start;
-
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
-    max-width: 600px;
-    margin: 0 auto;
+    gap: 30px;
   }
+}
+
+/* КАРТОЧКИ */
+.calendar-wrapper,
+.booking-card {
+  background: #fff;
+  padding: 40px;
+  border-radius: 40px;
+  box-shadow: 0 20px 60px rgba(61, 44, 23, 0.05);
+  border: 1px solid rgba(238, 228, 216, 0.6);
 }
 
 .card-label {
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.15em;
   color: #a68b6a;
-  margin-bottom: 15px;
+  margin-bottom: 25px;
   font-weight: 700;
 }
 
-.calendar-wrapper {
-  background: white;
-  padding: 35px;
-  border-radius: 32px;
-  box-shadow: 0 15px 45px rgba(94, 78, 59, 0.04);
-
-  .calendar-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-
-  .calendar-legend {
-    display: flex;
-    gap: 20px;
-    margin-top: 25px;
-    font-size: 13px;
-    color: #888;
-    .dot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      margin-right: 6px;
-      &.available {
-        background: #f0ede8;
-      }
-      &.selected {
-        background: var(--primary, #d8b48b);
-      }
-    }
-  }
-}
-
-.booking-card {
-  background: white;
-  padding: 35px;
-  border-radius: 32px;
-  box-shadow: 0 15px 45px rgba(94, 78, 59, 0.04);
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-}
-
+/* ДЕТАЛИ ПРАВОЙ ПАНЕЛИ */
 .date-display {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
   gap: 12px;
+  margin-bottom: 24px;
   .date-box {
-    padding: 14px;
+    flex: 1;
+    padding: 16px;
     border: 1px solid #f0ede8;
-    border-radius: 16px;
+    border-radius: 20px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: 0.3s;
     &.active {
-      border-color: var(--primary, #d8b48b);
+      border-color: #d8b48b;
       background: #fdfaf7;
     }
     .type {
       font-size: 10px;
       text-transform: uppercase;
       color: #a68b6a;
+      font-weight: 700;
       display: block;
       margin-bottom: 4px;
     }
     .value {
       font-weight: 600;
-      font-size: 15px;
-      color: #333;
+      font-size: 16px;
+      color: #2c231a;
     }
   }
 }
 
 .guests-picker {
   position: relative;
+  margin-bottom: 24px;
   label {
     font-size: 13px;
     color: #a68b6a;
     margin-bottom: 8px;
     display: block;
+    font-weight: 600;
   }
   .picker-trigger {
-    padding: 16px;
+    padding: 18px 24px;
     border: 1px solid #f0ede8;
-    border-radius: 16px;
+    border-radius: 20px;
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     cursor: pointer;
     font-weight: 600;
+    color: #2c231a;
+    transition: 0.3s;
+    &:hover {
+      border-color: #d8b48b;
+    }
     svg {
-      transition: 0.3s;
+      transition: 0.4s;
       &.rotated {
         transform: rotate(180deg);
       }
@@ -378,20 +445,20 @@ onBeforeUnmount(() =>
   }
 }
 
+/* ВЫПАДАШКА */
 .guests-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
-  z-index: 50;
-  margin-top: 8px;
-  border-radius: 20px;
-  padding: 15px 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  background: #fff;
+  z-index: 100;
+  margin-top: 10px;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
   border: 1px solid #f0ede8;
 }
-
 .guest-row {
   display: flex;
   justify-content: space-between;
@@ -400,133 +467,266 @@ onBeforeUnmount(() =>
   &:not(:last-child) {
     border-bottom: 1px solid #f8f6f3;
   }
-  .guest-info {
-    display: flex;
-    flex-direction: column;
-    strong {
-      font-size: 15px;
-      color: #333;
-    }
-    span {
-      font-size: 11px;
-      color: #999;
-    }
+  .guest-info strong {
+    font-size: 15px;
+    color: #2c231a;
+    font-weight: 600;
   }
-}
-
-.counter {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  button {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: 1px solid #e5e0d8;
-    background: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    &:hover {
-      border-color: var(--primary, #d8b48b);
-      color: var(--primary, #d8b48b);
-    }
-  }
-  span {
-    min-width: 18px;
-    text-align: center;
-    font-weight: 700;
-    color: #333;
-  }
-}
-
-.checkbox-container {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-size: 14px;
-  color: #444;
-  input {
-    position: absolute;
-    opacity: 0;
-  }
-  .checkmark {
-    height: 20px;
-    width: 20px;
-    background-color: #f0ede8;
-    border-radius: 6px;
-    margin-right: 12px;
-    position: relative;
-    transition: 0.2s;
-  }
-  input:checked ~ .checkmark {
-    background-color: var(--primary, #d8b48b);
-  }
-  .checkmark:after {
-    content: "";
-    position: absolute;
-    display: none;
-    left: 7px;
-    top: 3px;
-    width: 5px;
-    height: 10px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-  }
-  input:checked ~ .checkmark:after {
+  .guest-info span {
+    font-size: 11px;
+    color: #a68b6a;
     display: block;
   }
 }
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  button {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid #e5e0d8;
+    background: #fff;
+    cursor: pointer;
+    transition: 0.2s;
+    font-weight: 600;
+    &:hover {
+      border-color: #d8b48b;
+      color: #d8b48b;
+    }
+  }
+  span {
+    font-weight: 700;
+    color: #2c231a;
+    min-width: 15px;
+    text-align: center;
+  }
+}
 
+/* ЧЕКБОКС */
+.extra-services {
+  margin-bottom: 30px;
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #444;
+    input {
+      position: absolute;
+      opacity: 0;
+    }
+    .checkmark {
+      width: 24px;
+      height: 24px;
+      background: #f0ede8;
+      border-radius: 8px;
+      margin-right: 14px;
+      position: relative;
+      transition: 0.3s;
+    }
+    input:checked ~ .checkmark {
+      background: #d8b48b;
+    }
+    .checkmark:after {
+      content: "";
+      position: absolute;
+      display: none;
+      left: 9px;
+      top: 5px;
+      width: 6px;
+      height: 11px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    input:checked ~ .checkmark:after {
+      display: block;
+    }
+    .text {
+      font-weight: 500;
+      color: #2c231a;
+    }
+  }
+}
+
+/* КАРТОЧКА ЦЕНЫ  */
+.price-details-card {
+  background: #fdfaf7;
+  border-radius: 24px;
+  padding: 25px;
+  margin-bottom: 30px;
+  .price-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 15px;
+    color: #8c7d6d;
+    span:last-child {
+      color: #2c231a;
+      font-weight: 600;
+    }
+  }
+  .price-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px dashed #d8c8b4;
+    span:first-child {
+      font-weight: 700;
+      color: #2c231a;
+      font-size: 17px;
+    }
+    .total-amount {
+      font-size: 26px;
+      font-weight: 700;
+      color: #d8b48b;
+    }
+  }
+}
+
+/* КНОПКА */
 .btn-primary-booking {
   width: 100%;
-  padding: 20px;
-  background: var(--primary, #d8b48b);
-  color: white;
+  padding: 22px;
+  background: #6b5a45;
+  color: #fff;
   border: none;
-  border-radius: 18px;
-  font-size: 17px;
-  font-weight: 700;
+  border-radius: 20px;
+  font-size: 18px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   &:disabled {
     background: #e0ddd8;
     cursor: not-allowed;
   }
   &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    filter: brightness(1.05);
+    background: #4d4031;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(107, 90, 69, 0.2);
   }
 }
 
-.divider {
-  border: 0;
-  border-top: 1px solid #f8f6f3;
-  margin: 5px 0;
-}
 .hint {
   font-size: 11px;
   color: #a68b6a;
   text-align: center;
-  margin-top: 12px;
-}
-.summary-line {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  font-size: 15px;
-  color: #333;
+  margin-top: 15px;
+  font-weight: 600;
 }
 
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: 0.2s ease;
+/* МОДАЛЬНОЕ ОКНО */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 24, 18, 0.7);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
 }
-.fade-slide-enter-from,
-.fade-slide-leave-to {
+.modal-container {
+  background: #fff;
+  width: 100%;
+  max-width: 480px;
+  border-radius: 40px;
+  padding: 50px;
+  position: relative;
+  text-align: center;
+  .modal-close {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    border: none;
+    background: none;
+    font-size: 30px;
+    color: #a68b6a;
+    cursor: pointer;
+  }
+  .modal-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2c231a;
+    margin-bottom: 12px;
+  }
+  .modal-subtitle {
+    color: #8c7d6d;
+    font-size: 15px;
+    margin-bottom: 35px;
+  }
+}
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 30px;
+  .custom-input {
+    width: 100%;
+    padding: 20px;
+    background: #f8f5f2;
+    border: 1px solid #eee4d8;
+    border-radius: 18px;
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
+    &:focus {
+      border-color: #d8b48b;
+      background: #fff;
+    }
+  }
+}
+.modal-check-summary {
+  background: #fdfaf7;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 35px;
+  .check-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+    &.final {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #eee4d8;
+      font-size: 18px;
+    }
+    .gold {
+      color: #d8b48b;
+      font-weight: 800;
+    }
+  }
+}
+
+/* АНИМАЦИИ */
+.dropdown-slide-enter-active,
+.dropdown-slide-leave-active {
+  transition: 0.3s ease;
+}
+.dropdown-slide-enter-from,
+.dropdown-slide-leave-to {
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(-12px);
+}
+
+.modal-zoom-enter-active,
+.modal-zoom-leave-active {
+  transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal-zoom-enter-from,
+.modal-zoom-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.dot.booked {
+  background: #e5e0d8;
+  text-decoration: line-through;
 }
 </style>

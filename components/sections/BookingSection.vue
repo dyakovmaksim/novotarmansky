@@ -1,100 +1,92 @@
 <template>
-  <section class="booking">
-    <div class="booking__container">
-      <div class="booking__grid">
-        <div class="booking__form">
-          <h2 class="booking__title">Бронирование</h2>
+  <section class="booking-section">
+    <div class="booking-section__container">
+      <div class="booking-section__grid">
+        <div class="booking-section__form">
+          <h2 class="booking-section__title">Бронирование</h2>
 
-          <div class="booking__field-group">
-            <label class="booking__label">Даты проживания</label>
-            <div class="booking__dates">
-              <button
-                type="button"
-                class="booking__date-btn"
+          <div class="booking-section__field">
+            <label class="field-label">Даты проживания</label>
+            <div class="date-picker-group">
+              <div
+                class="date-picker-item"
                 :class="{ 'is-active': selecting === 'checkin' }"
                 @click="selecting = 'checkin'"
               >
-                <span class="booking__date-label">Заезд</span>
-                <span class="booking__date-value">{{
+                <span class="date-picker-item__label">Заезд</span>
+                <span class="date-picker-item__value">{{
                   checkin ? formatDate(checkin) : "Выбрать"
                 }}</span>
-              </button>
-
-              <div class="booking__dates-separator"></div>
-
-              <button
-                type="button"
-                class="booking__date-btn"
+              </div>
+              <div class="date-picker-divider"></div>
+              <div
+                class="date-picker-item"
                 :class="{ 'is-active': selecting === 'checkout' }"
                 @click="selecting = 'checkout'"
               >
-                <span class="booking__date-label">Отъезд</span>
-                <span class="booking__date-value">{{
+                <span class="date-picker-item__label">Отъезд</span>
+                <span class="date-picker-item__value">{{
                   checkout ? formatDate(checkout) : "Выбрать"
                 }}</span>
-              </button>
+              </div>
             </div>
           </div>
 
-          <div class="booking__field-group" ref="guestsRef">
-            <label class="booking__label">Количество гостей</label>
-            <div class="booking__guests">
-              <button
-                type="button"
-                class="booking__guests-trigger"
-                @click="showGuests = !showGuests"
+          <div class="booking-section__field" ref="guestsRef">
+            <label class="field-label">Количество гостей</label>
+            <div
+              class="guests-dropdown-trigger"
+              @click="showGuests = !showGuests"
+            >
+              <span class="guests-dropdown-trigger__text">{{
+                guestsSummary
+              }}</span>
+              <svg
+                :class="{ 'is-open': showGuests }"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
               >
-                <span class="booking__guests-text">{{ guestsSummary }}</span>
-                <svg
-                  :class="{ 'is-open': showGuests }"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
+                <path
+                  d="M5 8L10 13L15 8"
+                  stroke="#3D2C17"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+
+              <transition name="dropdown-fade">
+                <div
+                  v-if="showGuests"
+                  class="guests-dropdown-content"
+                  @click.stop
                 >
-                  <path
-                    d="M5 8L10 13L15 8"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </button>
-
-              <transition name="fade-slide">
-                <div v-if="showGuests" class="booking__guests-dropdown">
-                  <div class="guest-control">
-                    <div class="guest-control__info">
-                      <span class="guest-control__name">Взрослые</span>
-                      <span class="guest-control__desc">от 12 лет</span>
+                  <div
+                    class="guest-control-row"
+                    v-for="type in guestConfigs"
+                    :key="type.id"
+                  >
+                    <div class="guest-control-row__info">
+                      <span class="guest-name">{{ type.name }}</span>
+                      <span class="guest-desc">{{ type.desc }}</span>
                     </div>
-                    <div class="guest-control__counter">
+                    <div class="guest-control-row__actions">
                       <button
-                        @click="adults = Math.max(1, adults - 1)"
-                        :disabled="adults <= 1"
+                        type="button"
+                        @click="changeGuestCount(type.id, -1)"
+                        :disabled="isLimit(type.id, -1)"
                       >
                         -
                       </button>
-                      <span>{{ adults }}</span>
-                      <button @click="adults++">+</button>
-                    </div>
-                  </div>
-
-                  <div class="guest-control">
-                    <div class="guest-control__info">
-                      <span class="guest-control__name">Дети</span>
-                      <span class="guest-control__desc">до 12 лет</span>
-                    </div>
-                    <div class="guest-control__counter">
+                      <span class="guest-count">{{ type.ref.value }}</span>
                       <button
-                        @click="children = Math.max(0, children - 1)"
-                        :disabled="children <= 0"
+                        type="button"
+                        @click="changeGuestCount(type.id, 1)"
                       >
-                        -
+                        +
                       </button>
-                      <span>{{ children }}</span>
-                      <button @click="children++">+</button>
                     </div>
                   </div>
                 </div>
@@ -102,16 +94,36 @@
             </div>
           </div>
 
+          <transition name="simple-fade">
+            <div v-if="checkin && checkout" class="booking-summary-card">
+              <div class="summary-row">
+                <span class="summary-row__label"
+                  >{{ pricePerNight.toLocaleString() }} ₽ × {{ totalNights }}
+                  {{ getNightsWord(totalNights) }}</span
+                >
+                <span class="summary-row__value"
+                  >{{ totalPrice.toLocaleString() }} ₽</span
+                >
+              </div>
+              <div class="summary-row summary-row--total">
+                <span class="summary-row__label">Итого к оплате</span>
+                <span class="summary-row__value"
+                  >{{ totalPrice.toLocaleString() }} ₽</span
+                >
+              </div>
+            </div>
+          </transition>
+
           <button
-            class="booking__submit"
+            class="booking-submit-btn"
             :disabled="!checkin || !checkout"
-            @click="submit"
+            @click="isModalOpen = true"
           >
             Оставить заявку
           </button>
         </div>
 
-        <div class="booking__calendar-wrapper">
+        <div class="booking-section__calendar-col">
           <Calendar
             :checkin="checkin"
             :checkout="checkout"
@@ -121,6 +133,50 @@
         </div>
       </div>
     </div>
+
+    <transition name="modal-fade">
+      <div
+        v-if="isModalOpen"
+        class="booking-modal-overlay"
+        @click.self="isModalOpen = false"
+      >
+        <div class="booking-modal-container">
+          <button class="booking-modal-close" @click="isModalOpen = false">
+            ×
+          </button>
+          <h3 class="booking-modal-title">Почти готово</h3>
+          <p class="booking-modal-subtitle">
+            Оставьте контакты для подтверждения брони на
+            {{ formatDate(checkin) }}
+          </p>
+
+          <div class="booking-modal-inputs">
+            <input
+              v-model="userName"
+              type="text"
+              placeholder="Ваше имя"
+              class="custom-input"
+            />
+            <input
+              :value="userPhone"
+              @input="onPhoneInput"
+              type="tel"
+              placeholder="+7 (___) ___-__-__"
+              class="custom-input"
+            />
+          </div>
+
+          <div class="booking-modal-price">
+            <span>Сумма к оплате:</span>
+            <strong>{{ totalPrice.toLocaleString() }} ₽</strong>
+          </div>
+
+          <button class="booking-submit-btn" @click="handleFinalSubmit">
+            Подтвердить бронь
+          </button>
+        </div>
+      </div>
+    </transition>
   </section>
 </template>
 
@@ -128,28 +184,48 @@
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import Calendar from "../Calendar.vue";
 
+const pricePerNight = 5000;
 const checkin = ref(null);
 const checkout = ref(null);
 const selecting = ref("checkin");
 const showGuests = ref(false);
 const adults = ref(1);
 const children = ref(0);
+const isModalOpen = ref(false);
+const userName = ref("");
+const userPhone = ref("");
 const guestsRef = ref(null);
 
-const guestsSummary = computed(() => {
-  const aText = `${adults.value} ${adults.value === 1 ? "взрослый" : "взрослых"}`;
-  const cText =
-    children.value > 0
-      ? `, ${children.value} ${children.value === 1 ? "ребенок" : "детей"}`
-      : "";
-  return aText + cText;
+const guestConfigs = [
+  { id: "adults", name: "Взрослые", desc: "от 12 лет", ref: adults },
+  { id: "children", name: "Дети", desc: "до 12 лет", ref: children },
+];
+
+const totalNights = computed(() => {
+  if (!checkin.value || !checkout.value) return 0;
+  return Math.max(
+    1,
+    Math.ceil((checkout.value - checkin.value) / (1000 * 60 * 60 * 24)),
+  );
 });
 
-function formatDate(date) {
-  return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "short" });
-}
+const totalPrice = computed(() => totalNights.value * pricePerNight);
 
-function onSelectDate(date) {
+const guestsSummary = computed(() => {
+  let res = `${adults.value} ${adults.value === 1 ? "взрослый" : "взрослых"}`;
+  if (children.value > 0)
+    res += `, ${children.value} ${children.value === 1 ? "ребенок" : "детей"}`;
+  return res;
+});
+
+const formatDate = (d) =>
+  d.toLocaleDateString("ru-RU", { day: "2-digit", month: "short" });
+const getNightsWord = (n) => {
+  const r = new Intl.PluralRules("ru-RU").select(n);
+  return r === "one" ? "ночь" : r === "few" ? "ночи" : "ночей";
+};
+
+const onSelectDate = (date) => {
   if (selecting.value === "checkin") {
     checkin.value = date;
     if (checkout.value && checkout.value <= date) checkout.value = null;
@@ -164,271 +240,364 @@ function onSelectDate(date) {
       selecting.value = "checkout";
     }
   }
-}
+};
 
-function submit() {
-  console.log("Submit:", {
-    checkin: checkin.value,
-    checkout: checkout.value,
-    guests: guestsSummary.value,
-  });
-  alert("Заявка успешно создана!");
-}
+const changeGuestCount = (id, val) => {
+  if (id === "adults") adults.value = Math.max(1, adults.value + val);
+  else children.value = Math.max(0, children.value + val);
+};
+
+const isLimit = (id, val) =>
+  id === "adults"
+    ? adults.value <= 1 && val < 0
+    : children.value <= 0 && val < 0;
+
+const onPhoneInput = (e) => {
+  let v = e.target.value.replace(/\D/g, "").substring(0, 11);
+  if (v.startsWith("7") || v.startsWith("8")) v = v.substring(1);
+  let r = "+7 ";
+  if (v.length > 0) r += "(" + v.substring(0, 3);
+  if (v.length > 3) r += ") " + v.substring(3, 6);
+  if (v.length > 6) r += "-" + v.substring(6, 8);
+  if (v.length > 8) r += "-" + v.substring(8, 10);
+  userPhone.value = r;
+};
+
+const handleFinalSubmit = () => {
+  if (userName.value && userPhone.value.length >= 18) {
+    alert("Заявка успешно отправлена!");
+    isModalOpen.value = false;
+  }
+};
 
 const handleClickOutside = (e) => {
   if (guestsRef.value && !guestsRef.value.contains(e.target))
     showGuests.value = false;
 };
-
-onMounted(() => document.addEventListener("mousedown", handleClickOutside));
+onMounted(() => document.addEventListener("click", handleClickOutside));
 onBeforeUnmount(() =>
-  document.removeEventListener("mousedown", handleClickOutside),
+  document.removeEventListener("click", handleClickOutside),
 );
 </script>
 
 <style lang="scss" scoped>
-.booking {
-  padding: 40px 0;
+.booking-section {
+  padding: 60px 0;
+  background: #fff;
+  font-family: "Unageo", sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+
+  :deep(*) {
+    font-family: "Unageo", sans-serif !important;
+    box-sizing: border-box;
+  }
 
   &__container {
-    background: #fff;
-    border: 1px solid #e8e1d9;
-    border-radius: 40px;
-    padding: 40px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
   }
 
   &__grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.1fr 0.9fr;
     gap: 60px;
     align-items: start;
+
+    @media (max-width: 992px) {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
   }
 
   &__title {
     font-size: 32px;
-    margin-bottom: 30px;
+    font-weight: 600;
     color: #3d2c17;
+    margin-bottom: 32px;
+    letter-spacing: -0.01em;
   }
 
-  &__field-group {
+  &__field {
     margin-bottom: 24px;
     position: relative;
-  }
-
-  &__label {
-    display: block;
-    font-size: 14px;
-    color: #b0a79c;
-    margin-bottom: 8px;
-    font-weight: 500;
-  }
-
-  &__dates {
-    display: flex;
-    align-items: center;
-    border: 2px solid #eee4d8;
-    border-radius: 16px;
-    overflow: hidden;
-    transition: border-color 0.3s;
-
-    &:has(.is-active) {
-      border-color: var(--primary);
-    }
-  }
-
-  &__date-btn {
-    flex: 1;
-    background: none;
-    border: none;
-    padding: 12px 20px;
-    text-align: left;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    transition: background 0.2s;
-
-    &.is-active {
-      background: #fdfaf7;
-    }
-
-    .booking__date-label {
+    .field-label {
+      display: block;
       font-size: 12px;
+      font-weight: 600;
       color: #b0a79c;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 0.04em;
     }
+  }
 
-    .booking__date-value {
-      font-size: 18px;
+  .date-picker-group {
+    display: flex;
+    background: #f8f5f2;
+    border: 1px solid #eee4d8;
+    border-radius: 16px;
+    padding: 6px;
+  }
+
+  .date-picker-item {
+    flex: 1;
+    padding: 10px 16px;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: 0.3s ease;
+    &.is-active {
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(61, 44, 23, 0.06);
+    }
+    &__label {
+      display: block;
+      font-size: 11px;
+      color: #a68b6a;
+      margin-bottom: 2px;
+    }
+    &__value {
+      font-size: 16px;
       font-weight: 600;
       color: #3d2c17;
     }
   }
 
-  &__dates-separator {
-    width: 2px;
-    height: 30px;
+  .date-picker-divider {
+    width: 1px;
     background: #eee4d8;
+    margin: 8px 0;
   }
 
-  &__guests {
-    position: relative;
-  }
-
-  &__guests-trigger {
-    width: 100%;
-    padding: 18px 20px;
-    border: 2px solid #eee4d8;
+  .guests-dropdown-trigger {
+    background: #f8f5f2;
+    border: 1px solid #eee4d8;
     border-radius: 16px;
-    background: #fff;
+    padding: 18px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    font-size: 18px;
-    font-weight: 600;
-    color: #3d2c17;
-    transition: 0.3s;
-
-    &:hover {
-      border-color: var(--primary);
+    position: relative;
+    &__text {
+      font-size: 16px;
+      font-weight: 500;
+      color: #3d2c17;
     }
-
     svg {
-      color: var(--primary);
-      transition: transform 0.3s;
+      transition: 0.3s;
       &.is-open {
         transform: rotate(180deg);
       }
     }
   }
 
-  &__guests-dropdown {
+  .guests-dropdown-content {
     position: absolute;
-    top: calc(100% + 10px);
+    top: calc(100% + 8px);
     left: 0;
     right: 0;
     background: #fff;
-    border: 1px solid #e8e1d9;
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-    z-index: 100;
+    border: 1px solid #eee4d8;
+    border-radius: 18px;
+    padding: 16px;
+    z-index: 50;
+    box-shadow: 0 10px 30px rgba(61, 44, 23, 0.1);
   }
 
-  &__submit {
+  .guest-control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    &:not(:last-child) {
+      border-bottom: 1px solid #f8f5f2;
+    }
+    .guest-name {
+      font-weight: 600;
+      color: #3d2c17;
+      display: block;
+    }
+    .guest-desc {
+      font-size: 12px;
+      color: #a68b6a;
+    }
+    &__actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      button {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1px solid #eee4d8;
+        background: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+      .guest-count {
+        font-weight: 600;
+        min-width: 15px;
+        text-align: center;
+      }
+    }
+  }
+
+  .booking-summary-card {
+    background: #fdfbfa;
+    border: 1px solid #eee4d8;
+    border-radius: 20px;
+    padding: 24px;
+    margin: 32px 0;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    &__label {
+      color: #8c7d6d;
+      font-size: 15px;
+    }
+    &__value {
+      font-weight: 600;
+      color: #3d2c17;
+    }
+    &--total {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px dashed #d9d0c7;
+      .summary-row__label {
+        font-size: 17px;
+        font-weight: 600;
+        color: #3d2c17;
+      }
+      .summary-row__value {
+        font-size: 24px;
+        font-weight: 600;
+        color: #bd9e7e;
+      }
+    }
+  }
+
+  .booking-submit-btn {
     width: 100%;
     padding: 20px;
-    background: var(--primary, #bd9e7e);
+    background: #6b5a45;
     color: #fff;
     border: none;
     border-radius: 16px;
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 17px;
+    font-weight: 600;
     cursor: pointer;
-    transition:
-      transform 0.2s,
-      background 0.3s;
-
+    transition: 0.3s;
     &:hover:not(:disabled) {
-      background: #a68b6a;
-      transform: translateY(-2px);
+      background: #5a4b39;
+      transform: translateY(-1px);
     }
-
     &:disabled {
-      opacity: 0.5;
+      background: #d9d0c7;
       cursor: not-allowed;
     }
   }
-}
 
-.guest-control {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
-
-  &:not(:last-child) {
-    border-bottom: 1px solid #f8f5f2;
-  }
-
-  &__name {
-    display: block;
-    font-weight: 600;
-    color: #3d2c17;
-  }
-  &__desc {
-    font-size: 12px;
-    color: #b0a79c;
-  }
-
-  &__counter {
+  .booking-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(30, 20, 10, 0.5);
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
-    gap: 15px;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
 
-    button {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 1px solid #eee4d8;
-      background: #fff;
+  .booking-modal-container {
+    background: #fff;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 24px;
+    padding: 40px;
+    position: relative;
+    .booking-modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      border: none;
+      background: none;
+      font-size: 24px;
+      color: #b0a79c;
       cursor: pointer;
+    }
+    .booking-modal-title {
+      font-size: 22px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 8px;
+      color: #3d2c17;
+    }
+    .booking-modal-subtitle {
+      font-size: 14px;
+      text-align: center;
+      color: #8c7d6d;
+      margin-bottom: 24px;
+    }
+    .booking-modal-inputs {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-
-      &:hover:not(:disabled) {
-        background: #fdfaf7;
-        border-color: var(--primary);
-      }
-      &:disabled {
-        opacity: 0.3;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .custom-input {
+      width: 100%;
+      padding: 16px;
+      background: #f8f5f2;
+      border: 1px solid #eee4d8;
+      border-radius: 12px;
+      font-size: 15px;
+      outline: none;
+      transition: 0.3s;
+      &:focus {
+        border-color: #bd9e7e;
+        background: #fff;
       }
     }
-
-    span {
-      font-weight: 600;
-      min-width: 20px;
-      text-align: center;
+    .booking-modal-price {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      font-size: 15px;
+      strong {
+        color: #bd9e7e;
+        font-size: 20px;
+      }
     }
   }
 }
 
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: all 0.3s ease;
+.dropdown-fade-enter-active,
+.dropdown-fade-leave-active {
+  transition: 0.2s ease;
 }
-.fade-slide-enter-from,
-.fade-slide-leave-to {
+.dropdown-fade-enter-from,
+.dropdown-fade-leave-to {
   opacity: 0;
   transform: translateY(-10px);
 }
 
-@media (max-width: 992px) {
-  .booking__grid {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-  .booking__container {
-    padding: 30px;
-  }
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: 0.3s ease;
 }
-
-@media (max-width: 480px) {
-  .booking__container {
-    border-radius: 0;
-    border: none;
-    padding: 20px;
-  }
-  .booking__title {
-    font-size: 24px;
-  }
-  .booking__date-value {
-    font-size: 16px;
-  }
-  .booking__guests-trigger {
-    font-size: 16px;
-  }
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
 }
 </style>
