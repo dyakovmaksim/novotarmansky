@@ -318,8 +318,6 @@ onBeforeUnmount(() =>
 .booking-page {
   padding: 80px 0 120px;
   background: #fdfbf9;
-  min-height: 100vh;
-  // ПРИНУДИТЕЛЬНЫЙ ИДЕАЛЬНЫЙ ШРИФТ
   font-family: "Unageo", sans-serif !important;
   -webkit-font-smoothing: antialiased;
 }
@@ -380,7 +378,6 @@ onBeforeUnmount(() =>
   font-weight: 700;
 }
 
-/* ДЕТАЛИ ПРАВОЙ ПАНЕЛИ */
 .date-display {
   display: flex;
   gap: 12px;
@@ -445,7 +442,6 @@ onBeforeUnmount(() =>
   }
 }
 
-/* ВЫПАДАШКА */
 .guests-dropdown {
   position: absolute;
   top: 100%;
@@ -504,7 +500,6 @@ onBeforeUnmount(() =>
   }
 }
 
-/* ЧЕКБОКС */
 .extra-services {
   margin-bottom: 30px;
   .checkbox-container {
@@ -551,7 +546,6 @@ onBeforeUnmount(() =>
   }
 }
 
-/* КАРТОЧКА ЦЕНЫ  */
 .price-details-card {
   background: #fdfaf7;
   border-radius: 24px;
@@ -588,11 +582,10 @@ onBeforeUnmount(() =>
   }
 }
 
-/* КНОПКА */
 .btn-primary-booking {
   width: 100%;
   padding: 22px;
-  background: #6b5a45;
+  background: var(--primary);
   color: #fff;
   border: none;
   border-radius: 20px;
@@ -619,7 +612,6 @@ onBeforeUnmount(() =>
   font-weight: 600;
 }
 
-/* МОДАЛЬНОЕ ОКНО */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -699,12 +691,12 @@ onBeforeUnmount(() =>
     }
     .gold {
       color: #d8b48b;
-      font-weight: 800;
+      font-weight: 700;
+      font-family: "Unageo", sans-serif !important;
     }
   }
 }
 
-/* АНИМАЦИИ */
 .dropdown-slide-enter-active,
 .dropdown-slide-leave-active {
   transition: 0.3s ease;
