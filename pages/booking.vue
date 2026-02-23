@@ -296,11 +296,39 @@ function onPhoneInput(e) {
   userPhone.value = res;
 }
 
-function confirmBooking() {
+async function confirmBooking() {
   if (!userName.value || userPhone.value.length < 18)
     return alert("Заполните данные!");
-  alert("Заявка принята! Мы скоро свяжемся с вами.");
-  isModalOpen.value = false;
+
+  const bookingData = {
+    userName: userName.value,
+    userPhone: userPhone.value,
+    dates: `${formatDate(checkin.value)} — ${formatDate(checkout.value)}`,
+    checkinDate: checkin.value.toISOString().split("T")[0],
+    checkoutDate: checkout.value.toISOString().split("T")[0],
+    guests: guestsText.value,
+    sauna: hasSauna.value,
+    totalPrice: totalPrice.value,
+  };
+
+  try {
+    const response = await fetch("http://localhost:3001/api/new-booking", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bookingData),
+    });
+
+    if (response.ok) {
+      alert("Заявка успешно отправлена! Хозяин получил уведомление.");
+      isModalOpen.value = false;
+      userName.value = "";
+      userPhone.value = "";
+    } else {
+      throw new Error();
+    }
+  } catch (error) {
+    alert("Произошла ошибка при связи с ботом.");
+  }
 }
 
 const handleClickOutside = (e) => {
