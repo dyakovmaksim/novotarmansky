@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // В Prisma 6 пишем url прямо сюда!
+}
+
+model House {
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+  pricePerNight Float
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  bookings    Booking[]
+}
+
+model Booking {
+  id          String   @id @default(uuid())
+  houseId     String   // Ссылка на ID дома
+  house       House    @relation(fields: [houseId], references: [id], onDelete: Cascade)
+  customerName String   // Имя клиента
+  phone       String   // Телефон для связи
+  startDate   DateTime // Дата заезда
+  endDate     DateTime // Дата выезда
+  createdAt   DateTime @default(now())
+}
