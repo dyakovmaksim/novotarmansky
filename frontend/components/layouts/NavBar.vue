@@ -65,6 +65,7 @@ watch(isOpen, (newValue) => {
 });
 
 const links = [
+  { name: "Наши дома", path: "/houses" },
   { name: "О нас", path: "/aboutus" },
   { name: "Фото", path: "/photos" },
   { name: "Акции", path: "/promotion" },

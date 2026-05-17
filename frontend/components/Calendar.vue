@@ -1,7 +1,7 @@
 <template>
   <div class="calendar">
     <div class="calendar__header">
-      <button class="calendar__nav" @click="prevMonth">
+      <button type="button" class="calendar__nav" @click="prevMonth">
         <svg
           width="20"
           height="20"
@@ -22,7 +22,7 @@
         </transition>
       </div>
 
-      <button class="calendar__nav" @click="nextMonth">
+      <button type="button" class="calendar__nav" @click="nextMonth">
         <svg
           width="20"
           height="20"
@@ -51,6 +51,7 @@
 
           <button
             v-for="day in days"
+            type="button"
             :key="day.getTime()"
             class="calendar__day"
             :class="{
@@ -78,9 +79,14 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 
+// ПРИНИМАЕМ ПРОПСЫ: Добавляем disabledDates, куда прилетает массив строк от [id].vue
 const props = defineProps({
   checkin: Date,
   checkout: Date,
+  disabledDates: {
+    type: Array,
+    default: () => [],
+  },
 });
 const emit = defineEmits(["select"]);
 
@@ -179,10 +185,25 @@ function isInRange(day) {
   );
 }
 
+// ИСПРАВЛЕННАЯ ФУНКЦИЯ БЛОКИРОВКИ ДАТЫ
 function isDisabled(day) {
   const now = new Date();
   now.setHours(0, 0, 0, 0);
-  return day < now;
+
+  // 1. Блокируем прошлые дни
+  if (day < now) return true;
+
+  // 2. Если массив заблокированных дат пуст — день доступен
+  if (!props.disabledDates || props.disabledDates.length === 0) return false;
+
+  // Форматируем текущий день ячейки сетки в строковый формат 'YYYY-MM-DD'
+  const year = day.getFullYear();
+  const month = String(day.getMonth() + 1).padStart(2, "0");
+  const dayOfMonth = String(day.getDate()).padStart(2, "0");
+  const currentDayStr = `${year}-${month}-${dayOfMonth}`;
+
+  // 3. Блокируем день, если эта строка есть в массиве занятых дат
+  return props.disabledDates.includes(currentDayStr);
 }
 
 function selectDate(day) {
@@ -346,8 +367,17 @@ function selectDate(day) {
     }
 
     &.is-disabled {
-      color: #e0e0e0;
+      color: #b0a79c !important; /* Делаем текст заблокированной даты серым и невыразительным */
+      background-color: #f7f5f2 !important; /* Слегка подкрашиваем заблокированную ячейку */
+      border-radius: 50%;
       cursor: not-allowed;
+      opacity: 0.4;
+
+      &:hover {
+        &::after {
+          display: none !important; /* Убираем эффект наведения для заблокированных */
+        }
+      }
     }
   }
 }
