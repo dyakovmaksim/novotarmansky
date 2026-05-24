@@ -38,15 +38,18 @@ services:
   frontend:
     build:
       context: ./frontend
-      args:
-        NUXT_PUBLIC_API_BASE: ${SITE_URL}/api
-        NUXT_PUBLIC_SITE_URL: ${SITE_URL}
-        NUXT_PUBLIC_HOUSE_TITLE: ${HOUSE_TITLE}
-        NUXT_PUBLIC_HOUSE_PRICE_PER_NIGHT: ${HOUSE_PRICE_PER_NIGHT}
-        NUXT_PUBLIC_SAUNA_PRICE: ${SAUNA_PRICE}
     restart: unless-stopped
     depends_on:
       - backend
+    # Nuxt 3 reads NUXT_PUBLIC_* from runtime env on Nitro startup and injects
+    # them into __NUXT__.config so the client gets the right URLs. This means
+    # we can change SITE_URL without rebuilding the image.
+    environment:
+      NUXT_PUBLIC_API_BASE: ${SITE_URL}/api
+      NUXT_PUBLIC_SITE_URL: ${SITE_URL}
+      NUXT_PUBLIC_HOUSE_TITLE: ${HOUSE_TITLE}
+      NUXT_PUBLIC_HOUSE_PRICE_PER_NIGHT: ${HOUSE_PRICE_PER_NIGHT}
+      NUXT_PUBLIC_SAUNA_PRICE: ${SAUNA_PRICE}
 
   nginx:
     image: nginx:1.27-alpine
