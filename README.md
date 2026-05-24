@@ -1,75 +1,143 @@
-# Nuxt Minimal Starter
+# novotarmansky
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Сайт-лендинг с бронированием загородного дома «Новотарманский». Заявки приходят админу в Telegram, статусы (Ожидает / Подтверждено / Отменено) ведутся прямо из бота.
 
-## Setup
+См. [CLAUDE.md](CLAUDE.md) — подробный контекст проекта для разработки, [BACKLOG.md](BACKLOG.md) — что ещё доделать.
 
-Make sure to install dependencies:
+## Стек
+
+- **Backend:** NestJS 11 + Prisma 6 + PostgreSQL 16, встроенный Telegram-бот (long-polling)
+- **Frontend:** Nuxt 3 + Vue 3 + Sass
+- **Прокси:** nginx + Let's Encrypt
+- **Контейнеры:** docker-compose (db + backend + frontend + nginx)
+
+## Локальная разработка
+
+Нужен PostgreSQL (локально или в Docker).
 
 ```bash
-# npm
+# 1. Postgres в Docker (один контейнер):
+docker run -d --name novotarmansky-pg --restart unless-stopped \
+  -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=novotarmansky \
+  -p 5432:5432 -v novotarmansky_pg_data:/var/lib/postgresql/data postgres:16-alpine
+
+# 2. Backend:
+cd backend
 npm install
+cp .env.example .env       # отредактировать TELEGRAM_*
+npx prisma migrate deploy  # применить миграции
+npm run start:dev          # → http://localhost:3001
 
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
+# 3. Frontend (в другом терминале):
+cd frontend
+npm install
+npm run dev                # → http://localhost:3000
 ```
 
-## Development Server
+## Деплой (VPS + Docker)
 
-Start the development server on `http://localhost:3000`:
+Один `docker compose up -d --build` на сервере поднимает всё: postgres, backend, frontend, nginx.
+
+### 1. Подготовка сервера
 
 ```bash
-# npm
-npm run dev
+# Установить Docker и docker compose plugin (Debian/Ubuntu)
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER  # перелогиниться
 
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
+# Открыть порты
+sudo ufw allow 80
+sudo ufw allow 443
 ```
 
-## Production
-
-Build the application for production:
+### 2. Клон и конфиг
 
 ```bash
-# npm
-npm run build
+git clone <repo-url> /opt/novotarmansky
+cd /opt/novotarmansky
 
-# pnpm
-pnpm build
+# Скопировать пример env и заполнить
+cp .env.production.example .env
+nano .env                                       # SITE_URL, DB_PASSWORD, TELEGRAM_*
 
-# yarn
-yarn build
-
-# bun
-bun run build
+# Подставить домен в nginx-конфиг
+sed -i 's/<DOMAIN>/your-domain.com/g' nginx/default.conf
 ```
 
-Locally preview production build:
+### 3. Первый запуск без HTTPS (для выпуска сертификата)
 
 ```bash
-# npm
-npm run preview
+# Временно закомментировать HTTPS-сервер в nginx/default.conf
+# (или просто запустить — порт 443 не отвечает, но 80 уже принимает ACME-challenge)
 
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
+docker compose up -d db backend frontend nginx
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+### 4. Выпуск Let's Encrypt сертификата
+
+```bash
+docker compose run --rm certbot certonly \
+  --webroot -w /var/www/certbot \
+  -d your-domain.com -d www.your-domain.com \
+  --email you@example.com --agree-tos --no-eff-email
+```
+
+### 5. Включить HTTPS
+
+```bash
+# Раскомментировать HTTPS-сервер в nginx/default.conf, затем:
+docker compose exec nginx nginx -s reload
+```
+
+Сайт доступен на `https://your-domain.com`. API — `https://your-domain.com/api/...`.
+
+### 6. Автообновление сертификата
+
+В `cron` (рут):
+
+```cron
+0 3 * * * cd /opt/novotarmansky && docker compose run --rm certbot renew --quiet && docker compose exec nginx nginx -s reload
+```
+
+## Обновление кода на проде
+
+```bash
+cd /opt/novotarmansky
+git pull
+docker compose up -d --build backend frontend
+# Миграции применяются в entrypoint backend-контейнера автоматически.
+```
+
+## Полезные команды
+
+```bash
+# Логи всех сервисов
+docker compose logs -f
+
+# Только backend
+docker compose logs -f backend
+
+# Заглянуть в БД
+docker compose exec db psql -U "$DB_USER" -d "$DB_NAME"
+
+# Перезапустить только backend (например, после изменения .env)
+docker compose up -d --force-recreate backend
+```
+
+## Структура
+
+```
+novotarmansky/
+├── backend/             NestJS + Prisma
+│   ├── Dockerfile       multi-stage build
+│   ├── prisma/          schema + migrations
+│   └── src/             app code (bookings, telegram)
+├── frontend/            Nuxt 3
+│   ├── Dockerfile       multi-stage build
+│   ├── pages/           маршруты сайта
+│   └── components/      Vue-компоненты + иконки
+├── nginx/
+│   └── default.conf     reverse-proxy + TLS
+├── docker-compose.yml
+└── .env.production.example
+```
