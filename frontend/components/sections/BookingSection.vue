@@ -204,9 +204,12 @@ const config = useRuntimeConfig();
 const pricePerNight = config.public.house.pricePerNight;
 const apiBase = config.public.apiBase;
 
+// Без SSR — в Docker hairpin NAT обычно не делается, и обращение из
+// контейнера фронта к публичному apiBase зависает до таймаута.
+// occupied-dates нужны только для UI календаря, поисковикам они не нужны.
 const { data: occupiedDates, refresh: refreshOccupied } = await useFetch(
   `${apiBase}/bookings/occupied-dates`,
-  { default: () => [] },
+  { default: () => [], server: false, lazy: true },
 );
 
 const checkin = ref(null);

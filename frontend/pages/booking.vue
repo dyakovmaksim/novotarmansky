@@ -238,9 +238,10 @@ const basePrice = config.public.house.pricePerNight;
 const saunaPrice = config.public.saunaPrice;
 const apiBase = config.public.apiBase;
 
+// Без SSR — Docker hairpin NAT иначе зависает запрос на 20+ секунд.
 const { data: occupiedDates, refresh: refreshOccupied } = await useFetch(
   `${apiBase}/bookings/occupied-dates`,
-  { default: () => [] },
+  { default: () => [], server: false, lazy: true },
 );
 
 const checkin = ref(null);
