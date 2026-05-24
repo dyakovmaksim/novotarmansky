@@ -4,34 +4,21 @@
       <div class="footer__grid">
         <div class="footer__col footer__col--main">
           <NuxtLink to="/" class="footer__logo">
-            novotarmanskiy<span>house</span>
+            {{ CONTACT.brand.name }}<span>{{ CONTACT.brand.nameAccent }}</span>
           </NuxtLink>
-          <p class="footer__text">
-            Сдаем не просто дом, а атмосферу спокойствия и уюта в 20 минутах от
-            города. Ваш идеальный отдых начинается здесь.
-          </p>
+          <p class="footer__text">{{ CONTACT.brand.tagline }}</p>
           <div class="footer__socials">
             <a
-              href="https://wa.me/..."
+              v-for="s in CONTACT.socials"
+              :key="s.id"
+              :href="s.href"
               target="_blank"
+              rel="noopener"
               class="footer__social-link"
-              title="WhatsApp"
-              >WA</a
+              :title="s.label"
             >
-            <a
-              href="https://t.me/..."
-              target="_blank"
-              class="footer__social-link"
-              title="Telegram"
-              >TG</a
-            >
-            <a
-              href="#"
-              target="_blank"
-              class="footer__social-link"
-              title="ВКонтакте"
-              >VK</a
-            >
+              {{ s.short }}
+            </a>
           </div>
         </div>
 
@@ -49,22 +36,22 @@
           <h4 class="footer__title">Для гостей</h4>
           <ul class="footer__list">
             <li><NuxtLink to="/booking">Забронировать</NuxtLink></li>
-            <li><NuxtLink to="/rules">Правила дома</NuxtLink></li>
-            <li><NuxtLink to="/faq">Вопросы и ответы</NuxtLink></li>
-            <li><NuxtLink to="/reviews">Отзывы гостей</NuxtLink></li>
+            <li><NuxtLink to="/aboutus">О доме</NuxtLink></li>
+            <li><NuxtLink to="/promotion">Акции</NuxtLink></li>
+            <li><NuxtLink to="/photos">Фотогалерея</NuxtLink></li>
           </ul>
         </div>
 
         <div class="footer__col">
           <h4 class="footer__title">Связаться с нами</h4>
           <div class="footer__contacts">
-            <a href="tel:+79990000000" class="footer__phone"
-              >+7 (999) 000-00-00</a
-            >
-            <p class="footer__address">
-              п. Новотарманский, <br />ул. Лесная, д. 10
+            <a :href="CONTACT.phone.href" class="footer__phone">
+              {{ CONTACT.phone.display }}
+            </a>
+            <p class="footer__address">{{ CONTACT.address.short }}</p>
+            <p class="footer__worktime">
+              {{ CONTACT.workHours.label }}: {{ CONTACT.workHours.value }}
             </p>
-            <p class="footer__worktime">Прием звонков: 09:00 — 22:00</p>
           </div>
         </div>
       </div>
@@ -85,8 +72,8 @@
           </div>
         </div>
         <div class="footer__legal-right">
-          <p>ИП Иванов Иван Иванович</p>
-          <p>ИНН: 720000000000 | ОГРНИП: 320000000000000</p>
+          <p>{{ CONTACT.legal.company }}</p>
+          <p>ИНН: {{ CONTACT.legal.inn }} | ОГРНИП: {{ CONTACT.legal.ogrnip }}</p>
         </div>
       </div>
     </div>

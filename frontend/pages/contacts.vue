@@ -1,3 +1,11 @@
+<script setup>
+useSeoMeta({
+  title: "Контакты — Novotarmanskiy house",
+  description:
+    "Адрес, телефон, мессенджеры и режим работы. Как нас найти и связаться.",
+});
+</script>
+
 <template>
   <div>
     <LayoutsNavBar />
@@ -11,34 +19,44 @@
             <div class="contact-card accent-box">
               <h2>Как нас найти</h2>
               <div class="contact-item">
-                <span class="icon">📍</span>
+                <IconPin class="icon" />
                 <div>
-                  <strong>Адрес:</strong>
+                  <strong>{{ CONTACT.address.label }}:</strong>
+                  <p>{{ CONTACT.address.value }}</p>
+                </div>
+              </div>
+
+              <div class="contact-item">
+                <IconPhone class="icon" />
+                <div>
+                  <strong>{{ CONTACT.phone.label }}:</strong>
                   <p>
-                    Тюменская область, пос. Новотарманский, ул. Янтарная, 143
+                    <a :href="CONTACT.phone.href">{{ CONTACT.phone.display }}</a>
                   </p>
                 </div>
               </div>
 
               <div class="contact-item">
-                <span class="icon">📞</span>
+                <IconMail class="icon" />
                 <div>
-                  <strong>Телефон:</strong>
-                  <p><a href="tel:+71234567890">+7 (123) 456-78-90</a></p>
-                </div>
-              </div>
-
-              <div class="contact-item">
-                <span class="icon">✉️</span>
-                <div>
-                  <strong>Email:</strong>
-                  <p>hello@novotarmansky.ru</p>
+                  <strong>{{ CONTACT.email.label }}:</strong>
+                  <p>
+                    <a :href="CONTACT.email.href">{{ CONTACT.email.value }}</a>
+                  </p>
                 </div>
               </div>
 
               <div class="social-links">
-                <a href="#" class="social-btn">Telegram</a>
-                <a href="#" class="social-btn">VK</a>
+                <a
+                  v-for="s in CONTACT.socials"
+                  :key="s.id"
+                  :href="s.href"
+                  target="_blank"
+                  rel="noopener"
+                  class="social-btn"
+                >
+                  {{ s.label }}
+                </a>
               </div>
             </div>
 
@@ -48,15 +66,25 @@
                 Мы принимаем гостей круглосуточно по предварительному
                 бронированию.
               </p>
-              <p><strong>Заезд:</strong> после 15:00</p>
-              <p><strong>Выезд:</strong> до 12:00</p>
+              <p>
+                <strong>{{ CONTACT.checkIn.label }}:</strong>
+                {{ CONTACT.checkIn.value }}
+              </p>
+              <p>
+                <strong>{{ CONTACT.checkOut.label }}:</strong>
+                {{ CONTACT.checkOut.value }}
+              </p>
+              <p>
+                <strong>{{ CONTACT.workHours.label }}:</strong>
+                {{ CONTACT.workHours.value }}
+              </p>
             </div>
           </div>
 
           <div class="map-section">
             <div class="map-container">
               <iframe
-                src="https://yandex.ru/map-widget/v1/?um=constructor%3AВАШ_УНИКАЛЬНЫЙ_ID&amp;source=constructor"
+                :src="`https://yandex.ru/map-widget/v1/?um=constructor%3A${CONTACT.yandexMapId}&amp;source=constructor`"
                 width="100%"
                 height="620"
                 frameborder="0"
@@ -133,7 +161,10 @@ h2 {
 }
 
 .icon {
-  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: currentColor;
 }
 
 .social-links {
