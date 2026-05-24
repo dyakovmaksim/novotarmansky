@@ -2,7 +2,15 @@
   <section class="about">
     <div class="about__wrapper">
       <div class="about__bg">
-        <img src="/images/AboutUsPic.png" alt="Вид на дом" class="about__img" />
+        <NuxtImg
+          src="/images/AboutUsPic.png"
+          alt="Вид на дом"
+          class="about__img"
+          width="1600"
+          format="webp"
+          quality="78"
+          loading="lazy"
+        />
         <div class="about__overlay"></div>
       </div>
 

@@ -1,3 +1,11 @@
+<script setup>
+useSeoMeta({
+  title: "О доме — Novotarmanskiy house",
+  description:
+    "Современный комфорт и тишина леса в посёлке Новотарманский. 4 спальных места, кухня-гостиная, баня и BBQ.",
+});
+</script>
+
 <template>
   <NuxtLayout name="page-layout">
     <div class="about-page">
@@ -19,14 +27,28 @@
         </div>
 
         <div class="grid-item image-card reveal" style="grid-area: house-img">
-          <img src="/images/house.png" alt="Наш гостевой дом" />
+          <NuxtImg
+            src="/images/house.png"
+            alt="Наш гостевой дом"
+            width="1000"
+            format="webp"
+            quality="78"
+            loading="lazy"
+          />
         </div>
 
         <div
           class="grid-item image-card tall-img reveal"
           style="grid-area: interior-img"
         >
-          <img src="/images/interior-wide.png" alt="Интерьер" />
+          <NuxtImg
+            src="/images/interior-wide.png"
+            alt="Интерьер"
+            width="1000"
+            format="webp"
+            quality="78"
+            loading="lazy"
+          />
           <div class="dark-overlay">
             <p>Уют и тишина в каждой детали вашего отдыха.</p>
           </div>

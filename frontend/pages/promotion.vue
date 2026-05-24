@@ -9,7 +9,14 @@
         <div class="promo-list">
           <div v-for="(promo, index) in promos" :key="index" class="promo-card">
             <div class="promo-image">
-              <img :src="promo.image" :alt="promo.title" />
+              <NuxtImg
+                :src="promo.image"
+                :alt="promo.title"
+                width="800"
+                format="webp"
+                quality="78"
+                loading="lazy"
+              />
               <div class="promo-badge" v-if="promo.badge">
                 {{ promo.badge }}
               </div>
@@ -34,32 +41,14 @@
 </template>
 
 <script setup>
-const promos = [
-  {
-    title: "Будни дешевле",
-    description:
-      "При бронировании дома с понедельника по четверг — скидка 20% на вторые сутки. Проведите время в тишине без суеты.",
-    image: "/images/house.jpg",
-    badge: "-20%",
-    date: "до 01.06.2024",
-  },
-  {
-    title: "Баня в подарок",
-    description:
-      "Забронируйте дом на двое суток в выходные и получите 2 часа настоящей русской бани совершенно бесплатно.",
-    image: "/images/sauna.jpg",
-    badge: "Подарок",
-    date: "бессрочно",
-  },
-  {
-    title: "Для именинников",
-    description:
-      "Дарим праздничную скидку 10% в день рождения и неделю после него. Отметьте важную дату на природе!",
-    image: "/images/interior-wide.jpg",
-    badge: "Скидка",
-    date: "круглый год",
-  },
-];
+useSeoMeta({
+  title: "Акции — Novotarmanskiy house",
+  description:
+    "Скидки на будние дни, бесплатная баня в выходные, акция на день рождения. Действующие предложения.",
+});
+
+// Список акций — в utils/promotions.ts (auto-imported).
+const promos = PROMOTIONS;
 </script>
 
 <style scoped>

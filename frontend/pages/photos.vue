@@ -23,7 +23,14 @@
             :key="index"
             class="gallery-item"
           >
-            <img :src="photo.src" :alt="photo.category" loading="lazy" />
+            <NuxtImg
+              :src="photo.src"
+              :alt="photo.category"
+              width="600"
+              format="webp"
+              quality="75"
+              loading="lazy"
+            />
           </div>
         </div>
 
@@ -40,34 +47,19 @@
 <script setup>
 import { ref, computed } from "vue";
 
-// Список категорий
-const categories = [
-  { id: "all", name: "Все" },
-  { id: "house", name: "Дом" },
-  { id: "yard", name: "Двор" },
-  { id: "kitchen", name: "Кухня" },
-  { id: "bedroom", name: "Спальни" },
-  { id: "hall", name: "Зал" },
-  { id: "bbq", name: "Мангал" },
-];
+useSeoMeta({
+  title: "Фотогалерея — Novotarmanskiy house",
+  description:
+    "Фото дома, интерьера, бани и придомовой территории. Посмотрите, как выглядит ваш отдых.",
+});
 
+// Категории и список фото — в utils/photos.ts (auto-imported).
+const categories = PHOTO_CATEGORIES;
 const currentCategory = ref("all");
 
-// Массив данных (добавьте сюда свои пути к фото)
-const photos = ref([
-  { src: "/images/house.jpg", category: "house" },
-  { src: "/images/yard-1.jpg", category: "yard" },
-  { src: "/images/kitchen-1.jpg", category: "kitchen" },
-  { src: "/images/bedroom-1.jpg", category: "bedroom" },
-  { src: "/images/hall-1.jpg", category: "hall" },
-  { src: "/images/bbq-1.jpg", category: "bbq" },
-  // Добавляйте новые фото здесь
-]);
-
-// Логика фильтрации
 const filteredPhotos = computed(() => {
-  if (currentCategory.value === "all") return photos.value;
-  return photos.value.filter((p) => p.category === currentCategory.value);
+  if (currentCategory.value === "all") return PHOTOS;
+  return PHOTOS.filter((p) => p.category === currentCategory.value);
 });
 </script>
 

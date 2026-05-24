@@ -128,6 +128,7 @@
             :checkin="checkin"
             :checkout="checkout"
             :selecting="selecting"
+            :disabled-dates="occupiedDates"
             @select="onSelectDate"
           />
         </div>
@@ -171,8 +172,22 @@
             <strong>{{ totalPrice.toLocaleString() }} ₽</strong>
           </div>
 
-          <button class="booking-submit-btn" @click="handleFinalSubmit">
-            Подтвердить бронь
+          <label class="consent">
+            <input v-model="consent" type="checkbox" />
+            <span>
+              Согласен на
+              <NuxtLink to="/personal-data" target="_blank"
+                >обработку персональных данных</NuxtLink
+              >
+            </span>
+          </label>
+
+          <button
+            class="booking-submit-btn"
+            :disabled="isSubmitting || !consent"
+            @click="handleFinalSubmit"
+          >
+            {{ isSubmitting ? "Отправляем..." : "Подтвердить бронь" }}
           </button>
         </div>
       </div>
@@ -182,9 +197,18 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { toast } from "vue-sonner";
 import Calendar from "../Calendar.vue";
 
-const pricePerNight = 5000;
+const config = useRuntimeConfig();
+const pricePerNight = config.public.house.pricePerNight;
+const apiBase = config.public.apiBase;
+
+const { data: occupiedDates, refresh: refreshOccupied } = await useFetch(
+  `${apiBase}/bookings/occupied-dates`,
+  { default: () => [] },
+);
+
 const checkin = ref(null);
 const checkout = ref(null);
 const selecting = ref("checkin");
@@ -192,8 +216,10 @@ const showGuests = ref(false);
 const adults = ref(1);
 const children = ref(0);
 const isModalOpen = ref(false);
+const isSubmitting = ref(false);
 const userName = ref("");
 const userPhone = ref("");
+const consent = ref(false);
 const guestsRef = ref(null);
 
 const guestConfigs = [
@@ -263,10 +289,46 @@ const onPhoneInput = (e) => {
   userPhone.value = r;
 };
 
-const handleFinalSubmit = () => {
-  if (userName.value && userPhone.value.length >= 18) {
-    alert("Заявка успешно отправлена!");
+const handleFinalSubmit = async () => {
+  if (!userName.value || userPhone.value.length < 18) {
+    toast.error("Заполните имя и телефон полностью.");
+    return;
+  }
+  if (!checkin.value || !checkout.value) return;
+  if (!consent.value) {
+    toast.error("Необходимо согласие на обработку персональных данных.");
+    return;
+  }
+  if (isSubmitting.value) return;
+
+  isSubmitting.value = true;
+  try {
+    await $fetch(`${apiBase}/bookings`, {
+      method: "POST",
+      body: {
+        customerName: userName.value,
+        phone: userPhone.value,
+        startDate: checkin.value.toISOString(),
+        endDate: checkout.value.toISOString(),
+        adults: adults.value,
+        children: children.value,
+      },
+    });
+    toast.success("Заявка отправлена! Мы свяжемся с вами для подтверждения.");
     isModalOpen.value = false;
+    userName.value = "";
+    userPhone.value = "";
+    consent.value = false;
+    checkin.value = null;
+    checkout.value = null;
+    await refreshOccupied();
+  } catch (err) {
+    const apiMessage = Array.isArray(err?.data?.message)
+      ? err.data.message[0]
+      : err?.data?.message;
+    toast.error(apiMessage || "Не удалось отправить заявку. Попробуйте ещё раз.");
+  } finally {
+    isSubmitting.value = false;
   }
 };
 
@@ -483,6 +545,27 @@ onBeforeUnmount(() =>
         font-weight: 600;
         color: #bd9e7e;
       }
+    }
+  }
+
+  .consent {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0 18px;
+    font-size: 13px;
+    color: #6b5a45;
+    cursor: pointer;
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #6b5a45;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    a {
+      color: #6b5a45;
+      text-decoration: underline;
     }
   }
 

@@ -10,10 +10,14 @@
           <div class="gallery__slider-viewport">
             <transition :name="slideDirection">
               <div :key="activeIndex" class="gallery__slide">
-                <img
+                <NuxtImg
                   :src="images[activeIndex]"
                   alt="Интерьер"
                   class="gallery__img"
+                  width="1600"
+                  format="webp"
+                  quality="78"
+                  :loading="activeIndex === 0 ? 'eager' : 'lazy'"
                 />
                 <div class="gallery__overlay"></div>
                 <div class="gallery__info">
@@ -83,7 +87,14 @@
           </div>
           <div class="gallery__side-preview" @click="next">
             <div class="gallery__side-label">Далее</div>
-            <img :src="images[(activeIndex + 1) % images.length]" alt="Next" />
+            <NuxtImg
+              :src="images[(activeIndex + 1) % images.length]"
+              alt="Next"
+              width="600"
+              format="webp"
+              quality="70"
+              loading="lazy"
+            />
           </div>
         </div>
       </div>
@@ -111,7 +122,12 @@ const startTimer = () => {
   timer = setInterval(next, 5000);
 };
 
-const stopTimer = () => clearInterval(timer);
+const stopTimer = () => {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+  }
+};
 
 const next = () => {
   slideDirection.value = "slide-left";
@@ -128,8 +144,22 @@ const goTo = (i) => {
   activeIndex.value = i;
 };
 
-onMounted(startTimer);
-onUnmounted(stopTimer);
+// Pause auto-rotation while the tab is hidden — no point burning CPU and
+// triggering image swaps the user can't see.
+const handleVisibilityChange = () => {
+  if (document.hidden) stopTimer();
+  else startTimer();
+};
+
+onMounted(() => {
+  startTimer();
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+});
+
+onUnmounted(() => {
+  stopTimer();
+  document.removeEventListener("visibilitychange", handleVisibilityChange);
+});
 </script>
 
 <style lang="scss" scoped>
@@ -203,8 +233,7 @@ onUnmounted(stopTimer);
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.35);
     border: 1px solid rgba(255, 255, 255, 0.3);
     color: #fff;
     cursor: pointer;

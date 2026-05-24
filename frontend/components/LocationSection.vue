@@ -8,7 +8,7 @@
           
           <div class="location__list">
             <div class="location__item">
-              <div class="location__icon">📍</div>
+              <div class="location__icon"><IconPin /></div>
               <div class="location__item-text">
                 <strong>Посёлок Новотарманский</strong>
                 <p>Уютное место в окружении природы</p>
@@ -16,7 +16,7 @@
             </div>
 
             <div class="location__item">
-              <div class="location__icon">♨️</div>
+              <div class="location__icon"><IconFlame /></div>
               <div class="location__item-text">
                 <strong>Источник «Советский»</strong>
                 <p>10 минут на автомобиле</p>
@@ -24,7 +24,7 @@
             </div>
 
             <div class="location__item">
-              <div class="location__icon">🌲</div>
+              <div class="location__icon"><IconPine /></div>
               <div class="location__item-text">
                 <strong>База отдыха «Верхний Бор»</strong>
                 <p>15 минут (источники, озеро, лес)</p>
@@ -101,7 +101,6 @@
   }
 
   &__icon {
-    font-size: 24px;
     background: rgba(255, 255, 255, 0.1);
     width: 48px;
     height: 48px;
@@ -110,6 +109,11 @@
     justify-content: center;
     border-radius: 12px;
     flex-shrink: 0;
+    color: #fff;
+    svg {
+      width: 24px;
+      height: 24px;
+    }
   }
 
   &__item-text {
@@ -172,7 +176,11 @@
 
   @media (max-width: 480px) {
     &__title { font-size: 28px; }
-    &__icon { width: 40px; height: 40px; font-size: 20px; }
+    &__icon {
+      width: 40px;
+      height: 40px;
+      svg { width: 20px; height: 20px; }
+    }
     &__item-text {
       strong { font-size: 16px; }
       p { font-size: 13px; }

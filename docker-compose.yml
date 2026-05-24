@@ -1,0 +1,81 @@
+name: novotarmansky
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # DATABASE_URL is composed inside the container; db host = service name.
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      PORT: 3001
+      CORS_ORIGIN: ${SITE_URL}
+      HOUSE_TITLE: ${HOUSE_TITLE}
+      HOUSE_PRICE_PER_NIGHT: ${HOUSE_PRICE_PER_NIGHT}
+      SAUNA_PRICE: ${SAUNA_PRICE}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_ADMIN_CHAT_ID: ${TELEGRAM_ADMIN_CHAT_ID}
+    # No ports: — backend is only reachable via nginx upstream inside the network.
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NUXT_PUBLIC_API_BASE: ${SITE_URL}/api
+        NUXT_PUBLIC_SITE_URL: ${SITE_URL}
+        NUXT_PUBLIC_HOUSE_TITLE: ${HOUSE_TITLE}
+        NUXT_PUBLIC_HOUSE_PRICE_PER_NIGHT: ${HOUSE_PRICE_PER_NIGHT}
+        NUXT_PUBLIC_SAUNA_PRICE: ${SAUNA_PRICE}
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - certbot_www:/var/www/certbot:ro
+      - letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - frontend
+      - backend
+
+  # One-shot helper: issue / renew Let's Encrypt cert.
+  # First run:
+  #   docker compose run --rm certbot certonly --webroot -w /var/www/certbot \
+  #     -d <DOMAIN> -d www.<DOMAIN> --email you@example.com --agree-tos --no-eff-email
+  # Renew (cron / systemd timer):
+  #   docker compose run --rm certbot renew && docker compose exec nginx nginx -s reload
+  certbot:
+    image: certbot/certbot:latest
+    profiles: ["tools"]
+    volumes:
+      - certbot_www:/var/www/certbot
+      - letsencrypt:/etc/letsencrypt
+
+volumes:
+  pg_data:
+  certbot_www:
+  letsencrypt:
