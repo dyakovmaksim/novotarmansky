@@ -19,6 +19,7 @@
                 :checkin="checkin"
                 :checkout="checkout"
                 :selecting="selecting"
+                :disabled-dates="occupiedDates"
                 @select="onSelectDate"
               />
             </div>
@@ -195,8 +196,22 @@
               </div>
             </div>
 
-            <button class="btn-primary-booking" @click="confirmBooking">
-              Отправить заявку
+            <label class="consent">
+              <input v-model="consent" type="checkbox" />
+              <span>
+                Согласен на
+                <NuxtLink to="/personal-data" target="_blank"
+                  >обработку персональных данных</NuxtLink
+                >
+              </span>
+            </label>
+
+            <button
+              class="btn-primary-booking"
+              :disabled="isSubmitting || !consent"
+              @click="confirmBooking"
+            >
+              {{ isSubmitting ? "Отправляем..." : "Отправить заявку" }}
             </button>
           </div>
         </div>
@@ -209,11 +224,24 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { toast } from "vue-sonner";
 import Calendar from "@/components/Calendar.vue";
 
-// ЦЕНОВАЯ ПОЛИТИКА
-const basePrice = 8500; // Цена за ночь
-const saunaPrice = 3000; // Разовая услуга
+useSeoMeta({
+  title: "Бронирование — Novotarmanskiy house",
+  description:
+    "Выберите даты, гостей и услуги. Заявка подтверждается напрямую через Telegram.",
+});
+
+const config = useRuntimeConfig();
+const basePrice = config.public.house.pricePerNight;
+const saunaPrice = config.public.saunaPrice;
+const apiBase = config.public.apiBase;
+
+const { data: occupiedDates, refresh: refreshOccupied } = await useFetch(
+  `${apiBase}/bookings/occupied-dates`,
+  { default: () => [] },
+);
 
 const checkin = ref(null);
 const checkout = ref(null);
@@ -224,8 +252,10 @@ const children = ref(0);
 const hasSauna = ref(false);
 const guestsRef = ref(null);
 const isModalOpen = ref(false);
+const isSubmitting = ref(false);
 const userName = ref("");
 const userPhone = ref("");
+const consent = ref(false);
 
 const guestSettings = [
   { type: "adults", title: "Взрослые", sub: "От 12 лет", ref: adults },
@@ -297,37 +327,48 @@ function onPhoneInput(e) {
 }
 
 async function confirmBooking() {
-  if (!userName.value || userPhone.value.length < 18)
-    return alert("Заполните данные!");
+  if (!userName.value || userPhone.value.length < 18) {
+    toast.error("Заполните имя и телефон.");
+    return;
+  }
+  if (!checkin.value || !checkout.value) return;
+  if (!consent.value) {
+    toast.error("Необходимо согласие на обработку персональных данных.");
+    return;
+  }
+  if (isSubmitting.value) return;
 
-  const bookingData = {
-    userName: userName.value,
-    userPhone: userPhone.value,
-    dates: `${formatDate(checkin.value)} — ${formatDate(checkout.value)}`,
-    checkinDate: checkin.value.toISOString().split("T")[0],
-    checkoutDate: checkout.value.toISOString().split("T")[0],
-    guests: guestsText.value,
-    sauna: hasSauna.value,
-    totalPrice: totalPrice.value,
-  };
-
+  isSubmitting.value = true;
   try {
-    const response = await fetch("http://localhost:3001/api/new-booking", {
+    await $fetch(`${apiBase}/bookings`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(bookingData),
+      body: {
+        customerName: userName.value,
+        phone: userPhone.value,
+        startDate: checkin.value.toISOString(),
+        endDate: checkout.value.toISOString(),
+        adults: adults.value,
+        children: children.value,
+        hasSauna: hasSauna.value,
+      },
     });
 
-    if (response.ok) {
-      alert("Заявка успешно отправлена! Хозяин получил уведомление.");
-      isModalOpen.value = false;
-      userName.value = "";
-      userPhone.value = "";
-    } else {
-      throw new Error();
-    }
-  } catch (error) {
-    alert("Произошла ошибка при связи с ботом.");
+    toast.success("Заявка успешно отправлена! Хозяин получил уведомление.");
+    isModalOpen.value = false;
+    userName.value = "";
+    userPhone.value = "";
+    consent.value = false;
+    hasSauna.value = false;
+    checkin.value = null;
+    checkout.value = null;
+    await refreshOccupied();
+  } catch (err) {
+    const apiMessage = Array.isArray(err?.data?.message)
+      ? err.data.message[0]
+      : err?.data?.message;
+    toast.error(apiMessage || "Произошла ошибка при отправке заявки.");
+  } finally {
+    isSubmitting.value = false;
   }
 }
 
@@ -607,6 +648,27 @@ onBeforeUnmount(() =>
       font-weight: 700;
       color: #d8b48b;
     }
+  }
+}
+
+.consent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 18px;
+  font-size: 13px;
+  color: #6b5a45;
+  cursor: pointer;
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #6b5a45;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  a {
+    color: #6b5a45;
+    text-decoration: underline;
   }
 }
 
