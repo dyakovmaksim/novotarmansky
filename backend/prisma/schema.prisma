@@ -4,26 +4,26 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") // В Prisma 6 пишем url прямо сюда!
+  url      = env("DATABASE_URL")
 }
 
-model House {
-  id            String   @id @default(uuid())
-  title         String
-  description   String
-  pricePerNight Float
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  bookings    Booking[]
+// Single-house listing — house metadata (title, price) lives in env, not DB.
+// Bookings are standalone records: the admin gets a Telegram alert per row.
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
 }
 
 model Booking {
-  id          String   @id @default(uuid())
-  houseId     String   // Ссылка на ID дома
-  house       House    @relation(fields: [houseId], references: [id], onDelete: Cascade)
-  customerName String   // Имя клиента
-  phone       String   // Телефон для связи
-  startDate   DateTime // Дата заезда
-  endDate     DateTime // Дата выезда
-  createdAt   DateTime @default(now())
+  id           String        @id @default(uuid())
+  customerName String
+  phone        String
+  startDate    DateTime
+  endDate      DateTime
+  adults       Int           @default(1)
+  children     Int           @default(0)
+  hasSauna     Boolean       @default(false)
+  status       BookingStatus @default(PENDING)
+  createdAt    DateTime      @default(now())
 }
