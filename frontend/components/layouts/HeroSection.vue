@@ -1,7 +1,17 @@
 <template>
   <section class="hero-block">
     <div class="hero-block__bg">
-      <img src="/images/house.jpg" alt="House" class="hero-block__img" />
+      <NuxtImg
+        src="/images/house.jpg"
+        alt="House"
+        class="hero-block__img"
+        width="2000"
+        format="webp"
+        quality="78"
+        loading="eager"
+        fetchpriority="high"
+        preload
+      />
       <div class="hero-block__overlay"></div>
     </div>
 
