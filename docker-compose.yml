@@ -68,7 +68,7 @@ services:
   # One-shot helper: issue / renew Let's Encrypt cert.
   # First run:
   #   docker compose run --rm certbot certonly --webroot -w /var/www/certbot \
-  #     -d <DOMAIN> -d www.<DOMAIN> --email you@example.com --agree-tos --no-eff-email
+  #     -d novotarmanskiyhouse.ru -d www.novotarmanskiyhouse.ru --email you@example.com --agree-tos --no-eff-email
   # Renew (cron / systemd timer):
   #   docker compose run --rm certbot renew && docker compose exec nginx nginx -s reload
   certbot:

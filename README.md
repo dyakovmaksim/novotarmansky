@@ -60,8 +60,9 @@ cd /opt/novotarmansky
 cp .env.production.example .env
 nano .env                                       # SITE_URL, DB_PASSWORD, TELEGRAM_*
 
-# Подставить домен в nginx-конфиг
-sed -i 's/<DOMAIN>/your-domain.com/g' nginx/default.conf
+# Домен уже прописан в nginx/default.conf (novotarmanskiyhouse.ru).
+# Если домен другой — заменить во всех вхождениях:
+# sed -i 's/novotarmanskiyhouse\.ru/your-domain.com/g' nginx/default.conf
 ```
 
 ### 3. Первый запуск без HTTPS (для выпуска сертификата)
@@ -78,7 +79,7 @@ docker compose up -d db backend frontend nginx
 ```bash
 docker compose run --rm certbot certonly \
   --webroot -w /var/www/certbot \
-  -d your-domain.com -d www.your-domain.com \
+  -d novotarmanskiyhouse.ru -d www.novotarmanskiyhouse.ru \
   --email you@example.com --agree-tos --no-eff-email
 ```
 
@@ -89,7 +90,7 @@ docker compose run --rm certbot certonly \
 docker compose exec nginx nginx -s reload
 ```
 
-Сайт доступен на `https://your-domain.com`. API — `https://your-domain.com/api/...`.
+Сайт доступен на `https://novotarmanskiyhouse.ru`. API — `https://novotarmanskiyhouse.ru/api/...`.
 
 ### 6. Автообновление сертификата
 

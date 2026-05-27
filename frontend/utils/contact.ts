@@ -19,20 +19,19 @@ export const CONTACT = {
 
   phone: {
     label: "Телефон",
-    // PLACEHOLDER — замените на реальный номер. Формат для display и для href.
-    display: "+7 (999) 000-00-00",
-    href: "tel:+79990000000",
+    display: "+7 (932) 050-00-58",
+    href: "tel:+79320500058",
   },
 
   email: {
     label: "Email",
-    value: "hello@novotarmansky.ru", // PLACEHOLDER
+    value: "hello@novotarmansky.ru", // PLACEHOLDER — реальной почты пока нет
     href: "mailto:hello@novotarmansky.ru",
   },
 
   workHours: {
     label: "Приём звонков",
-    value: "09:00 — 22:00",
+    value: "09:00 — 19:00",
   },
 
   checkIn: {
@@ -52,19 +51,19 @@ export const CONTACT = {
       id: "telegram",
       label: "Telegram",
       short: "TG",
-      href: "https://t.me/novotarmanskiy", // PLACEHOLDER
+      href: "https://t.me/NOVOTARMANSKIY_HOUSE",
     },
     {
       id: "whatsapp",
       label: "WhatsApp",
       short: "WA",
-      href: "https://wa.me/79990000000", // PLACEHOLDER
+      href: "https://wa.me/79320500058",
     },
     {
       id: "vk",
       label: "ВКонтакте",
       short: "VK",
-      href: "https://vk.com/novotarmanskiy", // PLACEHOLDER
+      href: "https://vk.com/novo_house_arenda_doma_tmn",
     },
   ],
 
@@ -74,6 +73,9 @@ export const CONTACT = {
     ogrnip: "320000000000000", // PLACEHOLDER
   },
 
-  // ID встроенной Яндекс-карты (constructor). Замените на свой.
-  yandexMapId: "ВАШ_УНИКАЛЬНЫЙ_ID",
+  // ID карты из Яндекс.Конструктора карт (https://yandex.ru/map-constructor).
+  // Это длинная строка после "constructor:" в коде вставки, которую даёт Яндекс.
+  // Значение взято из готовой карты, уже встроенной на главной (LocationSection).
+  yandexMapId:
+    "6b6abf998c508a3928ec2bde98c8011f402be7e5a6b1f8cdfeede9111f737bc6",
 };

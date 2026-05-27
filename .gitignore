@@ -9,6 +9,9 @@ dist
 # Node dependencies
 node_modules
 
+# Orphan root lockfile (no package.json here — deps live in backend/ and frontend/)
+/package-lock.json
+
 # Logs
 logs
 *.log
@@ -25,4 +28,6 @@ logs
 !.env.production.example
 
 CLAUDE.md
-BACKLOG.md 
+BACKLOG.md
+SERVER.md
+.claude
