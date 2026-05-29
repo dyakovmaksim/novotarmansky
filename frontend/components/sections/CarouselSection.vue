@@ -12,7 +12,7 @@
               <div :key="activeIndex" class="gallery__slide">
                 <NuxtImg
                   :src="images[activeIndex]"
-                  alt="Интерьер"
+                  alt="Интерьер загородного дома Novotarmanskiy house"
                   class="gallery__img"
                   width="1600"
                   format="webp"
@@ -89,7 +89,7 @@
             <div class="gallery__side-label">Далее</div>
             <NuxtImg
               :src="images[(activeIndex + 1) % images.length]"
-              alt="Next"
+              alt="Следующее фото интерьера дома"
               width="600"
               format="webp"
               quality="70"

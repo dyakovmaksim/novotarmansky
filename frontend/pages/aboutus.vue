@@ -43,7 +43,7 @@ useSeoMeta({
         >
           <NuxtImg
             src="/images/interior-wide.png"
-            alt="Интерьер"
+            alt="Интерьер гостевого дома Novotarmanskiy house"
             width="1000"
             format="webp"
             quality="78"

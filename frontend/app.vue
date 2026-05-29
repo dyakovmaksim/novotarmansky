@@ -23,7 +23,15 @@ useHead({
     // Canonical to the apex domain so duplicate hosts don't split SEO weight.
     { rel: "canonical", href: siteUrl },
   ],
-  meta: [{ name: "viewport", content: "width=device-width, initial-scale=1" }],
+  meta: [
+    { name: "viewport", content: "width=device-width, initial-scale=1" },
+    // Search engine ownership verification (Yandex.Webmaster / Google Search Console).
+    { name: "yandex-verification", content: "56370e301f4cab79" },
+    {
+      name: "google-site-verification",
+      content: "J9C6fGZJQKVYzNDV2bkzudukXKE8ukxCLcRJ0YVPXXA",
+    },
+  ],
 });
 
 // Site-wide SEO defaults. Each page can override with its own useSeoMeta().

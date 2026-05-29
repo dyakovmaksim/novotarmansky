@@ -3,7 +3,7 @@
     <div class="hero-block__bg">
       <NuxtImg
         src="/images/house.jpg"
-        alt="House"
+        alt="Загородный дом Novotarmanskiy house с баней в посёлке Новотарманский под Тюменью"
         class="hero-block__img"
         width="2000"
         format="webp"
@@ -22,7 +22,7 @@
           <span class="hero-block__brand">Novotarmanskiy house</span>
         </h1>
         <p class="hero-block__subtitle">
-          Ваш идеальный выбор для аренды уютного дома в живописном уголке Тюмени
+          Снять уютный загородный дом с баней посуточно — в 20 минутах от Тюмени, посёлок Новотарманский
         </p>
         <div class="hero-block__actions">
           <NuxtLink to="/#photos" class="hero-block__btn hero-block__btn--white">
