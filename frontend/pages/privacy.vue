@@ -10,9 +10,7 @@
 
       <section class="legal-page__section">
         <h2>1. Какие данные мы собираем</h2>
-        <p>
-          При оформлении заявки на бронирование мы запрашиваем:
-        </p>
+        <p>При оформлении заявки на бронирование мы запрашиваем:</p>
         <ul>
           <li>имя гостя;</li>
           <li>номер телефона для связи;</li>
@@ -40,20 +38,11 @@
       <section class="legal-page__section">
         <h2>4. Связь с нами</h2>
         <p>
-          По вопросам обработки персональных данных пишите на
-          <a :href="CONTACT.email.href">{{ CONTACT.email.value }}</a> или
-          звоните по телефону
-          <a :href="CONTACT.phone.href">{{ CONTACT.phone.display }}</a>.
+          По вопросам обработки персональных данных свяжитесь с нами по телефону
+          <a :href="CONTACT.phone.href">{{ CONTACT.phone.display }}</a
+          >.
         </p>
       </section>
-
-      <p class="legal-page__placeholder">
-        <IconWarning class="legal-page__placeholder-icon" />
-        <span>
-          Это шаблонный текст. Перед запуском в продакшен утвердите его с
-          юристом и при необходимости опубликуйте полную редакцию.
-        </span>
-      </p>
     </article>
   </NuxtLayout>
 </template>

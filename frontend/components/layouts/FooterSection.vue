@@ -1,237 +1,118 @@
 <template>
-  <footer class="footer">
-    <div class="footer__container">
-      <div class="footer__grid">
-        <div class="footer__col footer__col--main">
-          <NuxtLink to="/" class="footer__logo">
-            {{ CONTACT.brand.name }}<span>{{ CONTACT.brand.nameAccent }}</span>
-          </NuxtLink>
-          <p class="footer__text">{{ CONTACT.brand.tagline }}</p>
-          <div class="footer__socials">
+  <footer class="house-footer">
+    <div class="site-container">
+      <div class="footer-layout">
+        <div>
+          <NuxtLink to="/" class="footer-brand"
+            >novotarmanskiy<span>house</span></NuxtLink
+          >
+          <p>Дом для отдыха в Новотарманском.<br >В 20 минутах от Тюмени.</p>
+          <div class="footer-socials">
             <a
               v-for="s in CONTACT.socials"
               :key="s.id"
               :href="s.href"
               target="_blank"
               rel="noopener"
-              class="footer__social-link"
-              :title="s.label"
+              >{{ s.label }}</a
             >
-              {{ s.short }}
-            </a>
           </div>
         </div>
-
-        <div class="footer__col">
-          <h4 class="footer__title">Навигация</h4>
-          <ul class="footer__list">
-            <li><NuxtLink to="/aboutus">О проекте</NuxtLink></li>
-            <li><NuxtLink to="/photos">Галерея дома</NuxtLink></li>
-            <li><NuxtLink to="/promotion">Текущие акции</NuxtLink></li>
-            <li><NuxtLink to="/contacts">Как добраться</NuxtLink></li>
-          </ul>
-        </div>
-
-        <div class="footer__col">
-          <h4 class="footer__title">Для гостей</h4>
-          <ul class="footer__list">
-            <li><NuxtLink to="/booking">Забронировать</NuxtLink></li>
-            <li><NuxtLink to="/aboutus">О доме</NuxtLink></li>
-            <li><NuxtLink to="/promotion">Акции</NuxtLink></li>
-            <li><NuxtLink to="/photos">Фотогалерея</NuxtLink></li>
-          </ul>
-        </div>
-
-        <div class="footer__col">
-          <h4 class="footer__title">Связаться с нами</h4>
-          <div class="footer__contacts">
-            <a :href="CONTACT.phone.href" class="footer__phone">
-              {{ CONTACT.phone.display }}
-            </a>
-            <p class="footer__address">{{ CONTACT.address.short }}</p>
-            <p class="footer__worktime">
-              {{ CONTACT.workHours.label }}: {{ CONTACT.workHours.value }}
-            </p>
-          </div>
+        <nav aria-label="Навигация в подвале">
+          <NuxtLink to="/aboutus">О доме</NuxtLink
+          ><NuxtLink to="/photos">Фотографии</NuxtLink
+          ><NuxtLink to="/booking">Выбрать даты</NuxtLink
+          ><NuxtLink to="/promotion">Акции</NuxtLink>
+        </nav>
+        <div>
+          <a class="footer-phone" :href="CONTACT.phone.href">{{
+            CONTACT.phone.display
+          }}</a>
+          <p>{{ CONTACT.address.short }}</p>
+          <p>Звонки {{ CONTACT.workHours.value }}</p>
+          <NuxtLink to="/contacts" class="text-button">Как добраться</NuxtLink>
         </div>
       </div>
-
-      <div class="footer__divider"></div>
-
-      <div class="footer__legal">
-        <div class="footer__legal-left">
-          <p>
-            © {{ new Date().getFullYear() }} Novotarmanskiy House. Все права
-            защищены.
-          </p>
-          <div class="footer__policy-links">
-            <NuxtLink to="/privacy">Политика конфиденциальности</NuxtLink>
-            <NuxtLink to="/personal-data"
-              >Обработка персональных данных</NuxtLink
-            >
-          </div>
-        </div>
-        <div class="footer__legal-right">
-          <p>{{ CONTACT.legal.company }}</p>
-          <p>ИНН: {{ CONTACT.legal.inn }} | ОГРНИП: {{ CONTACT.legal.ogrnip }}</p>
-        </div>
+      <div class="footer-bottom">
+        <span>© {{ new Date().getFullYear() }} Novotarmanskiy house</span
+        ><NuxtLink to="/privacy">Конфиденциальность</NuxtLink
+        ><NuxtLink to="/personal-data">Персональные данные</NuxtLink>
       </div>
     </div>
   </footer>
 </template>
-
-<style lang="scss" scoped>
-.footer {
-  background-color: #fcfaf8; // Мягкий светлый фон, чтобы отделить от контента
-  padding: 80px 0 30px;
-  border-top: 1px solid #eee;
-
-  &__container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
+<style scoped>
+.house-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding: 48px 0 24px;
+}
+.footer-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 0.7fr 1fr;
+  gap: 40px;
+}
+.footer-brand {
+  font-size: 22px;
+  font-weight: 700;
+}
+.footer-brand span {
+  font-weight: 400;
+}
+.house-footer p {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 12px;
+}
+.footer-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 16px;
+  font-size: 14px;
+}
+.footer-socials a {
+  padding: 8px 0;
+}
+.footer-layout nav {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+.footer-layout nav a {
+  padding: 6px 0;
+  font-size: 15px;
+}
+.footer-phone {
+  font-size: 20px;
+  font-weight: 600;
+}
+.footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  border-top: 1px solid var(--line);
+  margin-top: 32px;
+  padding-top: 20px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.footer-bottom a {
+  text-decoration: underline;
+}
+@media (max-width: 700px) {
+  .footer-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
   }
-
-  &__grid {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
-    gap: 40px;
-    margin-bottom: 50px;
-
-    @media (max-width: 1024px) {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    @media (max-width: 600px) {
-      grid-template-columns: 1fr;
-      text-align: center;
-    }
+  .footer-layout nav {
+    grid-template-columns: 1fr 1fr;
   }
-
-  &__logo {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--primary, #5e4e3b);
-    text-decoration: none;
-    display: block;
-    margin-bottom: 20px;
-    span {
-      font-weight: 300;
-    }
+  .house-footer {
+    padding-top: 32px;
   }
-
-  &__text {
-    font-size: 14px;
-    line-height: 1.6;
-    color: #666;
-    margin-bottom: 25px;
-  }
-
-  &__socials {
-    display: flex;
-    gap: 10px;
-    @media (max-width: 600px) {
-      justify-content: center;
-    }
-  }
-
-  &__social-link {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #fff;
-    border: 1px solid #ddd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    color: #5e4e3b;
-    font-size: 11px;
-    font-weight: 700;
-    transition: all 0.3s ease;
-    &:hover {
-      background: #5e4e3b;
-      color: #fff;
-      border-color: #5e4e3b;
-    }
-  }
-
-  &__title {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 25px;
-    color: #333;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  &__list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    li {
-      margin-bottom: 12px;
-      a {
-        text-decoration: none;
-        color: #666;
-        font-size: 15px;
-        transition: color 0.2s;
-        &:hover {
-          color: #5e4e3b;
-        }
-      }
-    }
-  }
-
-  &__phone {
-    display: block;
-    font-size: 20px;
-    font-weight: 700;
-    color: #333;
-    text-decoration: none;
-    margin-bottom: 15px;
-  }
-
-  &__address,
-  &__worktime {
-    font-size: 14px;
-    color: #666;
-    line-height: 1.5;
-    margin-bottom: 10px;
-  }
-
-  &__divider {
-    height: 1px;
-    background: #eee;
-    margin-bottom: 30px;
-  }
-
-  &__legal {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 30px;
-    font-size: 13px;
-    color: #999;
-    line-height: 1.6;
-
-    @media (max-width: 850px) {
-      flex-direction: column;
-      text-align: center;
-      align-items: center;
-    }
-  }
-
-  &__policy-links {
-    display: flex;
-    gap: 20px;
-    margin-top: 5px;
-    a {
-      color: #999;
-      &:hover {
-        color: #666;
-      }
-    }
+  .footer-bottom {
+    gap: 12px;
   }
 }
 </style>

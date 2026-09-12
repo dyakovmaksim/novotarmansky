@@ -1,208 +1,148 @@
-<script setup>
-useSeoMeta({
-  title: "Контакты — Novotarmanskiy house",
-  description:
-    "Адрес, телефон, мессенджеры и режим работы. Как нас найти и связаться.",
-});
-</script>
-
 <template>
   <div>
     <LayoutsNavBar />
-
-    <main class="contacts-page">
-      <div class="container">
-        <h1 class="page-title">Контакты</h1>
-
-        <div class="contacts-grid">
-          <div class="info-section">
-            <div class="contact-card accent-box">
-              <h2>Как нас найти</h2>
-              <div class="contact-item">
-                <IconPin class="icon" />
-                <div>
-                  <strong>{{ CONTACT.address.label }}:</strong>
-                  <p>{{ CONTACT.address.value }}</p>
-                </div>
-              </div>
-
-              <div class="contact-item">
-                <IconPhone class="icon" />
-                <div>
-                  <strong>{{ CONTACT.phone.label }}:</strong>
-                  <p>
-                    <a :href="CONTACT.phone.href">{{ CONTACT.phone.display }}</a>
-                  </p>
-                </div>
-              </div>
-
-              <div class="contact-item">
-                <IconMail class="icon" />
-                <div>
-                  <strong>{{ CONTACT.email.label }}:</strong>
-                  <p>
-                    <a :href="CONTACT.email.href">{{ CONTACT.email.value }}</a>
-                  </p>
-                </div>
-              </div>
-
-              <div class="social-links">
-                <a
-                  v-for="s in CONTACT.socials"
-                  :key="s.id"
-                  :href="s.href"
-                  target="_blank"
-                  rel="noopener"
-                  class="social-btn"
-                >
-                  {{ s.label }}
-                </a>
-              </div>
+    <main id="main-content" class="contact-page site-container">
+      <header class="page-heading">
+        <h1>Приезжайте в Новотарманский</h1>
+        <p>Расскажем о доме, поможем выбрать даты и подскажем дорогу.</p>
+      </header>
+      <div class="contact-layout">
+        <div>
+          <section class="contact-info">
+            <h2>На связи с вами</h2>
+            <a class="contact-phone" :href="CONTACT.phone.href">{{
+              CONTACT.phone.display
+            }}</a>
+            <p>Приём звонков: {{ CONTACT.workHours.value }}</p>
+            <div class="contact-socials">
+              <a
+                v-for="s in CONTACT.socials"
+                :key="s.id"
+                :href="s.href"
+                target="_blank"
+                rel="noopener"
+                >{{ s.label }}</a
+              >
             </div>
-
-            <div class="contact-card work-hours">
-              <h2>Режим работы</h2>
-              <p>
-                Мы принимаем гостей круглосуточно по предварительному
-                бронированию.
-              </p>
-              <p>
-                <strong>{{ CONTACT.checkIn.label }}:</strong>
-                {{ CONTACT.checkIn.value }}
-              </p>
-              <p>
-                <strong>{{ CONTACT.checkOut.label }}:</strong>
-                {{ CONTACT.checkOut.value }}
-              </p>
-              <p>
-                <strong>{{ CONTACT.workHours.label }}:</strong>
-                {{ CONTACT.workHours.value }}
-              </p>
-            </div>
-          </div>
-
-          <div class="map-section">
-            <div class="map-container">
-              <iframe
-                :src="`https://yandex.ru/map-widget/v1/?um=constructor%3A${CONTACT.yandexMapId}&amp;source=constructor`"
-                width="100%"
-                height="620"
-                frameborder="0"
-                allowfullscreen="true"
-                loading="lazy"
-              ></iframe>
-            </div>
-          </div>
+            <p class="contact-address">{{ CONTACT.address.value }}</p>
+          </section>
+          <section class="arrival-info">
+            <h2>Планируйте приезд</h2>
+            <dl>
+              <div>
+                <dt>Заезд</dt>
+                <dd>После 15:00</dd>
+              </div>
+              <div>
+                <dt>Выезд</dt>
+                <dd>До 12:00</dd>
+              </div>
+            </dl>
+            <p>Если нужно другое время, заранее согласуйте его с хозяином.</p>
+            <NuxtLink to="/booking" class="button">Выбрать даты</NuxtLink>
+          </section>
         </div>
+        <HouseMap />
       </div>
     </main>
-
     <LayoutsFooterSection />
   </div>
 </template>
-
+<script setup>
+useSeoMeta({
+  title: "Контакты и маршрут — Novotarmanskiy house",
+  description:
+    "Загородный дом в Новотарманском: ул. Янтарная, 143. Телефон, мессенджеры и маршрут из Тюмени.",
+});
+</script>
 <style scoped>
-.contacts-page {
-  padding: 60px 0;
-  background-color: #fdfaf7;
-  min-height: 85vh;
+.contact-page {
+  padding-top: 128px;
+  padding-bottom: 64px;
 }
-
-.container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-.page-title {
-  text-align: center;
-  color: #5e4e3b; /* */
-  margin-bottom: 50px;
-  font-size: 36px;
-}
-
-.contacts-grid {
+.contact-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
 }
-
-.contact-card {
-  background: white;
-  padding: 40px;
-  border-radius: 30px; /* */
-  margin-bottom: 20px;
-  box-shadow: 0 10px 30px rgba(94, 78, 59, 0.05);
+.contact-layout > div {
+  min-width: 0;
 }
-
-.accent-box {
-  background-color: #d8b48b; /* */
-  color: white;
+.contact-info {
+  background: var(--sand);
+  border-radius: 16px;
+  padding: 28px;
 }
-
-.accent-box h2 {
-  color: white;
-}
-.accent-box a {
-  color: white;
-  text-decoration: underline;
-}
-
-h2 {
-  color: #5e4e3b;
-  margin-bottom: 25px;
-  font-size: 24px;
-}
-
-.contact-item {
-  display: flex;
-  gap: 15px;
+.contact-info h2,
+.arrival-info h2 {
+  font-size: 26px;
   margin-bottom: 20px;
 }
-
-.icon {
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  color: currentColor;
+.contact-phone {
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 600;
 }
-
-.social-links {
+.contact-info p {
+  margin-top: 16px;
+  color: var(--muted);
+}
+.contact-socials {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
-  margin-top: 30px;
+  margin-top: 20px;
 }
-
-.social-btn {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 8px 15px;
-  border-radius: 15px;
-  text-decoration: none !important;
+.contact-socials a {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  background: #fff9;
+  padding: 10px 16px;
+  border-radius: 8px;
   font-size: 14px;
-  transition: background 0.3s;
 }
-
-.social-btn:hover {
-  background: rgba(255, 255, 255, 0.4);
+.contact-address {
+  padding-top: 16px;
+  border-top: 1px solid #b5a995;
 }
-
-.map-section {
-  height: 100%;
+.arrival-info {
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  margin-top: 24px;
 }
-
-.map-container {
-  height: 615px; /* Фиксированная высота для карты */
-  border-radius: 30px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+.arrival-info dl {
+  display: flex;
+  gap: 48px;
 }
-
-@media (max-width: 850px) {
-  .contacts-grid {
+.arrival-info dt {
+  color: var(--muted);
+  font-size: 14px;
+}
+.arrival-info dd {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+.arrival-info p {
+  color: var(--muted);
+  margin: 20px 0;
+}
+.arrival-info .button {
+  width: 100%;
+}
+@media (max-width: 760px) {
+  .contact-page {
+    padding-top: 104px;
+    padding-bottom: 48px;
+  }
+  .contact-layout {
     grid-template-columns: 1fr;
   }
-  .map-container {
-    height: 350px;
+  .contact-info,
+  .arrival-info {
+    padding: 24px;
   }
 }
 </style>

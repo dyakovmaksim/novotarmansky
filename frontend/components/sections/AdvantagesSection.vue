@@ -1,134 +1,72 @@
 <template>
-  <section class="advantages">
-    <div class="advantages__container">
-      <header class="advantages__head reveal">
-        <span class="advantages__subtitle">Спокойно и без сюрпризов</span>
-        <h2 class="advantages__title">Почему выбирают нас</h2>
-      </header>
-
-      <div class="advantages__grid">
-        <div
-          v-for="(item, i) in advantages"
-          :key="item.title"
-          class="advantage reveal"
-          :style="{ '--delay': `${i * 70}ms` }"
-        >
-          <div class="advantage__icon">
-            <component :is="iconFor(item.icon)" />
-          </div>
-          <h3 class="advantage__title">{{ item.title }}</h3>
-          <p class="advantage__desc">{{ item.desc }}</p>
-        </div>
-      </div>
+  <section class="stay-benefits">
+    <h2>Просто договориться. Приятно приехать.</h2>
+    <div>
+      <article>
+        <IconKey />
+        <h3>Напрямую с хозяином</h3>
+        <p>Оставьте заявку и обсудите детали поездки без посредников.</p>
+      </article>
+      <article>
+        <IconWallet />
+        <h3>Понятная стоимость</h3>
+        <p>
+          Сначала даты и расчёт, затем ваши контакты. Платить на сайте не нужно.
+        </p>
+      </article>
+      <article>
+        <IconShield />
+        <h3>Весь дом для вас</h3>
+        <p>
+          До 8 гостей, собственная кухня и участок для отдыха вашей компанией.
+        </p>
+      </article>
     </div>
   </section>
 </template>
-
-<script setup>
-import IconWallet from "~/components/IconWallet.vue";
-import IconZap from "~/components/IconZap.vue";
-import IconKey from "~/components/IconKey.vue";
-import IconShield from "~/components/IconShield.vue";
-import IconPin from "~/components/IconPin.vue";
-import IconFlame from "~/components/IconFlame.vue";
-
-// Data lives in utils/advantages.ts (auto-imported).
-const advantages = ADVANTAGES;
-
-// Explicit name→component map (resolveComponent by string renders blank in dev).
-const icons = { IconWallet, IconZap, IconKey, IconShield, IconPin, IconFlame };
-const iconFor = (name) => icons[name];
-</script>
-
-<style lang="scss" scoped>
-.advantages {
-  padding: 80px 0;
-  background: #fdfbfa;
-
-  &__container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px;
+<style scoped>
+.stay-benefits {
+  padding: 48px 24px;
+}
+.stay-benefits h2 {
+  font-size: clamp(28px, 3vw, 40px);
+  margin-bottom: 28px;
+  max-width: 24ch;
+}
+.stay-benefits > div {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+.stay-benefits article {
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+}
+.stay-benefits svg {
+  width: 28px;
+  height: 28px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.stay-benefits h3 {
+  font-size: 21px;
+  margin-bottom: 12px;
+}
+.stay-benefits p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+@media (max-width: 700px) {
+  .stay-benefits {
+    padding: 32px 20px;
   }
-
-  &__head {
-    text-align: center;
-    margin-bottom: 48px;
+  .stay-benefits > div {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
-
-  &__subtitle {
-    color: var(--primary, #b9946e);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-size: 13px;
-    font-weight: 700;
-    display: block;
-    margin-bottom: 12px;
-  }
-
-  &__title {
-    font-size: clamp(28px, 4vw, 42px);
-    font-weight: 300;
-    color: #3d2c17;
-    line-height: 1.1;
-  }
-
-  &__grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-
-    @media (max-width: 900px) {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    @media (max-width: 560px) {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .advantage {
-    padding: 32px;
-    background: #fff;
-    border: 1px solid #eee4d8;
-    border-radius: 24px;
-    transition:
-      transform 0.3s ease,
-      box-shadow 0.3s ease;
-    transition-delay: var(--delay, 0ms);
-
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 16px 32px rgba(61, 44, 23, 0.08);
-    }
-
-    &__icon {
-      width: 52px;
-      height: 52px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 16px;
-      background: #f8f5f2;
-      color: var(--primary, #b9946e);
-      margin-bottom: 20px;
-      svg {
-        width: 26px;
-        height: 26px;
-      }
-    }
-
-    &__title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #3d2c17;
-      margin-bottom: 10px;
-    }
-
-    &__desc {
-      font-size: 14px;
-      line-height: 1.6;
-      color: #8c7d6d;
-    }
+  .stay-benefits article {
+    padding-top: 20px;
   }
 }
 </style>

@@ -8,9 +8,9 @@ export interface HighlightStat {
 }
 
 export const HOUSE_STATS: HighlightStat[] = [
-  { value: "до 8", label: "гостей" }, // PLACEHOLDER — реальная вместимость
+  { value: "до 8", label: "гостей" },
   { value: "2", label: "спальни" }, // PLACEHOLDER
-  { value: "120 м²", label: "площадь" }, // PLACEHOLDER
+  { value: "15:00", label: "время заезда" },
   { value: "круглый год", label: "приём гостей" },
 ];
 
@@ -25,7 +25,7 @@ export const AMENITIES: Amenity[] = [
   {
     icon: "IconWifi",
     title: "Wi-Fi",
-    desc: "Быстрый интернет по всему дому", // PLACEHOLDER — уточните скорость/покрытие
+    desc: "Wi-Fi для связи и ваших планов",
   },
   {
     icon: "IconUtensils",

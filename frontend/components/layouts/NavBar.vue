@@ -1,300 +1,178 @@
 <template>
-  <nav
-    class="nav"
-    :class="{ 'nav--scrolled': isScrolled || route.path !== '/' }"
-    role="navigation"
-  >
-    <div class="nav__container">
-      <NuxtLink to="/" class="nav__logo">
-        novotarmanskiy<span>house</span>
-      </NuxtLink>
-
-      <ul class="nav__menu">
-        <li v-for="link in links" :key="link.path">
-          <NuxtLink :to="link.path" class="nav__link">{{ link.name }}</NuxtLink>
-        </li>
-      </ul>
-
-      <div class="nav__actions">
-        <NuxtLink to="/booking" class="nav__cta-btn">Бронировать</NuxtLink>
-
-        <button
-          class="nav__burger"
-          @click="toggleMenu"
-          :class="{ 'is-active': isOpen }"
-          aria-label="Открыть меню"
-        >
-          <span></span>
-          <span></span>
-        </button>
+  <a class="skip-link" href="#main-content">Перейти к содержимому</a>
+  <header class="site-nav">
+    <nav class="site-container nav-inner" aria-label="Основная навигация">
+      <NuxtLink to="/" class="brand" @click="open = false"
+        >novotarmanskiy<span>house</span></NuxtLink
+      >
+      <div class="desktop-links">
+        <NuxtLink v-for="link in links" :key="link.path" :to="link.path">{{
+          link.label
+        }}</NuxtLink>
       </div>
-    </div>
-
-    <Teleport to="body">
-      <transition name="menu-fade">
-        <div v-if="isOpen" class="nav__mobile-overlay" @click.self="toggleMenu">
-          <div class="nav__mobile-content">
-            <ul class="nav__mobile-links">
-              <li
-                v-for="link in links"
-                :key="link.path"
-                @click="isOpen = false"
-              >
-                <NuxtLink :to="link.path">{{ link.name }}</NuxtLink>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </transition>
-    </Teleport>
-  </nav>
+      <NuxtLink to="/booking" class="nav-book">Выбрать даты</NuxtLink>
+      <button
+        class="menu-toggle"
+        type="button"
+        :aria-expanded="open"
+        aria-controls="mobile-navigation"
+        :aria-label="open ? 'Закрыть меню' : 'Открыть меню'"
+        @click="open = !open"
+      >
+        {{ open ? "×" : "☰" }}
+      </button>
+    </nav>
+    <nav
+      v-if="open"
+      id="mobile-navigation"
+      class="mobile-navigation"
+      aria-label="Мобильная навигация"
+      @keydown.esc="open = false"
+    >
+      <NuxtLink
+        v-for="link in links"
+        :key="link.path"
+        :to="link.path"
+        @click="open = false"
+        >{{ link.label }}</NuxtLink
+      >
+      <NuxtLink to="/booking" class="button" @click="open = false"
+        >Выбрать даты</NuxtLink
+      >
+      <a :href="CONTACT.phone.href">{{ CONTACT.phone.display }}</a>
+    </nav>
+  </header>
 </template>
-
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from "vue";
-import { useRoute } from "vue-router";
-
-const route = useRoute();
-const isOpen = ref(false);
-const isScrolled = ref(false);
-
-watch(isOpen, (newValue) => {
-  if (process.client) {
-    document.body.style.overflow = newValue ? "hidden" : "";
-  }
-});
-
+import { ref, watch, onMounted, onUnmounted } from "vue";
+const open = ref(false),
+  route = useRoute();
 const links = [
-  { name: "О нас", path: "/aboutus" },
-  { name: "Фото", path: "/photos" },
-  { name: "Акции", path: "/promotion" },
-  { name: "Контакты", path: "/contacts" },
+  { path: "/aboutus", label: "О доме" },
+  { path: "/photos", label: "Фотографии" },
+  { path: "/promotion", label: "Акции" },
+  { path: "/contacts", label: "Как добраться" },
 ];
-
-const toggleMenu = () => (isOpen.value = !isOpen.value);
-
-const handleScroll = () => {
-  isScrolled.value = window.scrollY > 50;
-};
-
-onMounted(() => {
-  window.addEventListener("scroll", handleScroll);
-  handleScroll();
-});
-
-onUnmounted(() => {
-  window.removeEventListener("scroll", handleScroll);
-});
+watch(
+  () => route.fullPath,
+  () => (open.value = false),
+);
+function escape(e) {
+  if (e.key === "Escape") open.value = false;
+}
+onMounted(() => document.addEventListener("keydown", escape));
+onUnmounted(() => document.removeEventListener("keydown", escape));
 </script>
-
-<style lang="scss" scoped>
-.nav {
+<style scoped>
+.site-nav {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  z-index: 1000;
-  padding: 24px 0;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-
-  .nav__logo,
-  .nav__link {
-    color: #fff;
-  }
-  .nav__burger span {
-    background: #fff;
-  }
-
-  &--scrolled {
-    padding: 12px 0;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-
-    .nav__logo,
-    .nav__link {
-      color: #3d2c17;
-    }
-    .nav__burger span {
-      background: #3d2c17;
-    }
-  }
-
-  &__container {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  &__logo {
-    font-size: 22px;
-    font-weight: 700;
-    text-decoration: none;
-    letter-spacing: -0.5px;
-    transition: color 0.3s;
-
-    span {
-      font-weight: 300;
-      opacity: 0.8;
-    }
-  }
-
-  &__menu {
-    display: flex;
-    gap: 32px;
-    list-style: none;
-
-    @media (max-width: 850px) {
-      display: none;
-    }
-  }
-
-  &__link {
-    text-decoration: none;
-    font-size: 15px;
-    font-weight: 500;
-    position: relative;
-    padding: 8px 0;
-    transition: color 0.3s;
-
-    &::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--primary, #5e4e3b);
-      transition: width 0.3s ease;
-    }
-
-    &:hover::after {
-      width: 100%;
-    }
-
-    &.router-link-active::after {
-      width: 100%;
-    }
-  }
-
-  &__actions {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-
-  &__cta-btn {
-    background: var(--primary, #5e4e3b);
-    color: #fff !important;
-    padding: 10px 24px;
-    border-radius: 100px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-    transition: all 0.3s ease;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(94, 78, 59, 0.3);
-    }
-
-    @media (max-width: 480px) {
-      display: none;
-    }
-  }
-
-  &__burger {
+  right: 0;
+  background: #fffffffa;
+  border-bottom: 1px solid var(--line);
+  z-index: 100;
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-height: 80px;
+}
+.brand {
+  font-weight: 700;
+  font-size: 21px;
+  letter-spacing: -0.7px;
+  white-space: nowrap;
+}
+.brand span {
+  font-weight: 400;
+}
+.desktop-links {
+  display: flex;
+  gap: 24px;
+  margin-left: auto;
+  font-size: 14px;
+}
+.desktop-links a {
+  padding: 12px 0;
+}
+.desktop-links .router-link-active {
+  text-decoration: underline;
+  text-underline-offset: 7px;
+}
+.nav-book {
+  background: var(--accent);
+  color: white;
+  padding: 12px 18px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.menu-toggle {
+  display: none;
+  background: white;
+  color: var(--ink);
+  width: 44px;
+  height: 44px;
+  font-size: 25px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  flex-shrink: 0;
+}
+.mobile-navigation {
+  padding: 20px;
+  display: grid;
+  gap: 8px;
+  background: white;
+  border-bottom: 1px solid var(--line);
+  max-height: calc(100dvh - 72px);
+  overflow: auto;
+}
+.mobile-navigation a {
+  padding: 12px;
+}
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 20px;
+  padding: 12px;
+  background: white;
+  z-index: 200;
+}
+.skip-link:focus {
+  top: 10px;
+}
+@media (min-width: 961px) {
+  .mobile-navigation {
     display: none;
-    flex-direction: column;
-    gap: 6px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
-    z-index: 1001;
-    position: relative;
-
-    span {
-      width: 28px;
-      height: 2px;
-      transition: all 0.3s ease;
-    }
-
-    &.is-active {
-      span:nth-child(1) {
-        transform: translateY(4px) rotate(45deg);
-        background: #3d2c17 !important;
-      }
-      span:nth-child(2) {
-        transform: translateY(-4px) rotate(-45deg);
-        background: #3d2c17 !important;
-      }
-    }
-
-    @media (max-width: 850px) {
-      display: flex;
-    }
-  }
-
-  &__mobile-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    z-index: 9999;
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  &__mobile-content {
-    width: 80%;
-    max-width: 300px;
-    background: #ffffff;
-    height: 100%;
-    padding: 100px 40px 40px;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    z-index: 10000;
-  }
-
-  &__mobile-links {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-
-    a {
-      text-decoration: none;
-      color: #3d2c17;
-      font-size: 20px;
-      font-weight: 600;
-    }
   }
 }
-
-.menu-fade-enter-active,
-.menu-fade-leave-active {
-  transition: opacity 0.3s ease;
-  .nav__mobile-content {
-    transition: transform 0.3s ease;
+@media (max-width: 960px) {
+  .desktop-links {
+    display: none;
+  }
+  .nav-book {
+    margin-left: auto;
+  }
+  .menu-toggle {
+    display: block;
+  }
+  .nav-inner {
+    min-height: 72px;
+    gap: 12px;
   }
 }
-
-.menu-fade-enter-from,
-.menu-fade-leave-to {
-  opacity: 0;
-  .nav__mobile-content {
-    transform: translateX(100%);
+@media (max-width: 540px) {
+  .nav-book {
+    display: none;
+  }
+  .menu-toggle {
+    margin-left: auto;
+  }
+  .brand {
+    font-size: 20px;
   }
 }
 </style>

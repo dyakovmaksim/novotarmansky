@@ -25,8 +25,8 @@ export const CONTACT = {
 
   email: {
     label: "Email",
-    value: "hello@novotarmansky.ru", // PLACEHOLDER — реальной почты пока нет
-    href: "mailto:hello@novotarmansky.ru",
+    value: "", // Publish only a verified email address.
+    href: "",
   },
 
   workHours: {
@@ -68,9 +68,9 @@ export const CONTACT = {
   ],
 
   legal: {
-    company: "ИП Иванов Иван Иванович", // PLACEHOLDER
-    inn: "720000000000", // PLACEHOLDER
-    ogrnip: "320000000000000", // PLACEHOLDER
+    company: "", // Await verified owner details.
+    inn: "",
+    ogrnip: "",
   },
 
   // ID карты из Яндекс.Конструктора карт (https://yandex.ru/map-constructor).

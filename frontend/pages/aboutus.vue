@@ -1,275 +1,152 @@
+<template>
+  <NuxtLayout name="page-layout"
+    ><article class="about-page site-container">
+      <header class="page-heading">
+        <h1>Дом для времени вместе</h1>
+        <p>
+          Novotarmanskiy house — загородный дом с баней в посёлке
+          Новотарманский, рядом с Тюменью.
+        </p>
+      </header>
+      <NuxtImg
+        class="about-cover"
+        src="/images/carousel/carousel2.jpg"
+        alt="Дом с террасой и мангальной зоной"
+        width="1400"
+        format="webp"
+        quality="82"
+        loading="eager"
+      />
+      <div class="about-details">
+        <section>
+          <h2>Собраться за одним столом</h2>
+          <p>
+            Кухня-гостиная с обеденным столом, отдельные спальни и собственный
+            участок. Готовьте вместе, общайтесь на террасе и отдыхайте в удобном
+            для вас ритме.
+          </p>
+          <NuxtImg
+            src="/images/carousel/carousel1.jpg"
+            alt="Кухня-гостиная"
+            width="800"
+            format="webp"
+            loading="lazy"
+          />
+        </section>
+        <section>
+          <h2>Добавить баню к заезду</h2>
+          <p>
+            Русскую баню можно выбрать при оформлении заявки. Её стоимость сразу
+            появится в расчёте поездки.
+          </p>
+          <NuxtImg
+            src="/images/sauna.png"
+            alt="Баня на участке"
+            width="800"
+            format="webp"
+            loading="lazy"
+          />
+        </section>
+      </div>
+      <section class="house-rules">
+        <h2>Перед поездкой</h2>
+        <dl>
+          <div>
+            <dt>Заезд и выезд</dt>
+            <dd>Заезд после 15:00, выезд до 12:00.</dd>
+          </div>
+          <div>
+            <dt>Размещение</dt>
+            <dd>
+              До 8 гостей, включая детей. В доме 2 спальни; нужные спальные
+              места согласуем перед заездом.
+            </dd>
+          </div>
+          <div>
+            <dt>Подтверждение</dt>
+            <dd>
+              После заявки хозяин свяжется с вами по телефону и согласует
+              детали.
+            </dd>
+          </div>
+        </dl>
+        <NuxtLink to="/booking" class="button">Выбрать даты отдыха</NuxtLink>
+      </section>
+    </article></NuxtLayout
+  >
+</template>
 <script setup>
 useSeoMeta({
   title: "О доме — Novotarmanskiy house",
   description:
-    "Современный комфорт и тишина леса в посёлке Новотарманский. 4 спальных места, кухня-гостиная, баня и BBQ.",
+    "Загородный дом с кухней-гостиной, спальнями, террасой и русской баней. Узнайте больше перед поездкой.",
 });
 </script>
-
-<template>
-  <NuxtLayout name="page-layout">
-    <div class="about-page">
-      <section class="reveal section-header">
-        <h1 class="title-primary">О нашем <span>пространстве</span></h1>
-        <p class="subtitle">
-          Тишина лесов и уют домашнего очага в п. Новотарманский
-        </p>
-      </section>
-
-      <div class="bento-grid">
-        <div class="grid-item brand-card reveal" style="grid-area: brand">
-          <h2 class="brand-name">Novotarmansky <span>house</span></h2>
-          <div class="tag-list">
-            <span class="tag">2 Комнаты</span>
-            <span class="tag">Русская Баня</span>
-            <span class="tag">BBQ Зона</span>
-          </div>
-        </div>
-
-        <div class="grid-item image-card reveal" style="grid-area: house-img">
-          <NuxtImg
-            src="/images/house.png"
-            alt="Наш гостевой дом"
-            width="1000"
-            format="webp"
-            quality="78"
-            loading="lazy"
-          />
-        </div>
-
-        <div
-          class="grid-item image-card tall-img reveal"
-          style="grid-area: interior-img"
-        >
-          <NuxtImg
-            src="/images/interior-wide.png"
-            alt="Интерьер гостевого дома Novotarmanskiy house"
-            width="1000"
-            format="webp"
-            quality="78"
-            loading="lazy"
-          />
-          <div class="dark-overlay">
-            <p>Уют и тишина в каждой детали вашего отдыха.</p>
-          </div>
-        </div>
-
-        <div class="grid-item rest-card reveal" style="grid-area: rest">
-          <div class="card-badge">Отдых</div>
-          <h3>Перезагрузка души</h3>
-          <p>
-            Настоящая русская баня с ароматом хвои и мангальная зона для
-            идеального вечера.
-          </p>
-        </div>
-
-        <div class="grid-item info-card reveal" style="grid-area: info">
-          <div class="info-container">
-            <div class="info-title-group">
-              <div class="card-badge dark">Удобства</div>
-              <h3>Ваш комфорт — наш приоритет</h3>
-            </div>
-            <ul class="feature-list">
-              <li>
-                <strong>4 спальных места:</strong> Мастер-спальня и
-                детская/гостевая.
-              </li>
-              <li>
-                <strong>Кухня-гостиная:</strong> Всё для кулинарных шедевров.
-              </li>
-              <li>
-                <strong>Забота:</strong> Свежие полотенца и гигиенические
-                наборы.
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </NuxtLayout>
-</template>
-
-<style lang="scss" scoped>
+<style scoped>
 .about-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px 80px;
+  padding-bottom: 64px;
 }
-
-.section-header {
-  text-align: center;
-  margin-bottom: 60px;
-  .title-primary {
-    font-size: clamp(32px, 5vw, 48px);
-    color: #333;
-    span {
-      color: var(--primary);
-      font-weight: 700;
-    }
-  }
+.about-cover {
+  width: 100%;
+  max-height: 560px;
+  object-fit: cover;
+  border-radius: 16px;
 }
-
-.bento-grid {
+.about-details {
   display: grid;
-  gap: 24px;
   grid-template-columns: 1fr 1fr;
-  grid-template-areas:
-    "brand house-img"
-    "interior-img rest"
-    "info info";
-
-  @media (max-width: 850px) {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "brand"
-      "house-img"
-      "interior-img"
-      "rest"
-      "info";
-  }
+  gap: 32px;
+  margin-top: 48px;
 }
-
-.grid-item {
-  border-radius: 32px;
-  overflow: hidden;
-  position: relative;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
+.about-details h2,
+.house-rules h2 {
+  font-size: 30px;
+  margin-bottom: 16px;
 }
-
-.brand-card {
-  background: var(--primary, #d8b48b);
-  color: white;
-  padding: 40px;
-  justify-content: center;
-  min-height: 320px;
-  .brand-name {
-    font-family: "Unageo", sans-serif;
-    font-size: 32px;
-    span {
-      display: block;
-      font-family: "Unageo", sans-serif;
-      font-size: 56px;
-      font-weight: 800;
-      line-height: 1;
-    }
-  }
+.about-details p {
+  color: var(--muted);
+  margin-bottom: 24px;
+  font-size: 17px;
+  line-height: 1.65;
 }
-
-.rest-card {
-  background: #f4efe9;
-  padding: 40px;
-  justify-content: center;
-  h3 {
-    color: var(--primary);
-    font-size: 26px;
-    margin: 15px 0;
-  }
-  p {
-    color: #666;
-    line-height: 1.6;
-  }
-}
-
-.info-card {
-  background: #fff;
-  padding: 40px 60px;
-  @media (max-width: 768px) {
-    padding: 30px;
-  }
-
-  .info-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 40px;
-    @media (max-width: 900px) {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-  }
-
-  h3 {
-    font-size: 28px;
-    color: #333;
-    margin-top: 15px;
-  }
-}
-
-.image-card {
+.about-details img {
+  width: 100%;
   height: 320px;
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  &.tall-img {
-    height: 400px;
-  }
-
-  .dark-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
-    display: flex;
-    align-items: flex-end;
-    padding: 30px;
-    p {
-      color: white;
-      font-size: 16px;
-      font-weight: 500;
-    }
-  }
+  object-fit: cover;
+  border-radius: 14px;
 }
-
-.card-badge {
-  background: #e6ded3;
-  color: var(--primary);
-  padding: 6px 16px;
-  border-radius: 100px;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  width: fit-content;
-
-  &.dark {
-    background: var(--primary);
-    color: white;
-  }
+.house-rules {
+  padding: 32px;
+  background: var(--surface);
+  border-radius: 16px;
+  margin-top: 48px;
 }
-
-.tag-list {
-  display: flex;
-  gap: 8px;
-  margin-top: 24px;
-  .tag {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 4px 12px;
-    border-radius: 100px;
-    font-size: 13px;
-  }
-}
-
-.feature-list {
-  list-style: none;
-  padding: 0;
+.house-rules dl {
   display: grid;
-  gap: 12px;
-  li {
-    font-size: 15px;
-    padding-left: 25px;
-    position: relative;
-    &::before {
-      content: "✓";
-      position: absolute;
-      left: 0;
-      color: var(--primary);
-      font-weight: bold;
-    }
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin: 24px 0;
+}
+.house-rules dt {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.house-rules dd {
+  color: var(--muted);
+}
+@media (max-width: 700px) {
+  .about-details {
+    grid-template-columns: 1fr;
+  }
+  .house-rules dl {
+    grid-template-columns: 1fr;
+  }
+  .house-rules {
+    padding: 24px;
+  }
+  .about-details h2,
+  .house-rules h2 {
+    font-size: 26px;
   }
 }
 </style>

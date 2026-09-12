@@ -1,5 +1,6 @@
 <template>
   <NuxtPage />
+  <MobileBookingBar />
   <ClientOnly>
     <Toaster position="top-center" :duration="4000" rich-colors />
   </ClientOnly>
