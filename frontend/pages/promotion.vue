@@ -1,114 +1,172 @@
 <template>
   <div>
     <LayoutsNavBar />
-    <main id="main-content" class="offers-page site-container">
-      <header class="page-heading">
-        <h1>Ещё один повод выбраться за город</h1>
-        <p>Предложения для отдыха с баней и встреч с близкими.</p>
-      </header>
-      <p class="offer-note">
-        В календаре показана базовая стоимость. Сообщите хозяину о выбранной
-        акции при подтверждении: он уточнит условия и итоговую сумму.
-      </p>
-      <div class="offers-grid">
-        <article
-          v-for="promo in PROMOTIONS"
-          :key="promo.title"
-          class="offer-card"
-        >
-          <NuxtImg
-            :src="promo.image"
-            :alt="promo.title"
-            width="900"
-            format="webp"
-            quality="80"
-            loading="lazy"
-          />
-          <div class="offer-copy">
-            <h2>{{ promo.title }}</h2>
-            <p>{{ promo.description }}</p>
-            <small>Срок действия: {{ promo.date }}</small
-            ><NuxtLink to="/booking" class="button">Выбрать даты</NuxtLink>
+
+    <main class="promotions-page">
+      <div class="container">
+        <h1 class="page-title">Акции и спецпредложения</h1>
+
+        <div class="promo-list">
+          <div v-for="(promo, index) in promos" :key="index" class="promo-card">
+            <div class="promo-image">
+              <NuxtImg
+                :src="promo.image"
+                :alt="promo.title"
+                width="800"
+                format="webp"
+                quality="78"
+                loading="lazy"
+              />
+              <div class="promo-badge" v-if="promo.badge">
+                {{ promo.badge }}
+              </div>
+            </div>
+
+            <div class="promo-content">
+              <h2 class="promo-title">{{ promo.title }}</h2>
+              <p class="promo-description">{{ promo.description }}</p>
+
+              <div class="promo-footer">
+                <span class="promo-date">Срок действия: {{ promo.date }}</span>
+                <button class="promo-btn">Забронировать</button>
+              </div>
+            </div>
           </div>
-        </article>
+        </div>
       </div>
     </main>
+
     <LayoutsFooterSection />
   </div>
 </template>
+
 <script setup>
 useSeoMeta({
-  title: "Предложения для отдыха — Novotarmanskiy house",
+  title: "Акции — Novotarmanskiy house",
   description:
-    "Отдых с баней и предложение на день рождения. Уточните условия акции при подтверждении заявки.",
+    "Скидки на будние дни, бесплатная баня в выходные, акция на день рождения. Действующие предложения.",
 });
+
+// Список акций — в utils/promotions.ts (auto-imported).
+const promos = PROMOTIONS;
 </script>
+
 <style scoped>
-.offers-page {
-  padding-top: 128px;
-  padding-bottom: 64px;
+.promotions-page {
+  padding: 60px 0;
+  background-color: #fdfaf7; /* Мягкий фон под стиль проекта */
+  min-height: 80vh;
 }
-.offer-note {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  padding: 20px;
-  border-radius: 12px;
-  color: var(--muted);
-  margin-bottom: 32px;
-  max-width: 80ch;
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
-.offers-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
+
+.page-title {
+  text-align: center;
+  color: #5e4e3b; /* Основной темный цвет из :root */
+  font-size: 36px;
+  margin-bottom: 50px;
 }
-.offer-card {
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  overflow: hidden;
+
+.promo-list {
   display: flex;
   flex-direction: column;
+  gap: 30px;
 }
-.offer-card img {
+
+.promo-card {
+  display: flex;
+  background: white;
+  border-radius: 30px; /* Закругление как в AboutUs */
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(94, 78, 59, 0.05);
+  transition: transform 0.3s ease;
+}
+
+.promo-card:hover {
+  transform: translateY(-5px);
+}
+
+.promo-image {
+  flex: 0 0 40%;
+  position: relative;
+  min-height: 250px;
+}
+
+.promo-image img {
   width: 100%;
-  height: 300px;
+  height: 100%;
   object-fit: cover;
 }
-.offer-copy {
-  padding: 28px;
+
+.promo-badge {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background-color: #d8b48b; /* Бежевый акцент */
+  color: white;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.promo-content {
+  flex: 1;
+  padding: 40px;
   display: flex;
   flex-direction: column;
-  flex: 1;
+  justify-content: space-between;
 }
-.offer-copy h2 {
-  font-size: 28px;
-  margin-bottom: 16px;
+
+.promo-title {
+  color: #5e4e3b;
+  font-size: 24px;
+  margin-bottom: 15px;
 }
-.offer-copy p {
-  color: var(--muted);
-  font-size: 16px;
-  line-height: 1.65;
+
+.promo-description {
+  color: #777;
+  line-height: 1.6;
   margin-bottom: 20px;
 }
-.offer-copy small {
-  font-size: 14px;
-  color: var(--muted);
+
+.promo-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-top: auto;
-  margin-bottom: 20px;
 }
-.offer-copy .button {
-  align-self: start;
+
+.promo-date {
+  font-size: 13px;
+  color: #a09384;
 }
-@media (max-width: 700px) {
-  .offers-page {
-    padding-top: 104px;
-    padding-bottom: 48px;
+
+.promo-btn {
+  background-color: #5e4e3b;
+  color: white;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.promo-btn:hover {
+  background-color: #d8b48b;
+}
+
+/* Адаптивность для мобилок */
+@media (max-width: 768px) {
+  .promo-card {
+    flex-direction: column;
   }
-  .offers-grid {
-    grid-template-columns: 1fr;
-  }
-  .offer-copy {
-    padding: 24px;
+  .promo-image {
+    min-height: 200px;
   }
 }
 </style>

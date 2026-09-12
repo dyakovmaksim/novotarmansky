@@ -1,26 +1,18 @@
 <template>
   <NuxtLayout name="page-layout">
     <article class="legal-page">
-      <h1 class="legal-page__title">
-        Согласие на обработку персональных данных
-      </h1>
+      <h1 class="legal-page__title">Согласие на обработку персональных данных</h1>
       <p class="legal-page__lead">
-        Отправляя заявку на бронирование, вы подтверждаете согласие на обработку
-        указанных вами персональных данных в соответствии с Федеральным законом
-        № 152-ФЗ «О персональных данных».
+        Отправляя заявку на бронирование, вы подтверждаете согласие на
+        обработку указанных вами персональных данных в соответствии с
+        Федеральным законом № 152-ФЗ «О персональных данных».
       </p>
 
-      <section v-if="CONTACT.legal.company" class="legal-page__section">
+      <section class="legal-page__section">
         <h2>1. Оператор</h2>
         <p>
-          <template v-if="CONTACT.legal.company"
-            >{{ CONTACT.legal.company }}, ИНН {{ CONTACT.legal.inn }}, ОГРНИП
-            {{ CONTACT.legal.ogrnip }}.</template
-          ><template v-else
-            >Сведения о владельце дома можно уточнить по телефону
-            <a :href="CONTACT.phone.href">{{ CONTACT.phone.display }}</a
-            >.</template
-          >
+          {{ CONTACT.legal.company }}, ИНН {{ CONTACT.legal.inn }}, ОГРНИП
+          {{ CONTACT.legal.ogrnip }}.
         </p>
       </section>
 
@@ -44,12 +36,19 @@
       <section class="legal-page__section">
         <h2>4. Срок действия согласия</h2>
         <p>
-          Согласие действует с момента отправки заявки и до его отзыва. Для
-          уточнения порядка отзыва свяжитесь с нами по телефону
-          <a :href="CONTACT.phone.href">{{ CONTACT.phone.display }}</a
-          >.
+          Согласие действует с момента отправки заявки и до его отзыва. Отзыв
+          оформляется письменным заявлением на адрес
+          <a :href="CONTACT.email.href">{{ CONTACT.email.value }}</a>.
         </p>
       </section>
+
+      <p class="legal-page__placeholder">
+        <IconWarning class="legal-page__placeholder-icon" />
+        <span>
+          Это шаблонный текст. Перед запуском в продакшен утвердите его с
+          юристом и оформите полную редакцию согласия.
+        </span>
+      </p>
     </article>
   </NuxtLayout>
 </template>

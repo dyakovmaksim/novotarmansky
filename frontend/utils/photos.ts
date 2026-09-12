@@ -1,38 +1,31 @@
+// Контент для страницы /photos. Чтобы добавить новые фото — добавьте файл
+// в frontend/public/images/ и пропишите путь + категорию здесь.
+
+export interface PhotoCategory {
+  id: string;
+  name: string;
+}
+
 export interface Photo {
   src: string;
-  category: string;
-  alt: string;
+  category: string; // id одной из PHOTO_CATEGORIES (кроме "all")
 }
-export const PHOTO_CATEGORIES = [
-  { id: "all", name: "Все фотографии" },
-  { id: "house", name: "Дом и участок" },
-  { id: "kitchen", name: "Кухня-гостиная" },
-  { id: "sauna", name: "Баня" },
+
+export const PHOTO_CATEGORIES: PhotoCategory[] = [
+  { id: "all", name: "Все" },
+  { id: "house", name: "Дом" },
+  { id: "yard", name: "Двор" },
+  { id: "kitchen", name: "Кухня" },
+  { id: "bedroom", name: "Спальни" },
+  { id: "hall", name: "Зал" },
+  { id: "bbq", name: "Мангал" },
 ];
+
 export const PHOTOS: Photo[] = [
-  {
-    src: "/images/carousel/carousel2.jpg",
-    category: "house",
-    alt: "Дом, терраса и крытая мангальная зона",
-  },
-  {
-    src: "/images/carousel/carousel1.jpg",
-    category: "kitchen",
-    alt: "Кухня-гостиная с обеденным столом",
-  },
-  {
-    src: "/images/sauna.png",
-    category: "sauna",
-    alt: "Русская баня на участке",
-  },
-  {
-    src: "/images/carousel/carousel4.jpg",
-    category: "sauna",
-    alt: "Комната отдыха с видом на участок",
-  },
-  {
-    src: "/images/house.jpg",
-    category: "house",
-    alt: "Вид на дом со стороны улицы",
-  },
+  { src: "/images/house.jpg", category: "house" },
+  { src: "/images/yard-1.jpg", category: "yard" },
+  { src: "/images/kitchen-1.jpg", category: "kitchen" },
+  { src: "/images/bedroom-1.jpg", category: "bedroom" },
+  { src: "/images/hall-1.jpg", category: "hall" },
+  { src: "/images/bbq-1.jpg", category: "bbq" },
 ];

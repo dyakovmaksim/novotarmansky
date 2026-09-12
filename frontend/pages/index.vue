@@ -5,8 +5,7 @@
     <CarouselSection id="photos" />
     <LocationSection id="location" />
     <AdvantagesSection id="advantages" />
-    <BookingSection />
-    <StayQuestions />
+    <BookingSection id="booking" />
   </NuxtLayout>
 </template>
 
@@ -29,7 +28,8 @@ useSeoMeta({
   description:
     "Аренда уютного дома с баней и мангалом в посёлке Новотарманский, 20 минут от Тюмени. Выбирайте даты и бронируйте онлайн.",
   ogTitle: "Novotarmanskiy house — отдых рядом с Тюменью",
-  ogDescription: "Уютный загородный дом с баней. Выберите даты и забронируйте.",
+  ogDescription:
+    "Уютный загородный дом с баней. Выберите даты и забронируйте.",
 });
 
 // Structured data for a rich search snippet (rating/price/geo can be added later).
@@ -65,21 +65,9 @@ useHead({
         petsAllowed: false,
         sameAs: CONTACT.socials.map((s) => s.href),
         amenityFeature: [
-          {
-            "@type": "LocationFeatureSpecification",
-            name: "Русская баня",
-            value: true,
-          },
-          {
-            "@type": "LocationFeatureSpecification",
-            name: "Мангал",
-            value: true,
-          },
-          {
-            "@type": "LocationFeatureSpecification",
-            name: "Полная приватность",
-            value: true,
-          },
+          { "@type": "LocationFeatureSpecification", name: "Русская баня", value: true },
+          { "@type": "LocationFeatureSpecification", name: "Мангал", value: true },
+          { "@type": "LocationFeatureSpecification", name: "Полная приватность", value: true },
         ],
       }),
     },
