@@ -3,5 +3,12 @@ Allow: /
 Disallow: /privacy
 Disallow: /personal-data
 
-# Замените на реальный домен после деплоя.
-# Sitemap: https://example.com/sitemap.xml
+User-agent: Yandex
+Allow: /
+Disallow: /privacy
+Disallow: /personal-data
+# Склеивает дубли страниц с рекламными/трекинговыми метками в один URL.
+Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&yclid&gclid&_openstat&from
+Host: https://novotarmanskiyhouse.ru
+
+Sitemap: https://novotarmanskiyhouse.ru/sitemap.xml

@@ -94,6 +94,19 @@
             </div>
           </div>
 
+          <div class="booking-section__field">
+            <label class="field-label">Дополнительно</label>
+            <label class="sauna-toggle">
+              <input v-model="hasSauna" type="checkbox" />
+              <span class="sauna-toggle__text">
+                Русская баня к заезду
+                <span class="sauna-toggle__price"
+                  >+{{ saunaPrice.toLocaleString() }} ₽</span
+                >
+              </span>
+            </label>
+          </div>
+
           <transition name="simple-fade">
             <div v-if="checkin && checkout" class="booking-summary-card">
               <div class="summary-row">
@@ -102,7 +115,13 @@
                   {{ getNightsWord(totalNights) }}</span
                 >
                 <span class="summary-row__value"
-                  >{{ totalPrice.toLocaleString() }} ₽</span
+                  >{{ basePrice.toLocaleString() }} ₽</span
+                >
+              </div>
+              <div v-if="hasSauna" class="summary-row">
+                <span class="summary-row__label">Русская баня</span>
+                <span class="summary-row__value"
+                  >+{{ saunaPrice.toLocaleString() }} ₽</span
                 >
               </div>
               <div class="summary-row summary-row--total">
@@ -202,11 +221,15 @@ import Calendar from "../Calendar.vue";
 
 const config = useRuntimeConfig();
 const pricePerNight = config.public.house.pricePerNight;
+const saunaPrice = config.public.saunaPrice;
 const apiBase = config.public.apiBase;
 
+// Без SSR — в Docker hairpin NAT обычно не делается, и обращение из
+// контейнера фронта к публичному apiBase зависает до таймаута.
+// occupied-dates нужны только для UI календаря, поисковикам они не нужны.
 const { data: occupiedDates, refresh: refreshOccupied } = await useFetch(
   `${apiBase}/bookings/occupied-dates`,
-  { default: () => [] },
+  { default: () => [], server: false, lazy: true },
 );
 
 const checkin = ref(null);
@@ -215,6 +238,7 @@ const selecting = ref("checkin");
 const showGuests = ref(false);
 const adults = ref(1);
 const children = ref(0);
+const hasSauna = ref(false);
 const isModalOpen = ref(false);
 const isSubmitting = ref(false);
 const userName = ref("");
@@ -235,7 +259,10 @@ const totalNights = computed(() => {
   );
 });
 
-const totalPrice = computed(() => totalNights.value * pricePerNight);
+const basePrice = computed(() => totalNights.value * pricePerNight);
+const totalPrice = computed(
+  () => basePrice.value + (hasSauna.value ? saunaPrice : 0),
+);
 
 const guestsSummary = computed(() => {
   let res = `${adults.value} ${adults.value === 1 ? "взрослый" : "взрослых"}`;
@@ -312,6 +339,7 @@ const handleFinalSubmit = async () => {
         endDate: checkout.value.toISOString(),
         adults: adults.value,
         children: children.value,
+        hasSauna: hasSauna.value,
       },
     });
     toast.success("Заявка отправлена! Мы свяжемся с вами для подтверждения.");
@@ -319,6 +347,7 @@ const handleFinalSubmit = async () => {
     userName.value = "";
     userPhone.value = "";
     consent.value = false;
+    hasSauna.value = false;
     checkin.value = null;
     checkout.value = null;
     await refreshOccupied();
@@ -566,6 +595,40 @@ onBeforeUnmount(() =>
     a {
       color: #6b5a45;
       text-decoration: underline;
+    }
+  }
+
+  .sauna-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: #f8f5f2;
+    border: 1px solid #eee4d8;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    &:hover {
+      border-color: #d9c9b5;
+    }
+    input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: #6b5a45;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    &__text {
+      font-size: 15px;
+      font-weight: 500;
+      color: #3d2c17;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    &__price {
+      color: #bd9e7e;
+      font-weight: 600;
     }
   }
 
