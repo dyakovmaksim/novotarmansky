@@ -103,35 +103,36 @@ useSeoMeta({
 
 <style scoped>
 .contacts-page {
-  padding: 60px 0;
+  padding: var(--section-space-tight) 0 var(--section-space);
   background-color: #fdfaf7;
   min-height: 85vh;
 }
 
 .container {
-  max-width: 1100px;
+  max-width: var(--content-width);
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--gutter);
 }
 
 .page-title {
   text-align: center;
   color: #5e4e3b; /* */
-  margin-bottom: 50px;
-  font-size: 36px;
+  margin-bottom: 40px;
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.15;
 }
 
 .contacts-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  gap: 24px;
 }
 
 .contact-card {
   background: white;
-  padding: 40px;
-  border-radius: 30px; /* */
-  margin-bottom: 20px;
+  padding: var(--card-padding);
+  border-radius: var(--radius-card);
+  margin-bottom: 16px;
   box-shadow: 0 10px 30px rgba(94, 78, 59, 0.05);
 }
 
@@ -150,14 +151,15 @@ useSeoMeta({
 
 h2 {
   color: #5e4e3b;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   font-size: 24px;
+  line-height: 1.25;
 }
 
 .contact-item {
   display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
+  gap: 14px;
+  margin-bottom: 18px;
 }
 
 .icon {
@@ -170,7 +172,7 @@ h2 {
 .social-links {
   display: flex;
   gap: 10px;
-  margin-top: 30px;
+  margin-top: 24px;
 }
 
 .social-btn {
@@ -192,7 +194,7 @@ h2 {
 
 .map-container {
   height: 615px; /* Фиксированная высота для карты */
-  border-radius: 30px;
+  border-radius: var(--radius-card);
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
@@ -203,6 +205,12 @@ h2 {
   }
   .map-container {
     height: 350px;
+  }
+}
+
+@media (max-width: 520px) {
+  .social-links {
+    flex-wrap: wrap;
   }
 }
 </style>

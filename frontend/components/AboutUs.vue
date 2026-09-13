@@ -62,13 +62,13 @@
 
 <style lang="scss" scoped>
 .about {
-  padding: 20px 0; // Внешние отступы регулируются в PageLayout через gap
+  padding: var(--section-space-tight) 0;
 
   &__wrapper {
     position: relative;
     width: 100%;
     min-height: 500px;
-    border-radius: 40px;
+    border-radius: var(--radius-card);
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -111,7 +111,7 @@
   &__content {
     position: relative;
     z-index: 2;
-    padding: 60px;
+    padding: clamp(32px, 5vw, 64px);
     display: grid;
     grid-template-columns: 1.2fr 0.8fr;
     gap: 40px;
@@ -124,16 +124,15 @@
 
     @media (max-width: 992px) {
       grid-template-columns: 1fr;
-      padding: 40px 24px;
+      padding: 40px 28px;
       text-align: center;
     }
   }
 
   &__subtitle {
     color: var(--primary, #b9946e);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-size: 13px;
+    letter-spacing: 0.04em;
+    font-size: 14px;
     font-weight: 700;
     display: block;
     margin-bottom: 12px;
@@ -141,16 +140,16 @@
 
   &__title {
     color: #fff;
-    font-size: clamp(28px, 4vw, 42px);
+    font-size: clamp(30px, 4vw, 44px);
     font-weight: 300;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     line-height: 1.1;
   }
 
   &__description {
     color: rgba(255, 255, 255, 0.85);
-    font-size: 17px;
-    line-height: 1.7;
+    font-size: 16px;
+    line-height: 1.65;
     max-width: 550px;
 
     p { margin-bottom: 16px; }
@@ -163,8 +162,8 @@
 
   &__features {
     display: flex;
-    gap: 30px;
-    margin-top: 40px;
+    gap: clamp(20px, 3vw, 36px);
+    margin-top: 36px;
 
     @media (max-width: 992px) {
       justify-content: center;
@@ -172,8 +171,9 @@
     }
 
     @media (max-width: 480px) {
-      flex-direction: column;
-      gap: 15px;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
   }
 
@@ -187,8 +187,7 @@
     }
     &-label {
       color: rgba(255, 255, 255, 0.6);
-      font-size: 12px;
-      text-transform: uppercase;
+      font-size: 13px;
     }
   }
 
@@ -196,8 +195,8 @@
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 40px;
-    border-radius: 30px;
+    padding: 32px;
+    border-radius: 20px;
     text-align: center;
     transform: rotate(2deg); // Легкий игривый наклон
 
@@ -211,7 +210,7 @@
   &__quote {
     color: #fff;
     font-style: italic;
-    font-size: 18px;
+    font-size: 17px;
     line-height: 1.5;
     margin-bottom: 20px;
     font-weight: 300;
@@ -219,13 +218,12 @@
 
   &__badge {
     display: inline-block;
-    padding: 8px 16px;
+    padding: 7px 14px;
     background: var(--primary, #b9946e);
     color: #fff;
     border-radius: 100px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
-    text-transform: uppercase;
   }
 }
 </style>

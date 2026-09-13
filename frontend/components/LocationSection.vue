@@ -52,11 +52,11 @@
 
 <style lang="scss" scoped>
 .location {
-  padding: 20px 0;
+  padding: var(--section-space-tight) 0;
   
   &__card {
     background-color: var(--primary, #5e4e3b);
-    border-radius: 40px;
+    border-radius: var(--radius-card);
     overflow: hidden;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   }
@@ -72,7 +72,7 @@
   }
 
   &__info {
-    padding: 60px;
+    padding: clamp(32px, 5vw, 64px);
     color: #fff;
     display: flex;
     flex-direction: column;
@@ -82,21 +82,21 @@
   }
 
   &__title {
-    font-size: 42px;
+    font-size: clamp(30px, 4vw, 44px);
     font-weight: 600;
-    margin-bottom: 40px;
+    margin-bottom: 32px;
     letter-spacing: -0.5px;
   }
 
   &__list {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
   }
 
   &__item {
     display: flex;
-    gap: 20px;
+    gap: 16px;
     align-items: flex-start;
   }
 
@@ -170,7 +170,7 @@
   @media (max-width: 768px) {
     &__card { border-radius: 30px; }
     &__title { font-size: 32px; margin-bottom: 30px; }
-    &__info { padding: 40px 24px; }
+    &__info { padding: 40px 28px; }
     &__map-wrapper { height: 300px; }
   }
 

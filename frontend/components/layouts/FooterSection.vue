@@ -83,20 +83,20 @@
 <style lang="scss" scoped>
 .footer {
   background-color: #fcfaf8; // Мягкий светлый фон, чтобы отделить от контента
-  padding: 80px 0 30px;
+  padding: var(--section-space-tight) 0 28px;
   border-top: 1px solid #eee;
 
   &__container {
-    max-width: 1200px;
+    max-width: var(--content-width);
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 var(--gutter);
   }
 
   &__grid {
     display: grid;
     grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
-    gap: 40px;
-    margin-bottom: 50px;
+    gap: clamp(28px, 4vw, 48px);
+    margin-bottom: 44px;
 
     @media (max-width: 1024px) {
       grid-template-columns: 1fr 1fr;
@@ -124,7 +124,7 @@
     font-size: 14px;
     line-height: 1.6;
     color: #666;
-    margin-bottom: 25px;
+    margin-bottom: 18px;
   }
 
   &__socials {
@@ -161,8 +161,7 @@
     font-weight: 700;
     margin-bottom: 25px;
     color: #333;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.01em;
   }
 
   &__list {
@@ -170,7 +169,7 @@
     padding: 0;
     margin: 0;
     li {
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       a {
         text-decoration: none;
         color: #666;
@@ -203,7 +202,7 @@
   &__divider {
     height: 1px;
     background: #eee;
-    margin-bottom: 30px;
+    margin-bottom: 24px;
   }
 
   &__legal {
@@ -224,13 +223,20 @@
 
   &__policy-links {
     display: flex;
-    gap: 20px;
+    gap: 16px;
     margin-top: 5px;
     a {
       color: #999;
       &:hover {
         color: #666;
       }
+    }
+  }
+
+  @media (max-width: 600px) {
+    &__policy-links {
+      flex-direction: column;
+      gap: 8px;
     }
   }
 }

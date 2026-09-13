@@ -386,23 +386,23 @@ onBeforeUnmount(() =>
 
 <style lang="scss" scoped>
 .booking-page {
-  padding: 80px 0 120px;
+  padding: var(--section-space-tight) 0 var(--section-space);
   background: #fdfbf9;
   font-family: "Unageo", sans-serif !important;
   -webkit-font-smoothing: antialiased;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: var(--content-width);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 var(--gutter);
 }
 
 .page-header {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 40px;
   .page-title {
-    font-size: clamp(36px, 6vw, 56px);
+    font-size: clamp(32px, 5vw, 52px);
     color: #2c231a;
     font-weight: 300;
     letter-spacing: -0.02em;
@@ -413,15 +413,16 @@ onBeforeUnmount(() =>
   }
   .page-subtitle {
     color: #8c7d6d;
-    font-size: 18px;
-    margin-top: 15px;
+    font-size: 17px;
+    line-height: 1.55;
+    margin-top: 12px;
   }
 }
 
 .booking-grid {
   display: grid;
   grid-template-columns: 1.2fr 420px;
-  gap: 50px;
+  gap: clamp(24px, 5vw, 56px);
   align-items: start;
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
@@ -433,8 +434,8 @@ onBeforeUnmount(() =>
 .calendar-wrapper,
 .booking-card {
   background: #fff;
-  padding: 40px;
-  border-radius: 40px;
+  padding: var(--card-padding);
+  border-radius: var(--radius-card);
   box-shadow: 0 20px 60px rgba(61, 44, 23, 0.05);
   border: 1px solid rgba(238, 228, 216, 0.6);
 }
@@ -444,7 +445,7 @@ onBeforeUnmount(() =>
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: #a68b6a;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   font-weight: 700;
 }
 
@@ -456,7 +457,7 @@ onBeforeUnmount(() =>
     flex: 1;
     padding: 16px;
     border: 1px solid #f0ede8;
-    border-radius: 20px;
+    border-radius: 16px;
     cursor: pointer;
     transition: 0.3s;
     &.active {

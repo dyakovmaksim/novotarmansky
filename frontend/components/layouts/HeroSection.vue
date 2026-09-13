@@ -42,10 +42,10 @@
 html body {
   .hero-block {
     position: relative;
-    min-height: 85vh;
+    min-height: min(760px, 88svh);
     display: flex;
     align-items: center;
-    padding: 100px 0 60px;
+    padding: 112px 0 80px;
     overflow: hidden;
 
     &__bg {
@@ -70,9 +70,9 @@ html body {
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 1200px;
+      max-width: var(--content-width);
       margin: 0 auto;
-      padding: 0 20px;
+      padding: 0 var(--gutter);
     }
 
     &__card {
@@ -82,24 +82,25 @@ html body {
       backdrop-filter: blur(15px) saturate(150%) !important;
       -webkit-backdrop-filter: blur(15px) saturate(150%) !important;
       border: 1px solid rgba(255, 255, 255, 0.2) !important;
-      padding: 40px;
+      padding: clamp(28px, 4vw, 44px);
       border-radius: 30px;
       color: #ffffff !important;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
     }
 
-    &__title { font-size: 32px; line-height: 1.2; margin-bottom: 15px; }
+    &__title { font-size: clamp(30px, 3.2vw, 44px); line-height: 1.12; letter-spacing: -0.02em; margin-bottom: 16px; }
     &__brand { font-weight: 700; }
-    &__subtitle { font-size: 17px; margin-bottom: 30px; opacity: 0.9; }
+    &__subtitle { max-width: 49ch; font-size: 17px; line-height: 1.55; margin-bottom: 32px; opacity: 0.92; }
 
     &__actions {
       display: flex;
-      gap: 15px;
+      gap: 12px;
     }
 
     &__btn {
       flex: 1;
-      padding: 16px;
+      min-height: 52px;
+      padding: 14px 20px;
       border-radius: 100px !important; // Овальные кнопки
       text-align: center;
       text-decoration: none;
@@ -120,9 +121,10 @@ html body {
   // Адаптив для маленьких экранов
   @media (max-width: 768px) {
     .hero-block {
-      padding-top: 80px;
+      min-height: 680px;
+      padding: 104px 0 48px;
       &__card {
-        padding: 30px 20px;
+        padding: 28px 24px;
         margin: 0 10px;
         // Если хочешь оставить прозрачность и на мобилках:
         background: rgba(0, 0, 0, 0.4) !important; 

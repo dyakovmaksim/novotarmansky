@@ -2,7 +2,6 @@
 @import "../style/var.scss";
 
 * {
-  font-family: Unageo;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -21,10 +20,48 @@ a {
 html,
 body {
   overflow-x: hidden;
-  width: 100vw;
+  width: 100%;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
+}
+
+body {
+  min-width: 320px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: "Unageo", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+img,
+svg {
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid rgba(185, 148, 110, 0.5);
+  outline-offset: 3px;
 }
 
 *,

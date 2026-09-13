@@ -138,24 +138,24 @@ const countByCategory = (category: Category) =>
 <style scoped>
 .gallery-page {
   min-height: 80vh;
-  padding: 64px 0 88px;
+  padding: var(--section-space-tight) 0 var(--section-space);
   background: #fcfcfc;
 }
 
 .container {
-  max-width: 1180px;
+  max-width: var(--content-width);
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--gutter);
 }
 
 .gallery-heading {
   max-width: 640px;
-  margin: 0 auto 34px;
+  margin: 0 auto 32px;
   text-align: center;
 }
 
 .gallery-heading h1 {
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   color: #5e4e3b;
   font-size: clamp(30px, 4vw, 42px);
 }
@@ -170,16 +170,16 @@ const countByCategory = (category: Category) =>
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 32px;
+  gap: 10px;
+  margin-bottom: 36px;
 }
 
 .filter-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 42px;
-  padding: 8px 15px;
+  min-height: 44px;
+  padding: 9px 16px;
   border: 1px solid #d8b48b;
   border-radius: 22px;
   background: transparent;
@@ -215,14 +215,14 @@ const countByCategory = (category: Category) =>
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 20px;
 }
 
 .gallery-item {
   aspect-ratio: 4 / 3;
   margin: 0;
   overflow: hidden;
-  border-radius: 18px;
+  border-radius: 16px;
   background: #eee7de;
 }
 

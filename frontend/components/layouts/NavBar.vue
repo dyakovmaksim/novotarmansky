@@ -94,7 +94,7 @@ onUnmounted(() => {
   left: 0;
   width: 100%;
   z-index: 1000;
-  padding: 24px 0;
+  padding: 18px 0;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
   .nav__logo,
@@ -106,7 +106,7 @@ onUnmounted(() => {
   }
 
   &--scrolled {
-    padding: 12px 0;
+    padding: 10px 0;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
@@ -123,16 +123,16 @@ onUnmounted(() => {
   }
 
   &__container {
-    max-width: 1240px;
+    max-width: var(--content-width);
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 var(--gutter);
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
 
   &__logo {
-    font-size: 22px;
+    font-size: 21px;
     font-weight: 700;
     text-decoration: none;
     letter-spacing: -0.5px;
@@ -146,7 +146,7 @@ onUnmounted(() => {
 
   &__menu {
     display: flex;
-    gap: 32px;
+    gap: 28px;
     list-style: none;
 
     @media (max-width: 850px) {
@@ -185,13 +185,14 @@ onUnmounted(() => {
   &__actions {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
   }
 
   &__cta-btn {
     background: var(--primary, #5e4e3b);
     color: #fff !important;
-    padding: 10px 24px;
+    min-height: 42px;
+    padding: 10px 20px;
     border-radius: 100px;
     text-decoration: none;
     font-weight: 600;
@@ -260,7 +261,7 @@ onUnmounted(() => {
     max-width: 300px;
     background: #ffffff;
     height: 100%;
-    padding: 100px 40px 40px;
+    padding: 92px 32px 32px;
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
@@ -271,7 +272,7 @@ onUnmounted(() => {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 24px;
 
     a {
       text-decoration: none;

@@ -42,32 +42,31 @@ const iconFor = (name) => icons[name];
 
 <style lang="scss" scoped>
 .advantages {
-  padding: 80px 0;
+  padding: var(--section-space) 0;
   background: #fdfbfa;
 
   &__container {
-    max-width: 1200px;
+    max-width: var(--content-width);
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 var(--gutter);
   }
 
   &__head {
     text-align: center;
-    margin-bottom: 48px;
+    margin-bottom: 40px;
   }
 
   &__subtitle {
     color: var(--primary, #b9946e);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-size: 13px;
+    letter-spacing: 0.04em;
+    font-size: 14px;
     font-weight: 700;
     display: block;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   &__title {
-    font-size: clamp(28px, 4vw, 42px);
+    font-size: clamp(30px, 4vw, 44px);
     font-weight: 300;
     color: #3d2c17;
     line-height: 1.1;
@@ -76,7 +75,7 @@ const iconFor = (name) => icons[name];
   &__grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    gap: 20px;
 
     @media (max-width: 900px) {
       grid-template-columns: repeat(2, 1fr);
@@ -87,7 +86,7 @@ const iconFor = (name) => icons[name];
   }
 
   .advantage {
-    padding: 32px;
+    padding: 30px;
     background: #fff;
     border: 1px solid #eee4d8;
     border-radius: 24px;

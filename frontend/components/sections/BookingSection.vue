@@ -373,7 +373,7 @@ onBeforeUnmount(() =>
 
 <style lang="scss" scoped>
 .booking-section {
-  padding: 60px 0;
+  padding: var(--section-space) 0;
   background: #fff;
   font-family: "Unageo", sans-serif !important;
   -webkit-font-smoothing: antialiased;
@@ -384,28 +384,28 @@ onBeforeUnmount(() =>
   }
 
   &__container {
-    max-width: 1200px;
+    max-width: var(--content-width);
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 var(--gutter);
   }
 
   &__grid {
     display: grid;
     grid-template-columns: 1.1fr 0.9fr;
-    gap: 60px;
+    gap: clamp(32px, 6vw, 72px);
     align-items: start;
 
     @media (max-width: 992px) {
       grid-template-columns: 1fr;
-      gap: 40px;
+      gap: 32px;
     }
   }
 
   &__title {
-    font-size: 32px;
+    font-size: clamp(30px, 4vw, 44px);
     font-weight: 600;
     color: #3d2c17;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
     letter-spacing: -0.01em;
   }
 
@@ -414,11 +414,10 @@ onBeforeUnmount(() =>
     position: relative;
     .field-label {
       display: block;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
       color: #b0a79c;
-      text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 9px;
       letter-spacing: 0.04em;
     }
   }
@@ -428,12 +427,12 @@ onBeforeUnmount(() =>
     background: #f8f5f2;
     border: 1px solid #eee4d8;
     border-radius: 16px;
-    padding: 6px;
+    padding: 5px;
   }
 
   .date-picker-item {
     flex: 1;
-    padding: 10px 16px;
+    padding: 12px 16px;
     cursor: pointer;
     border-radius: 12px;
     transition: 0.3s ease;
@@ -464,7 +463,8 @@ onBeforeUnmount(() =>
     background: #f8f5f2;
     border: 1px solid #eee4d8;
     border-radius: 16px;
-    padding: 18px 20px;
+    min-height: 56px;
+    padding: 16px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -602,6 +602,7 @@ onBeforeUnmount(() =>
     display: flex;
     align-items: center;
     gap: 12px;
+    min-height: 56px;
     padding: 16px 20px;
     background: #f8f5f2;
     border: 1px solid #eee4d8;
@@ -634,11 +635,12 @@ onBeforeUnmount(() =>
 
   .booking-submit-btn {
     width: 100%;
-    padding: 20px;
+    min-height: 56px;
+    padding: 16px 20px;
     background: #6b5a45;
     color: #fff;
     border: none;
-    border-radius: 16px;
+    border-radius: 14px;
     font-size: 17px;
     font-weight: 600;
     cursor: pointer;
@@ -670,7 +672,7 @@ onBeforeUnmount(() =>
     width: 100%;
     max-width: 420px;
     border-radius: 24px;
-    padding: 40px;
+    padding: clamp(28px, 5vw, 40px);
     position: relative;
     .booking-modal-close {
       position: absolute;

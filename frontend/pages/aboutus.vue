@@ -91,16 +91,17 @@ useSeoMeta({
 
 <style lang="scss" scoped>
 .about-page {
-  max-width: 1200px;
+  max-width: var(--content-width);
   margin: 0 auto;
-  padding: 0 24px 80px;
+  padding: 0 var(--gutter) var(--section-space);
 }
 
 .section-header {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 40px;
   .title-primary {
-    font-size: clamp(32px, 5vw, 48px);
+    font-size: clamp(30px, 4vw, 44px);
+    line-height: 1.15;
     color: #333;
     span {
       color: var(--primary);
@@ -111,7 +112,7 @@ useSeoMeta({
 
 .bento-grid {
   display: grid;
-  gap: 24px;
+  gap: 20px;
   grid-template-columns: 1fr 1fr;
   grid-template-areas:
     "brand house-img"
@@ -130,7 +131,7 @@ useSeoMeta({
 }
 
 .grid-item {
-  border-radius: 32px;
+  border-radius: var(--radius-card);
   overflow: hidden;
   position: relative;
   background: #fff;
@@ -142,7 +143,7 @@ useSeoMeta({
 .brand-card {
   background: var(--primary, #d8b48b);
   color: white;
-  padding: 40px;
+  padding: var(--card-padding);
   justify-content: center;
   min-height: 320px;
   .brand-name {
@@ -160,7 +161,7 @@ useSeoMeta({
 
 .rest-card {
   background: #f4efe9;
-  padding: 40px;
+  padding: var(--card-padding);
   justify-content: center;
   h3 {
     color: var(--primary);
@@ -175,7 +176,7 @@ useSeoMeta({
 
 .info-card {
   background: #fff;
-  padding: 40px 60px;
+  padding: var(--card-padding);
   @media (max-width: 768px) {
     padding: 30px;
   }

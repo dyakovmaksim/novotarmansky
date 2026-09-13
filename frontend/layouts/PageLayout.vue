@@ -64,18 +64,18 @@ onUnmounted(() => window.removeEventListener("scroll", handleScroll));
   display: flex;
   flex-direction: column;
 
-  &.pt-inner { padding-top: 140px; } // Увеличил отступ для страницы "О нас"
+  &.pt-inner { padding-top: 128px; }
 
   @media (max-width: 768px) {
 
-    &.pt-inner { padding-top: 100px; }
+    &.pt-inner { padding-top: 104px; }
   }
 }
 
 .scroll-btn {
   position: fixed;
-  bottom: 30px;
-  right: 30px;
+  bottom: 24px;
+  right: 24px;
   z-index: 1000;
   width: 50px;
   height: 50px;
@@ -88,6 +88,15 @@ onUnmounted(() => window.removeEventListener("scroll", handleScroll));
   justify-content: center;
   align-items: center;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 600px) {
+  .scroll-btn {
+    right: 16px;
+    bottom: 16px;
+    width: 44px;
+    height: 44px;
+  }
 }
 
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }

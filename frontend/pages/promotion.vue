@@ -72,34 +72,35 @@ const promos = computed(() =>
 
 <style scoped>
 .promotions-page {
-  padding: 60px 0;
+  padding: var(--section-space-tight) 0 var(--section-space);
   background-color: #fdfaf7; /* Мягкий фон под стиль проекта */
   min-height: 80vh;
 }
 
 .container {
-  max-width: 1000px;
+  max-width: var(--content-width);
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--gutter);
 }
 
 .page-title {
   text-align: center;
   color: #5e4e3b; /* Основной темный цвет из :root */
-  font-size: 36px;
-  margin-bottom: 50px;
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.15;
+  margin-bottom: 40px;
 }
 
 .promo-list {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 24px;
 }
 
 .promo-card {
   display: flex;
   background: white;
-  border-radius: 30px; /* Закругление как в AboutUs */
+  border-radius: var(--radius-card);
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(94, 78, 59, 0.05);
   transition: transform 0.3s ease;
@@ -135,7 +136,7 @@ const promos = computed(() =>
 
 .promo-content {
   flex: 1;
-  padding: 40px;
+  padding: var(--card-padding);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -144,7 +145,7 @@ const promos = computed(() =>
 .promo-title {
   color: #5e4e3b;
   font-size: 24px;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .promo-description {

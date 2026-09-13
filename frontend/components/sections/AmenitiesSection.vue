@@ -51,31 +51,30 @@ const iconFor = (name) => icons[name];
 
 <style lang="scss" scoped>
 .amenities {
-  padding: 80px 0;
+  padding: var(--section-space) 0;
 
   &__container {
-    max-width: 1200px;
+    max-width: var(--content-width);
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 var(--gutter);
   }
 
   &__head {
     text-align: center;
-    margin-bottom: 48px;
+    margin-bottom: 40px;
   }
 
   &__subtitle {
     color: var(--primary, #b9946e);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-size: 13px;
+    letter-spacing: 0.04em;
+    font-size: 14px;
     font-weight: 700;
     display: block;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   &__title {
-    font-size: clamp(28px, 4vw, 42px);
+    font-size: clamp(30px, 4vw, 44px);
     font-weight: 300;
     color: #3d2c17;
     line-height: 1.1;
@@ -85,15 +84,15 @@ const iconFor = (name) => icons[name];
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 48px;
-    margin-bottom: 64px;
-    padding: 32px;
+    gap: clamp(24px, 5vw, 56px);
+    margin-bottom: 48px;
+    padding: clamp(24px, 4vw, 36px);
     background: #fdfbfa;
     border: 1px solid #eee4d8;
     border-radius: 24px;
 
     @media (max-width: 600px) {
-      gap: 28px;
+      gap: 24px;
       padding: 28px 20px;
     }
   }
@@ -112,7 +111,6 @@ const iconFor = (name) => icons[name];
     &__label {
       margin-top: 8px;
       font-size: 13px;
-      text-transform: uppercase;
       letter-spacing: 0.04em;
       color: #a68b6a;
     }
@@ -121,7 +119,7 @@ const iconFor = (name) => icons[name];
   &__grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    gap: 20px;
 
     @media (max-width: 900px) {
       grid-template-columns: repeat(2, 1fr);
@@ -134,7 +132,7 @@ const iconFor = (name) => icons[name];
   .amenity {
     display: flex;
     align-items: flex-start;
-    gap: 18px;
+    gap: 16px;
     padding: 28px;
     background: #fff;
     border: 1px solid #eee4d8;

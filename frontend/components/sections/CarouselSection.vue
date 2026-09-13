@@ -164,19 +164,19 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .gallery {
-  padding: 60px 0;
+  padding: var(--section-space-tight) 0;
   background: #fff;
 
   &__container {
-    max-width: 1400px;
+    max-width: var(--content-width);
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 var(--gutter);
   }
 
   &__layout {
     display: grid;
     grid-template-columns: 1fr 300px;
-    gap: 20px;
+    gap: 16px;
     @media (max-width: 992px) {
       grid-template-columns: 1fr;
     }
@@ -184,7 +184,7 @@ onUnmounted(() => {
 
   &__main {
     position: relative;
-    border-radius: 30px;
+    border-radius: var(--radius-card);
     background: #000;
     overflow: hidden;
     aspect-ratio: 16 / 9;
