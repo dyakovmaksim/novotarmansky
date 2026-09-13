@@ -110,7 +110,7 @@ const currentCategory = ref<Category>("all");
 const config = useRuntimeConfig();
 const { data, pending, error } = await useFetch<GalleryImage[]>(
   `${config.public.apiBase}/gallery-images`,
-  { default: () => [] },
+  { default: () => [], server: false },
 );
 
 const allPhotos = computed<DisplayImage[]>(() => [
