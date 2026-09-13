@@ -36,6 +36,19 @@ ENV NODE_ENV=production
 ENV NITRO_PORT=3000
 ENV NITRO_HOST=0.0.0.0
 
+# Nuxt resolves public runtime config when Nitro starts, not only while the
+# client bundle is built. Keep the production values in the final image too.
+ARG NUXT_PUBLIC_API_BASE=/api
+ARG NUXT_PUBLIC_SITE_URL=http://localhost:3000
+ARG NUXT_PUBLIC_HOUSE_TITLE="Novotarmanskiy house"
+ARG NUXT_PUBLIC_HOUSE_PRICE_PER_NIGHT=5000
+ARG NUXT_PUBLIC_SAUNA_PRICE=3000
+ENV NUXT_PUBLIC_API_BASE=$NUXT_PUBLIC_API_BASE
+ENV NUXT_PUBLIC_SITE_URL=$NUXT_PUBLIC_SITE_URL
+ENV NUXT_PUBLIC_HOUSE_TITLE=$NUXT_PUBLIC_HOUSE_TITLE
+ENV NUXT_PUBLIC_HOUSE_PRICE_PER_NIGHT=$NUXT_PUBLIC_HOUSE_PRICE_PER_NIGHT
+ENV NUXT_PUBLIC_SAUNA_PRICE=$NUXT_PUBLIC_SAUNA_PRICE
+
 # Self-contained Nitro server bundle (.output already has everything it needs).
 COPY --from=builder /app/.output ./.output
 
