@@ -10,7 +10,10 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const uploadsDir =
     process.env.PROMOTIONS_UPLOAD_DIR ?? join(process.cwd(), 'uploads');
-  await mkdir(join(uploadsDir, 'promotions'), { recursive: true });
+  await Promise.all([
+    mkdir(join(uploadsDir, 'promotions'), { recursive: true }),
+    mkdir(join(uploadsDir, 'gallery'), { recursive: true }),
+  ]);
   app.useStaticAssets(uploadsDir, { prefix: '/api/uploads' });
 
   // All HTTP endpoints live under /api so a single domain can serve both the

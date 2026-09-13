@@ -10,6 +10,7 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { PromotionsService } from '../promotions/promotions.service';
+import { GalleryService } from '../gallery/gallery.service';
 
 type Photo = {
   file_id: string;
@@ -35,12 +36,15 @@ type PromotionDraft = {
   badge?: string;
   validUntil?: string;
 };
+type GalleryDraft = { category: GalleryCategory };
+type GalleryCategory = 'house' | 'interior' | 'territory' | 'sauna';
 
 @Injectable()
 export class TelegramService implements OnModuleInit, OnApplicationShutdown {
   constructor(
     private readonly prisma: PrismaService,
     private readonly promotions: PromotionsService,
+    private readonly gallery: GalleryService,
   ) {}
 
   private readonly logger = new Logger(TelegramService.name);
@@ -57,6 +61,8 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
   private readonly uploadsDir =
     process.env.PROMOTIONS_UPLOAD_DIR ?? join(process.cwd(), 'uploads');
   private readonly promotionDrafts = new Map<number, PromotionDraft>();
+  private readonly galleryDrafts = new Map<number, GalleryDraft>();
+  private archiveTimer?: NodeJS.Timeout;
   private lastUpdateId = 0;
   private stopped = false;
 
@@ -70,11 +76,25 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
     this.setMyCommands().catch((err) =>
       this.logger.warn(`setMyCommands failed: ${(err as Error).message}`),
     );
+    this.archiveFinishedBookings().catch((err) =>
+      this.logger.error('Could not archive finished bookings', err as Error),
+    );
+    this.archiveTimer = setInterval(
+      () =>
+        this.archiveFinishedBookings().catch((err) =>
+          this.logger.error(
+            'Could not archive finished bookings',
+            err as Error,
+          ),
+        ),
+      6 * 60 * 60 * 1000,
+    );
     this.startTelegramListener();
   }
 
   onApplicationShutdown(signal?: string) {
     this.stopped = true;
+    if (this.archiveTimer) clearInterval(this.archiveTimer);
     this.logger.log(`Telegram listener stopping (signal: ${signal ?? 'n/a'})`);
   }
 
@@ -175,6 +195,8 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
         { command: 'admin', description: 'Открыть панель управления' },
         { command: 'stats', description: 'Посмотреть сводку' },
         { command: 'promotions', description: 'Управлять акциями' },
+        { command: 'history', description: 'История завершённых заявок' },
+        { command: 'photos', description: 'Загрузить фото в галерею' },
         { command: 'cancel', description: 'Отменить текущее действие' },
         { command: 'help', description: 'Справка' },
       ],
@@ -184,7 +206,7 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
 
   private async adminMenuKeyboard() {
     const pending = await this.prisma.booking.count({
-      where: { status: 'PENDING' },
+      where: { archivedAt: null, status: 'PENDING' },
     });
     return {
       inline_keyboard: [
@@ -200,19 +222,41 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
         ],
         [
           { text: '🏷 Акции', callback_data: 'promos_0' },
+          { text: '🖼 Фото сайта', callback_data: 'gallery_menu' },
+        ],
+        [
+          { text: '🧾 История', callback_data: 'history_0' },
           { text: '📊 Сводка', callback_data: 'view_stats' },
         ],
       ],
     };
   }
 
+  private replyKeyboard() {
+    return {
+      keyboard: [
+        [{ text: '📋 Админка' }, { text: '🔔 Заявки' }],
+        [{ text: '🧾 История' }, { text: '🏷 Акции' }, { text: '🖼 Фото' }],
+      ],
+      resize_keyboard: true,
+      is_persistent: true,
+    };
+  }
+
   private async showAdminMenu(chatId: number, messageId?: number) {
-    const payload = {
+    const payload: any = {
       chat_id: chatId,
       text: `🏠 <b>${this.escapeHtml(this.houseTitle)}</b>\nПанель управления\n\nВыберите, что нужно сделать:`,
       parse_mode: 'HTML',
       reply_markup: await this.adminMenuKeyboard(),
     };
+    if (!messageId) {
+      await this.sendTg('sendMessage', {
+        chat_id: chatId,
+        text: 'Быстрые действия доступны в кнопках под строкой ввода.',
+        reply_markup: this.replyKeyboard(),
+      });
+    }
     return messageId
       ? this.sendTg('editMessageText', { ...payload, message_id: messageId })
       : this.sendTg('sendMessage', payload);
@@ -253,6 +297,7 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
     }
     if (text === '/cancel') {
       this.promotionDrafts.delete(chatId);
+      this.galleryDrafts.delete(chatId);
       await this.sendTg('sendMessage', {
         chat_id: chatId,
         text: 'Действие отменено. Откройте /admin, когда будете готовы.',
@@ -270,10 +315,32 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
         });
       return;
     }
-    if (text === '/start' || text === '/admin' || text === '🎛 Меню')
+    if (this.galleryDrafts.has(chatId)) {
+      if (message.photo?.length)
+        await this.handleGalleryPhoto(chatId, message.photo);
+      else
+        await this.sendTg('sendMessage', {
+          chat_id: chatId,
+          text: 'Сейчас нужна фотография. Для отмены используйте /cancel.',
+        });
+      return;
+    }
+    if (
+      text === '/start' ||
+      text === '/admin' ||
+      text === '🎛 Меню' ||
+      text === '📋 Админка'
+    )
       return this.showAdminMenu(chatId);
+    if (text === '🔔 Заявки')
+      return this.showBookingListMessage(chatId, 'pending');
+    if (text === '🧾 История' || text === '/history')
+      return this.showHistory(chatId);
     if (text === '/stats') return this.sendStatsMessage(chatId);
-    if (text === '/promotions') return this.showPromotions(chatId);
+    if (text === '/promotions' || text === '🏷 Акции')
+      return this.showPromotions(chatId);
+    if (text === '/photos' || text === '🖼 Фото')
+      return this.showGalleryMenu(chatId);
     if (text === '/help')
       await this.sendTg('sendMessage', {
         chat_id: chatId,
@@ -408,13 +475,120 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
     };
     for (const group of grouped) counts[group.status] = group._count._all;
     const upcoming = await this.prisma.booking.count({
-      where: { status: { not: 'CANCELLED' }, endDate: { gte: new Date() } },
+      where: {
+        archivedAt: null,
+        status: { not: 'CANCELLED' },
+        endDate: { gte: new Date() },
+      },
     });
     await this.sendTg('sendMessage', {
       chat_id: chatId,
       parse_mode: 'HTML',
       text: `📊 <b>Сводка</b>\n\n🔔 Новые заявки: <b>${counts.PENDING}</b>\n📅 Будущие заезды: <b>${upcoming}</b>\n✅ Подтверждено: <b>${counts.CONFIRMED}</b>\n❌ Отменено: <b>${counts.CANCELLED}</b>`,
     });
+  }
+
+  private async archiveFinishedBookings() {
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const result = await this.prisma.booking.updateMany({
+      where: { archivedAt: null, endDate: { lt: today } },
+      data: { archivedAt: new Date() },
+    });
+    if (result.count)
+      this.logger.log(`Archived ${result.count} finished booking(s)`);
+  }
+
+  private async showBookingListMessage(
+    chatId: number,
+    kind: 'pending' | 'upcoming',
+  ) {
+    const where =
+      kind === 'pending'
+        ? { archivedAt: null, status: 'PENDING' as BookingStatus }
+        : {
+            archivedAt: null,
+            status: { not: 'CANCELLED' as BookingStatus },
+            endDate: { gte: new Date() },
+          };
+    const bookings = await this.prisma.booking.findMany({
+      where,
+      orderBy:
+        kind === 'pending' ? { createdAt: 'desc' } : { startDate: 'asc' },
+      take: 8,
+    });
+    const heading = kind === 'pending' ? 'Новые заявки' : 'Ближайшие заезды';
+    const rows = bookings.length
+      ? bookings.map(
+          (booking) =>
+            `${this.statusEmoji(booking.status)} ${this.fmtDate(booking.startDate)}–${this.fmtDate(booking.endDate)} · ${this.escapeHtml(booking.customerName)}`,
+        )
+      : ['Нет записей.'];
+    await this.sendTg('sendMessage', {
+      chat_id: chatId,
+      parse_mode: 'HTML',
+      text: `<b>${heading}</b>\n\n${rows.join('\n')}`,
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Открыть список', callback_data: `${kind}_0` }],
+        ],
+      },
+    });
+  }
+
+  private async showHistory(
+    chatId: number,
+    messageId?: number,
+    requestedPage = 0,
+  ) {
+    await this.archiveFinishedBookings();
+    const bookings = await this.prisma.booking.findMany({
+      where: { OR: [{ archivedAt: { not: null } }, { status: 'CANCELLED' }] },
+      orderBy: [{ archivedAt: 'desc' }, { endDate: 'desc' }],
+    });
+    if (!bookings.length) {
+      const payload = {
+        chat_id: chatId,
+        text: '🧾 <b>История</b>\n\nЗавершённых и отменённых заявок пока нет.',
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🎛 В меню', callback_data: 'back_to_menu' }],
+          ],
+        },
+      };
+      return messageId
+        ? this.sendTg('editMessageText', { ...payload, message_id: messageId })
+        : this.sendTg('sendMessage', payload);
+    }
+    const page = Math.max(0, Math.min(requestedPage, bookings.length - 1));
+    const booking = bookings[page];
+    const nav: { text: string; callback_data: string }[] = [];
+    if (page) nav.push({ text: '◀️', callback_data: `history_${page - 1}` });
+    if (page < bookings.length - 1)
+      nav.push({ text: '▶️', callback_data: `history_${page + 1}` });
+    const keyboard: any[][] = nav.length ? [nav] : [];
+    keyboard.push(
+      [
+        {
+          text: '🗑 Удалить навсегда',
+          callback_data: `bookdelask_${booking.id}_${page}`,
+        },
+      ],
+      [{ text: '🎛 В меню', callback_data: 'back_to_menu' }],
+    );
+    const payload = {
+      chat_id: chatId,
+      text: this.formatBookingCard(booking, {
+        title: `🧾 История · ${page + 1} из ${bookings.length}`,
+        withPhone: true,
+      }),
+      parse_mode: 'HTML',
+      reply_markup: { inline_keyboard: keyboard },
+    };
+    return messageId
+      ? this.sendTg('editMessageText', { ...payload, message_id: messageId })
+      : this.sendTg('sendMessage', payload);
   }
 
   private async showBookingPage(
@@ -425,8 +599,9 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
   ) {
     const where =
       kind === 'pending'
-        ? { status: 'PENDING' as BookingStatus }
+        ? { archivedAt: null, status: 'PENDING' as BookingStatus }
         : {
+            archivedAt: null,
             status: { not: 'CANCELLED' as BookingStatus },
             endDate: { gte: new Date() },
           };
@@ -477,7 +652,11 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
 
   private async showCalendar(chatId: number, messageId: number) {
     const bookings = await this.prisma.booking.findMany({
-      where: { status: { not: 'CANCELLED' }, endDate: { gte: new Date() } },
+      where: {
+        archivedAt: null,
+        status: { not: 'CANCELLED' },
+        endDate: { gte: new Date() },
+      },
       orderBy: { startDate: 'asc' },
       take: 12,
     });
@@ -552,6 +731,166 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
       : this.sendTg('sendMessage', payload);
   }
 
+  private galleryCategoryLabel(category: GalleryCategory) {
+    return {
+      house: 'Дом снаружи',
+      interior: 'Интерьер',
+      territory: 'Территория',
+      sauna: 'Баня',
+    }[category];
+  }
+
+  private async showGalleryMenu(chatId: number, messageId?: number) {
+    const grouped = await this.prisma.galleryImage.groupBy({
+      by: ['category'],
+      _count: { _all: true },
+    });
+    const counts = new Map(
+      grouped.map((item) => [item.category, item._count._all]),
+    );
+    const categories: GalleryCategory[] = [
+      'house',
+      'interior',
+      'territory',
+      'sauna',
+    ];
+    const buttons = categories.map((category) => [
+      {
+        text: `${this.galleryCategoryLabel(category)} · ${counts.get(category) ?? 0}`,
+        callback_data: `galcat_${category}`,
+      },
+    ]);
+    const payload = {
+      chat_id: chatId,
+      parse_mode: 'HTML',
+      text: '🖼 <b>Фотогалерея сайта</b>\n\nВыберите раздел, затем отправьте фотографию. Она сразу появится на сайте.\n\nДля удаления откройте нужный раздел.',
+      reply_markup: {
+        inline_keyboard: [
+          ...buttons,
+          [{ text: '🎛 В меню', callback_data: 'back_to_menu' }],
+        ],
+      },
+    };
+    return messageId
+      ? this.sendTg('editMessageText', { ...payload, message_id: messageId })
+      : this.sendTg('sendMessage', payload);
+  }
+
+  private async showGalleryCategory(
+    chatId: number,
+    messageId: number,
+    category: GalleryCategory,
+    requestedPage = 0,
+  ) {
+    const images = await this.prisma.galleryImage.findMany({
+      where: { category },
+      orderBy: { createdAt: 'desc' },
+    });
+    const label = this.galleryCategoryLabel(category);
+    if (!images.length) {
+      return this.sendTg('editMessageText', {
+        chat_id: chatId,
+        message_id: messageId,
+        parse_mode: 'HTML',
+        text: `🖼 <b>${label}</b>\n\nВ этой категории пока нет загруженных фотографий.`,
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: '➕ Загрузить фото',
+                callback_data: `galnew_${category}`,
+              },
+            ],
+            [{ text: '⬅️ К категориям', callback_data: 'gallery_menu' }],
+          ],
+        },
+      });
+    }
+    const page = Math.max(0, Math.min(requestedPage, images.length - 1));
+    const image = images[page];
+    const nav: { text: string; callback_data: string }[] = [];
+    if (page)
+      nav.push({
+        text: '◀️',
+        callback_data: `galpage_${category}_${page - 1}`,
+      });
+    if (page < images.length - 1)
+      nav.push({
+        text: '▶️',
+        callback_data: `galpage_${category}_${page + 1}`,
+      });
+    const keyboard: any[][] = nav.length ? [nav] : [];
+    keyboard.push(
+      [{ text: '➕ Загрузить фото', callback_data: `galnew_${category}` }],
+      [
+        {
+          text: '🗑 Удалить это фото',
+          callback_data: `galdelask_${image.id}_${category}_${page}`,
+        },
+      ],
+      [{ text: '⬅️ К категориям', callback_data: 'gallery_menu' }],
+    );
+    return this.sendTg('editMessageText', {
+      chat_id: chatId,
+      message_id: messageId,
+      parse_mode: 'HTML',
+      text: `🖼 <b>${label}</b> · ${page + 1} из ${images.length}\n\nФото добавлено ${this.fmtDate(image.createdAt)}.`,
+      reply_markup: { inline_keyboard: keyboard },
+    });
+  }
+
+  private async handleGalleryPhoto(chatId: number, photos: Photo[]) {
+    const draft = this.galleryDrafts.get(chatId);
+    if (!draft) return;
+    const photo = photos[photos.length - 1];
+    if (photo.file_size && photo.file_size > 5 * 1024 * 1024)
+      return this.prompt(chatId, 'Файл больше 5 МБ. Отправьте фото поменьше.');
+    try {
+      const fileResponse = await this.sendTg('getFile', {
+        file_id: photo.file_id,
+      });
+      const fileData = await fileResponse.json();
+      const filePath = fileData.result?.file_path as string | undefined;
+      if (!fileData.ok || !filePath)
+        throw new Error('Telegram did not return a file path');
+      const image = await global.fetch(
+        `https://api.telegram.org/file/bot${this.botToken}/${filePath}`,
+      );
+      const bytes = Buffer.from(await image.arrayBuffer());
+      if (!image.ok || bytes.length > 5 * 1024 * 1024)
+        throw new Error('Image is unavailable or too large');
+      const filename = `${randomUUID()}.jpg`;
+      await mkdir(join(this.uploadsDir, 'gallery'), { recursive: true });
+      await writeFile(join(this.uploadsDir, 'gallery', filename), bytes);
+      await this.gallery.create(
+        draft.category,
+        `/api/uploads/gallery/${filename}`,
+      );
+      this.galleryDrafts.delete(chatId);
+      await this.sendTg('sendMessage', {
+        chat_id: chatId,
+        parse_mode: 'HTML',
+        text: `✅ Фото добавлено в раздел «${this.galleryCategoryLabel(draft.category)}» и уже видно в галерее сайта.`,
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: '🖼 Управлять фото',
+                callback_data: `galcat_${draft.category}`,
+              },
+            ],
+          ],
+        },
+      });
+    } catch (error) {
+      this.logger.error('Gallery image upload failed', error as Error);
+      await this.prompt(
+        chatId,
+        'Не удалось сохранить фото. Отправьте его ещё раз или используйте /cancel.',
+      );
+    }
+  }
+
   private async handleCallbackQuery(callback: TelegramCallback) {
     const { data } = callback;
     const chatId = callback.message.chat.id;
@@ -575,6 +914,90 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
       if (data === 'calendar') {
         await answer();
         return this.showCalendar(chatId, messageId);
+      }
+      if (data === 'gallery_menu') {
+        await answer();
+        return this.showGalleryMenu(chatId, messageId);
+      }
+      if (data.startsWith('history_')) {
+        await answer();
+        return this.showHistory(chatId, messageId, Number(data.split('_')[1]));
+      }
+      if (data.startsWith('galcat_')) {
+        await answer();
+        return this.showGalleryCategory(
+          chatId,
+          messageId,
+          data.split('_')[1] as GalleryCategory,
+        );
+      }
+      if (data.startsWith('galpage_')) {
+        const [, category, page] = data.split('_');
+        await answer();
+        return this.showGalleryCategory(
+          chatId,
+          messageId,
+          category as GalleryCategory,
+          Number(page),
+        );
+      }
+      if (data.startsWith('galnew_')) {
+        const category = data.split('_')[1] as GalleryCategory;
+        this.galleryDrafts.set(chatId, { category });
+        await answer();
+        return this.prompt(
+          chatId,
+          `Отправьте фото для раздела «${this.galleryCategoryLabel(category)}». Максимум 5 МБ.`,
+        );
+      }
+      if (data.startsWith('galdelask_')) {
+        const [, id, category, page] = data.split('_');
+        await answer();
+        return this.sendTg('editMessageText', {
+          chat_id: chatId,
+          message_id: messageId,
+          text: 'Удалить это фото из галереи сайта? Это действие нельзя отменить.',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: 'Да, удалить',
+                  callback_data: `galdel_${id}_${category}_${page}`,
+                },
+                {
+                  text: 'Не удалять',
+                  callback_data: `galpage_${category}_${page}`,
+                },
+              ],
+            ],
+          },
+        });
+      }
+      if (data.startsWith('galdel_')) {
+        const [, id, category, page] = data.split('_');
+        const image = await this.gallery.findOne(id);
+        if (!image) {
+          await answer('Фото уже удалено');
+          return this.showGalleryCategory(
+            chatId,
+            messageId,
+            category as GalleryCategory,
+            0,
+          );
+        }
+        await this.gallery.remove(id);
+        const filename = image.imagePath.split('/').pop();
+        if (filename)
+          await unlink(join(this.uploadsDir, 'gallery', filename)).catch(
+            () => undefined,
+          );
+        await answer('Фото удалено');
+        return this.showGalleryCategory(
+          chatId,
+          messageId,
+          category as GalleryCategory,
+          Number(page),
+        );
       }
       if (data.startsWith('pending_')) {
         await answer();
@@ -601,6 +1024,29 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
           messageId,
           Number(data.split('_')[1]),
         );
+      }
+      if (data.startsWith('bookdelask_')) {
+        const [, id, page] = data.split('_');
+        await answer();
+        return this.sendTg('editMessageText', {
+          chat_id: chatId,
+          message_id: messageId,
+          text: 'Удалить эту запись из истории навсегда? Вернуть её будет нельзя.',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                { text: 'Да, удалить', callback_data: `bookdel_${id}_${page}` },
+                { text: 'Не удалять', callback_data: `history_${page}` },
+              ],
+            ],
+          },
+        });
+      }
+      if (data.startsWith('bookdel_')) {
+        const [, id, page] = data.split('_');
+        await this.prisma.booking.delete({ where: { id } });
+        await answer('Запись удалена');
+        return this.showHistory(chatId, messageId, Number(page));
       }
       if (data === 'promo_new') {
         this.promotionDrafts.set(chatId, { step: 'title' });

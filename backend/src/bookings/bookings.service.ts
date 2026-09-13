@@ -24,6 +24,7 @@ export class BookingsService {
     // Cancelled bookings free their dates up again — don't count them.
     const conflictingBooking = await this.prisma.booking.findFirst({
       where: {
+        archivedAt: null,
         status: { not: 'CANCELLED' },
         OR: [
           { startDate: { lte: startDate }, endDate: { gte: startDate } },
@@ -57,7 +58,10 @@ export class BookingsService {
   }
 
   findAll() {
-    return this.prisma.booking.findMany({ orderBy: { startDate: 'asc' } });
+    return this.prisma.booking.findMany({
+      where: { archivedAt: null },
+      orderBy: { startDate: 'asc' },
+    });
   }
 
   findOne(id: string) {
@@ -79,7 +83,7 @@ export class BookingsService {
   // CANCELLED bookings are excluded so their dates become free again.
   async getOccupiedDates(): Promise<string[]> {
     const bookings = await this.prisma.booking.findMany({
-      where: { status: { not: 'CANCELLED' } },
+      where: { archivedAt: null, status: { not: 'CANCELLED' } },
       select: { startDate: true, endDate: true },
     });
 

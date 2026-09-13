@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { TelegramModule } from './telegram/telegram.module';
 import { PromotionsModule } from './promotions/promotions.module';
+import { GalleryModule } from './gallery/gallery.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PromotionsModule } from './promotions/promotions.module';
     TelegramModule,
     BookingsModule,
     PromotionsModule,
+    GalleryModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

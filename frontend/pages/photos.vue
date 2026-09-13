@@ -4,39 +4,43 @@
 
     <main class="gallery-page">
       <div class="container">
-        <h1 class="page-title">Галерея</h1>
+        <header class="gallery-heading">
+          <h1>Фотогалерея дома</h1>
+          <p>
+            Выберите, что хотите посмотреть: сам дом, интерьер, участок или
+            баню.
+          </p>
+        </header>
 
-        <div class="filter-menu">
+        <div class="filter-menu" aria-label="Категории фотографий">
           <button
-            v-for="cat in categories"
-            :key="cat.id"
-            :class="['filter-btn', { active: currentCategory === cat.id }]"
-            @click="currentCategory = cat.id"
+            v-for="category in categories"
+            :key="category.id"
+            :class="['filter-btn', { active: currentCategory === category.id }]"
+            type="button"
+            @click="currentCategory = category.id"
           >
-            {{ cat.name }}
+            {{ category.name }}
+            <span>{{ countByCategory(category.id) }}</span>
           </button>
         </div>
 
-        <div class="gallery-grid">
-          <div
-            v-for="(photo, index) in filteredPhotos"
-            :key="index"
+        <div v-if="filteredPhotos.length" class="gallery-grid">
+          <figure
+            v-for="photo in filteredPhotos"
+            :key="photo.id"
             class="gallery-item"
           >
-            <NuxtImg
-              :src="photo.src"
-              :alt="photo.category"
-              width="600"
-              format="webp"
-              quality="75"
-              loading="lazy"
-            />
-          </div>
+            <img :src="photo.imagePath" :alt="photo.alt" loading="lazy" />
+          </figure>
         </div>
 
-        <div v-if="filteredPhotos.length === 0" class="empty-msg">
+        <p v-else-if="!pending" class="empty-msg">
           Фотографии в этой категории скоро появятся.
-        </div>
+        </p>
+        <p v-if="error" class="empty-msg">
+          Не удалось загрузить новые фотографии. Попробуйте обновить страницу.
+        </p>
       </div>
     </main>
 
@@ -44,107 +48,211 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from "vue";
-
+<script setup lang="ts">
 useSeoMeta({
   title: "Фотогалерея — Novotarmanskiy house",
   description:
     "Фото дома, интерьера, бани и придомовой территории. Посмотрите, как выглядит ваш отдых.",
 });
 
-// Категории и список фото — в utils/photos.ts (auto-imported).
-const categories = PHOTO_CATEGORIES;
-const currentCategory = ref("all");
+type Category = "all" | "house" | "interior" | "territory" | "sauna";
+interface GalleryImage {
+  id: string;
+  category: Exclude<Category, "all">;
+  imagePath: string;
+}
+interface DisplayImage extends GalleryImage {
+  alt: string;
+}
 
-const filteredPhotos = computed(() => {
-  if (currentCategory.value === "all") return PHOTOS;
-  return PHOTOS.filter((p) => p.category === currentCategory.value);
-});
+const categories: { id: Category; name: string }[] = [
+  { id: "all", name: "Все фото" },
+  { id: "house", name: "Дом" },
+  { id: "interior", name: "Интерьер" },
+  { id: "territory", name: "Территория" },
+  { id: "sauna", name: "Баня" },
+];
+
+const basePhotos: DisplayImage[] = [
+  {
+    id: "base-house",
+    category: "house",
+    imagePath: "/images/house.jpg",
+    alt: "Загородный дом",
+  },
+  {
+    id: "base-interior-1",
+    category: "interior",
+    imagePath: "/images/carousel/carousel1.jpg",
+    alt: "Кухня и обеденная зона",
+  },
+  {
+    id: "base-interior-2",
+    category: "interior",
+    imagePath: "/images/carousel/carousel4.jpg",
+    alt: "Комната отдыха",
+  },
+  {
+    id: "base-territory",
+    category: "territory",
+    imagePath: "/images/carousel/carousel2.jpg",
+    alt: "Территория дома",
+  },
+  {
+    id: "base-sauna",
+    category: "sauna",
+    imagePath: "/images/sauna.png",
+    alt: "Баня",
+  },
+];
+
+const currentCategory = ref<Category>("all");
+const config = useRuntimeConfig();
+const { data, pending, error } = await useFetch<GalleryImage[]>(
+  `${config.public.apiBase}/gallery-images`,
+  { default: () => [] },
+);
+
+const allPhotos = computed<DisplayImage[]>(() => [
+  ...basePhotos,
+  ...(data.value ?? []).map((photo) => ({
+    ...photo,
+    alt:
+      categories.find((category) => category.id === photo.category)?.name ??
+      "Фотография дома",
+  })),
+]);
+const filteredPhotos = computed(() =>
+  currentCategory.value === "all"
+    ? allPhotos.value
+    : allPhotos.value.filter(
+        (photo) => photo.category === currentCategory.value,
+      ),
+);
+const countByCategory = (category: Category) =>
+  category === "all"
+    ? allPhotos.value.length
+    : allPhotos.value.filter((photo) => photo.category === category).length;
 </script>
 
 <style scoped>
 .gallery-page {
-  padding: 60px 0;
   min-height: 80vh;
-  background-color: #fcfcfc;
+  padding: 64px 0 88px;
+  background: #fcfcfc;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
-.page-title {
+.gallery-heading {
+  max-width: 640px;
+  margin: 0 auto 34px;
   text-align: center;
-  margin-bottom: 40px;
-  font-size: 36px;
-  color: #5e4e3b; /* Ваш основной цвет из :root */
 }
 
-/* Меню фильтров */
+.gallery-heading h1 {
+  margin: 0 0 12px;
+  color: #5e4e3b;
+  font-size: clamp(30px, 4vw, 42px);
+}
+
+.gallery-heading p {
+  margin: 0;
+  color: #746b61;
+  line-height: 1.55;
+}
+
 .filter-menu {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 40px;
+  gap: 8px;
+  margin-bottom: 32px;
 }
 
 .filter-btn {
-  padding: 10px 25px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 8px 15px;
   border: 1px solid #d8b48b;
+  border-radius: 22px;
   background: transparent;
-  border-radius: 25px;
-  cursor: pointer;
-  transition: all 0.3s ease;
   color: #5e4e3b;
+  cursor: pointer;
+  font: inherit;
 }
 
-.filter-btn:hover {
-  background-color: #f5ece2;
+.filter-btn span {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 11px;
+  background: #f2e8db;
+  font-size: 12px;
+}
+
+.filter-btn:hover,
+.filter-btn:focus-visible {
+  background: #f5ece2;
+  outline: none;
 }
 
 .filter-btn.active {
-  background-color: #d8b48b;
-  color: white;
+  border-color: #5e4e3b;
+  background: #5e4e3b;
+  color: #fff;
 }
 
-/* Сетка галереи */
+.filter-btn.active span {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
 }
 
 .gallery-item {
-  height: 250px;
-  border-radius: 20px;
+  aspect-ratio: 4 / 3;
+  margin: 0;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border-radius: 18px;
+  background: #eee7de;
 }
 
 .gallery-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  transition: transform 260ms ease;
 }
 
 .gallery-item:hover img {
-  transform: scale(1.05);
+  transform: scale(1.025);
 }
 
 .empty-msg {
+  margin: 44px 0;
   text-align: center;
-  color: #999;
-  margin-top: 50px;
+  color: #746b61;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 760px) {
+  .gallery-page {
+    padding: 42px 0 64px;
+  }
   .gallery-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .filter-menu {
+    justify-content: flex-start;
   }
 }
 </style>
