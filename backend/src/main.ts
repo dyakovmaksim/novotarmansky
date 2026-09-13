@@ -2,10 +2,16 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { mkdir } from 'node:fs/promises';
+import { join } from 'node:path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const uploadsDir =
+    process.env.PROMOTIONS_UPLOAD_DIR ?? join(process.cwd(), 'uploads');
+  await mkdir(join(uploadsDir, 'promotions'), { recursive: true });
+  app.useStaticAssets(uploadsDir, { prefix: '/api/uploads' });
 
   // All HTTP endpoints live under /api so a single domain can serve both the
   // frontend (/) and the API (/api/*) behind one nginx without CORS dance.

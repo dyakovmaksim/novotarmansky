@@ -43,6 +43,10 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY package.json ./
 
+# Telegram promotion photos are written here. A named volume is mounted at
+# runtime, but this ownership is also used when Docker initializes it.
+RUN mkdir -p /app/uploads/promotions && chown -R node:node /app/uploads
+
 # Run as the non-root user already provided by the node image.
 USER node
 

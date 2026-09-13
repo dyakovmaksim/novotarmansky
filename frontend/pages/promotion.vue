@@ -7,16 +7,9 @@
         <h1 class="page-title">Акции и спецпредложения</h1>
 
         <div class="promo-list">
-          <div v-for="(promo, index) in promos" :key="index" class="promo-card">
+          <article v-for="promo in promos" :key="promo.id" class="promo-card">
             <div class="promo-image">
-              <NuxtImg
-                :src="promo.image"
-                :alt="promo.title"
-                width="800"
-                format="webp"
-                quality="78"
-                loading="lazy"
-              />
+              <img :src="promo.image" :alt="promo.title" loading="lazy" />
               <div class="promo-badge" v-if="promo.badge">
                 {{ promo.badge }}
               </div>
@@ -27,12 +20,23 @@
               <p class="promo-description">{{ promo.description }}</p>
 
               <div class="promo-footer">
-                <span class="promo-date">Срок действия: {{ promo.date }}</span>
-                <button class="promo-btn">Забронировать</button>
+                <span class="promo-date"
+                  >Срок действия: {{ promo.validUntil }}</span
+                >
+                <NuxtLink to="/booking" class="promo-btn"
+                  >Забронировать</NuxtLink
+                >
               </div>
             </div>
-          </div>
+          </article>
         </div>
+
+        <p v-if="!promos.length && !pending" class="promo-empty">
+          Новые предложения появятся здесь совсем скоро.
+        </p>
+        <p v-if="error" class="promo-empty">
+          Не удалось загрузить акции. Попробуйте обновить страницу.
+        </p>
       </div>
     </main>
 
@@ -40,15 +44,30 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 useSeoMeta({
   title: "Акции — Novotarmanskiy house",
   description:
     "Скидки на будние дни, бесплатная баня в выходные, акция на день рождения. Действующие предложения.",
 });
 
-// Список акций — в utils/promotions.ts (auto-imported).
-const promos = PROMOTIONS;
+interface Promotion {
+  id: string;
+  title: string;
+  description: string;
+  imagePath: string;
+  badge?: string | null;
+  validUntil: string;
+}
+
+const config = useRuntimeConfig();
+const { data, pending, error } = await useFetch<Promotion[]>(
+  `${config.public.apiBase}/promotions`,
+  { default: () => [] },
+);
+const promos = computed(() =>
+  (data.value ?? []).map((promo) => ({ ...promo, image: promo.imagePath })),
+);
 </script>
 
 <style scoped>
@@ -154,6 +173,13 @@ const promos = PROMOTIONS;
   border-radius: 25px;
   cursor: pointer;
   transition: background 0.3s;
+  text-decoration: none;
+}
+
+.promo-empty {
+  text-align: center;
+  color: #777;
+  padding: 36px 0;
 }
 
 .promo-btn:hover {

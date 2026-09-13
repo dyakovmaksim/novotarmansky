@@ -4,34 +4,47 @@ import {
   OnApplicationShutdown,
   OnModuleInit,
 } from '@nestjs/common';
-import { Booking } from '@prisma/client';
+import { Booking, BookingStatus } from '@prisma/client';
+import { mkdir, unlink, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { PromotionsService } from '../promotions/promotions.service';
 
+type Photo = {
+  file_id: string;
+  file_size?: number;
+  width: number;
+  height: number;
+};
+type TelegramMessage = { chat: { id: number }; text?: string; photo?: Photo[] };
+type TelegramCallback = {
+  id: string;
+  data: string;
+  message: { chat: { id: number }; message_id: number; text?: string };
+};
 interface TelegramUpdate {
   update_id: number;
-  message?: {
-    chat: { id: number };
-    text?: string;
-  };
-  callback_query?: {
-    id: string;
-    data: string;
-    message: {
-      chat: { id: number };
-      message_id: number;
-      text: string;
-    };
-  };
+  message?: TelegramMessage;
+  callback_query?: TelegramCallback;
 }
+type PromotionDraft = {
+  step: 'title' | 'description' | 'badge' | 'validUntil' | 'image';
+  title?: string;
+  description?: string;
+  badge?: string;
+  validUntil?: string;
+};
 
 @Injectable()
 export class TelegramService implements OnModuleInit, OnApplicationShutdown {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly promotions: PromotionsService,
+  ) {}
 
   private readonly logger = new Logger(TelegramService.name);
   private readonly botToken = process.env.TELEGRAM_BOT_TOKEN ?? '';
-  // Comma-separated list of chat IDs that get booking notifications and can
-  // use /admin. One ID is fine; multiple are supported for shared management.
   private readonly adminChatIds = (process.env.TELEGRAM_ADMIN_CHAT_ID ?? '')
     .split(',')
     .map((id) => id.trim())
@@ -41,19 +54,19 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
     process.env.HOUSE_PRICE_PER_NIGHT ?? '5000',
   );
   private readonly saunaPrice = Number(process.env.SAUNA_PRICE ?? '3000');
+  private readonly uploadsDir =
+    process.env.PROMOTIONS_UPLOAD_DIR ?? join(process.cwd(), 'uploads');
+  private readonly promotionDrafts = new Map<number, PromotionDraft>();
   private lastUpdateId = 0;
   private stopped = false;
-
-  // ─────────────────────────── LIFECYCLE ───────────────────────────
 
   onModuleInit() {
     if (!this.botToken || this.adminChatIds.length === 0) {
       this.logger.warn(
-        'Telegram bot disabled: set TELEGRAM_BOT_TOKEN and TELEGRAM_ADMIN_CHAT_ID in .env to enable it.',
+        'Telegram bot disabled: set TELEGRAM_BOT_TOKEN and TELEGRAM_ADMIN_CHAT_ID.',
       );
       return;
     }
-    // Register the popup command menu Telegram shows next to the input box.
     this.setMyCommands().catch((err) =>
       this.logger.warn(`setMyCommands failed: ${(err as Error).message}`),
     );
@@ -61,27 +74,27 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
   }
 
   onApplicationShutdown(signal?: string) {
-    if (this.stopped) return;
     this.stopped = true;
     this.logger.log(`Telegram listener stopping (signal: ${signal ?? 'n/a'})`);
   }
 
-  // ─────────────────────────── PUBLIC API ───────────────────────────
-
   async notifyNewBooking(booking: Booking): Promise<void> {
-    if (this.adminChatIds.length === 0) return;
-
-    const text = this.formatNewBookingMessage(booking);
     for (const chatId of this.adminChatIds) {
       await this.sendTg('sendMessage', {
         chat_id: chatId,
-        text,
+        text: this.formatBookingCard(booking, {
+          title: '🔔 Новая заявка',
+          withPhone: true,
+        }),
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
             [
-              { text: '✅ Подтвердить', callback_data: `approve_${booking.id}` },
-              { text: '❌ Отменить', callback_data: `cancel_${booking.id}` },
+              {
+                text: '✅ Подтвердить',
+                callback_data: `approve_${booking.id}`,
+              },
+              { text: 'Отменить', callback_data: `cancelask_${booking.id}` },
             ],
           ],
         },
@@ -89,232 +102,298 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
     }
   }
 
-  // ─────────────────────────── FORMATTING ───────────────────────────
-
-  private statusEmoji(status: string): string {
-    if (status === 'CONFIRMED') return '✅';
-    if (status === 'CANCELLED') return '❌';
-    return '⏳';
-  }
-
-  private statusLabel(status: string): string {
-    if (status === 'CONFIRMED') return 'Подтверждено';
-    if (status === 'CANCELLED') return 'Отменено';
-    return 'Ожидает';
-  }
-
-  /** Number of nights between two dates, minimum 1. */
-  private calcNights(startDate: Date, endDate: Date): number {
-    const ms = endDate.getTime() - startDate.getTime();
-    return Math.max(1, Math.ceil(ms / (1000 * 60 * 60 * 24)));
-  }
-
-  /** Russian plural for "ночь". */
-  private nightsWord(n: number): string {
-    const mod10 = n % 10;
-    const mod100 = n % 100;
-    if (mod10 === 1 && mod100 !== 11) return 'ночь';
-    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'ночи';
-    return 'ночей';
-  }
-
-  private guestsLine(adults: number, children: number): string {
-    const parts = [`${adults} взр.`];
-    if (children > 0) parts.push(`${children} дет.`);
-    return parts.join(', ');
-  }
-
-  private formatMoney(rub: number): string {
-    return `${rub.toLocaleString('ru-RU')} ₽`;
-  }
-
-  /** ru-RU date like "10.07.2026". */
-  private fmtDate(d: Date): string {
-    return new Date(d).toLocaleDateString('ru-RU');
-  }
-
-  /**
-   * Returns { nights, total, totalLine } where totalLine breaks down the sum
-   * as "5 000 ₽ × 3 ноч. + 3 000 ₽ баня = 18 000 ₽" so the admin sees the math.
-   */
-  private priceBreakdown(booking: Booking) {
-    const nights = this.calcNights(booking.startDate, booking.endDate);
-    const base = nights * this.housePrice;
-    const sauna = booking.hasSauna ? this.saunaPrice : 0;
-    const total = base + sauna;
-    const parts = [`${this.formatMoney(this.housePrice)} × ${nights} ноч.`];
-    if (sauna > 0) parts.push(`${this.formatMoney(sauna)} баня`);
-    return {
-      nights,
-      total,
-      totalLine: `${parts.join(' + ')} = <b>${this.formatMoney(total)}</b>`,
-    };
-  }
-
-  private formatNewBookingMessage(booking: Booking): string {
-    const { nights, totalLine } = this.priceBreakdown(booking);
-    const start = this.fmtDate(booking.startDate);
-    const end = this.fmtDate(booking.endDate);
-    const guests = this.guestsLine(booking.adults, booking.children);
-    const saunaLine = booking.hasSauna ? '\n🧖 <b>Баня:</b> заказана' : '';
-
-    return (
-      `🔔 <b>НОВАЯ ЗАЯВКА</b>\n` +
-      `━━━━━━━━━━━━━━━━━━\n\n` +
-      `🏠 <b>${this.houseTitle}</b>\n\n` +
-      `👤 ${booking.customerName}\n` +
-      `📞 <code>${booking.phone}</code>\n\n` +
-      `📅 <b>Период:</b> ${start} — ${end}\n` +
-      `🌙 <b>Ночей:</b> ${nights} ${this.nightsWord(nights)}\n` +
-      `👥 <b>Гости:</b> ${guests}` +
-      saunaLine +
-      `\n\n💰 <b>Итого:</b>\n${totalLine}`
+  private escapeHtml(value: string) {
+    return value.replace(
+      /[&<>]/g,
+      (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[char] as string,
     );
+  }
+
+  private statusEmoji(status: BookingStatus) {
+    return status === 'CONFIRMED' ? '✅' : status === 'CANCELLED' ? '❌' : '⏳';
+  }
+
+  private statusLabel(status: BookingStatus) {
+    return status === 'CONFIRMED'
+      ? 'Подтверждено'
+      : status === 'CANCELLED'
+        ? 'Отменено'
+        : 'Ожидает решения';
+  }
+
+  private calcNights(startDate: Date, endDate: Date) {
+    return Math.max(
+      1,
+      Math.ceil((endDate.getTime() - startDate.getTime()) / 86_400_000),
+    );
+  }
+
+  private nightsWord(value: number) {
+    const mod10 = value % 10;
+    const mod100 = value % 100;
+    return mod10 === 1 && mod100 !== 11
+      ? 'ночь'
+      : mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)
+        ? 'ночи'
+        : 'ночей';
+  }
+
+  private formatMoney(value: number) {
+    return `${value.toLocaleString('ru-RU')} ₽`;
+  }
+
+  private fmtDate(date: Date) {
+    return new Date(date).toLocaleDateString('ru-RU');
   }
 
   private formatBookingCard(
     booking: Booking,
-    options: { withPhone?: boolean; title?: string } = {},
-  ): string {
-    const { nights, totalLine } = this.priceBreakdown(booking);
-    const start = this.fmtDate(booking.startDate);
-    const end = this.fmtDate(booking.endDate);
-    const guests = this.guestsLine(booking.adults, booking.children);
-    const saunaLine = booking.hasSauna ? '\n🧖 <b>Баня:</b> заказана' : '';
-    const phoneLine = options.withPhone
-      ? `\n📞 <code>${booking.phone}</code>`
+    options: { title?: string; withPhone?: boolean } = {},
+  ) {
+    const nights = this.calcNights(booking.startDate, booking.endDate);
+    const sauna = booking.hasSauna ? this.saunaPrice : 0;
+    const total = nights * this.housePrice + sauna;
+    const header = options.title ? `<b>${options.title}</b>\n\n` : '';
+    const guests = `${booking.adults} взр.${booking.children ? `, ${booking.children} дет.` : ''}`;
+    const phone = options.withPhone
+      ? `\n📞 <code>${this.escapeHtml(booking.phone)}</code>`
       : '';
-    const head = options.title
-      ? `<b>${options.title}</b>\n━━━━━━━━━━━━━━━━━━\n\n`
-      : '';
-
+    const saunaLine = booking.hasSauna ? '\n🧖 Баня включена' : '';
     return (
-      head +
-      `${this.statusEmoji(booking.status)} <b>Статус:</b> ${this.statusLabel(booking.status)}\n\n` +
-      `👤 ${booking.customerName}${phoneLine}\n\n` +
-      `📅 ${start} — ${end} (${nights} ${this.nightsWord(nights)})\n` +
-      `👥 ${guests}` +
-      saunaLine +
-      `\n\n💰 ${totalLine}`
+      `${header}${this.statusEmoji(booking.status)} <b>${this.statusLabel(booking.status)}</b>\n\n` +
+      `👤 ${this.escapeHtml(booking.customerName)}${phone}\n\n` +
+      `📅 ${this.fmtDate(booking.startDate)} — ${this.fmtDate(booking.endDate)}\n` +
+      `🌙 ${nights} ${this.nightsWord(nights)} · 👥 ${guests}${saunaLine}\n\n` +
+      `💰 ${this.formatMoney(this.housePrice)} × ${nights}${sauna ? ` + ${this.formatMoney(sauna)} баня` : ''}\n` +
+      `<b>Итого: ${this.formatMoney(total)}</b>`
     );
   }
-
-  // ─────────────────────────── BOT COMMANDS / MENU ───────────────────────────
 
   private async setMyCommands() {
     await this.sendTg('setMyCommands', {
       commands: [
-        { command: 'admin', description: 'Панель управления бронированиями' },
-        { command: 'stats', description: 'Статистика по статусам' },
-        { command: 'help', description: 'Справка по командам' },
+        { command: 'admin', description: 'Открыть панель управления' },
+        { command: 'stats', description: 'Посмотреть сводку' },
+        { command: 'promotions', description: 'Управлять акциями' },
+        { command: 'cancel', description: 'Отменить текущее действие' },
+        { command: 'help', description: 'Справка' },
       ],
       scope: { type: 'all_private_chats' },
     });
   }
 
-  private adminMenuKeyboard() {
+  private async adminMenuKeyboard() {
+    const pending = await this.prisma.booking.count({
+      where: { status: 'PENDING' },
+    });
     return {
       inline_keyboard: [
-        [{ text: '📅 Актуальные брони', callback_data: 'page_0' }],
-        [{ text: '📊 Статистика', callback_data: 'view_stats' }],
+        [
+          {
+            text: pending ? `🔔 Новые заявки · ${pending}` : '🔔 Новые заявки',
+            callback_data: 'pending_0',
+          },
+        ],
+        [
+          { text: '📅 Ближайшие заезды', callback_data: 'upcoming_0' },
+          { text: '🗓 Занятые даты', callback_data: 'calendar' },
+        ],
+        [
+          { text: '🏷 Акции', callback_data: 'promos_0' },
+          { text: '📊 Сводка', callback_data: 'view_stats' },
+        ],
       ],
     };
   }
 
-  private async startTelegramListener() {
-    this.logger.log('🤖 Telegram бот-слушатель запущен');
+  private async showAdminMenu(chatId: number, messageId?: number) {
+    const payload = {
+      chat_id: chatId,
+      text: `🏠 <b>${this.escapeHtml(this.houseTitle)}</b>\nПанель управления\n\nВыберите, что нужно сделать:`,
+      parse_mode: 'HTML',
+      reply_markup: await this.adminMenuKeyboard(),
+    };
+    return messageId
+      ? this.sendTg('editMessageText', { ...payload, message_id: messageId })
+      : this.sendTg('sendMessage', payload);
+  }
 
+  private async startTelegramListener() {
+    this.logger.log('Telegram admin bot started');
     while (!this.stopped) {
       try {
-        const url = `https://api.telegram.org/bot${this.botToken}/getUpdates?offset=${this.lastUpdateId + 1}&timeout=30`;
-        const response = await global.fetch(url);
+        const response = await global.fetch(
+          `https://api.telegram.org/bot${this.botToken}/getUpdates?offset=${this.lastUpdateId + 1}&timeout=30`,
+        );
         const data = await response.json();
-
-        if (data.ok && data.result && Array.isArray(data.result)) {
+        if (data.ok && Array.isArray(data.result))
           for (const update of data.result as TelegramUpdate[]) {
             this.lastUpdateId = update.update_id;
-
-            if (update.message && update.message.text) {
-              await this.handleTextMessage(update.message);
-            }
-
-            if (update.callback_query) {
+            if (update.message) await this.handleMessage(update.message);
+            if (update.callback_query)
               await this.handleCallbackQuery(update.callback_query);
-            }
           }
-        }
       } catch (error) {
-        this.logger.error('Ошибка в цикле опроса Telegram', error as Error);
+        this.logger.error('Telegram polling error', error as Error);
       }
-
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
 
-  private async handleTextMessage(message: {
-    chat: { id: number };
-    text?: string;
-  }) {
-    const text = message.text ?? '';
+  private async handleMessage(message: TelegramMessage) {
     const chatId = message.chat.id;
-
+    const text = message.text?.trim();
     if (!this.adminChatIds.includes(String(chatId))) {
-      // Polite refusal for non-admins so the bot doesn't look broken.
-      if (text === '/start' || text === '/help' || text.startsWith('/')) {
+      if (text?.startsWith('/'))
         await this.sendTg('sendMessage', {
           chat_id: chatId,
-          text: '⛔ Доступ ограничен. Этот бот предназначен только для администраторов.',
+          text: '⛔ Доступ ограничен.',
         });
-      }
       return;
     }
-
-    if (text === '/start') {
+    if (text === '/cancel') {
+      this.promotionDrafts.delete(chatId);
       await this.sendTg('sendMessage', {
         chat_id: chatId,
-        text:
-          `👋 <b>Добро пожаловать в админ-бот ${this.houseTitle}</b>\n` +
-          `━━━━━━━━━━━━━━━━━━\n\n` +
-          `Сюда приходят уведомления о новых заявках на бронирование и здесь же ими можно управлять.\n\n` +
-          `Доступные команды:\n` +
-          `• /admin — открыть панель управления\n` +
-          `• /stats — статистика по статусам\n` +
-          `• /help — эта справка`,
-        parse_mode: 'HTML',
+        text: 'Действие отменено. Откройте /admin, когда будете готовы.',
       });
       return;
     }
-
-    if (text === '/help') {
-      await this.sendTg('sendMessage', {
-        chat_id: chatId,
-        text:
-          `<b>Справка</b>\n` +
-          `━━━━━━━━━━━━━━━━━━\n\n` +
-          `📅 <b>Актуальные брони</b> — листалка по всем заявкам с подробностями.\n\n` +
-          `📊 <b>Статистика</b> — счётчики по статусам PENDING/CONFIRMED/CANCELLED.\n\n` +
-          `<b>Статусы:</b>\n` +
-          `⏳ Ожидает — новая заявка, требует подтверждения\n` +
-          `✅ Подтверждено — даты заблокированы в календаре\n` +
-          `❌ Отменено — даты снова свободны`,
-        parse_mode: 'HTML',
-      });
+    if (this.promotionDrafts.has(chatId)) {
+      if (message.photo?.length)
+        await this.handlePromotionPhoto(chatId, message.photo);
+      else if (text) await this.handlePromotionText(chatId, text);
+      else
+        await this.sendTg('sendMessage', {
+          chat_id: chatId,
+          text: 'Нужен текст или фотография. Для отмены используйте /cancel.',
+        });
       return;
     }
-
-    if (text === '/stats') {
-      await this.sendStatsMessage(chatId);
-      return;
-    }
-
-    if (text === '/admin' || text === '🎛 Меню') {
+    if (text === '/start' || text === '/admin' || text === '🎛 Меню')
+      return this.showAdminMenu(chatId);
+    if (text === '/stats') return this.sendStatsMessage(chatId);
+    if (text === '/promotions') return this.showPromotions(chatId);
+    if (text === '/help')
       await this.sendTg('sendMessage', {
         chat_id: chatId,
-        text: `⚙️ <b>Панель управления</b>\nВыберите раздел:`,
         parse_mode: 'HTML',
-        reply_markup: this.adminMenuKeyboard(),
+        text: '<b>Как пользоваться ботом</b>\n\n🔔 Новые заявки — подтвердить или отменить запрос.\n📅 Ближайшие заезды — все актуальные гости.\n🗓 Занятые даты — быстрый обзор календаря.\n🏷 Акции — добавить акцию с фото или удалить неактуальную.\n\nВ любой момент /cancel отменяет незавершённое добавление акции.',
       });
+  }
+
+  private async handlePromotionText(chatId: number, text: string) {
+    const draft = this.promotionDrafts.get(chatId);
+    if (!draft) return;
+    if (draft.step === 'title') {
+      if (text.length < 3 || text.length > 80)
+        return this.prompt(chatId, 'Название — от 3 до 80 символов.');
+      draft.title = text;
+      draft.step = 'description';
+      return this.prompt(
+        chatId,
+        'Опишите условия акции одним понятным сообщением.',
+      );
     }
+    if (draft.step === 'description') {
+      if (text.length < 10 || text.length > 700)
+        return this.prompt(chatId, 'Описание — от 10 до 700 символов.');
+      draft.description = text;
+      draft.step = 'badge';
+      return this.prompt(
+        chatId,
+        'Короткий бейдж, например «−20%» или «Подарок». Если не нужен — отправьте «-».',
+      );
+    }
+    if (draft.step === 'badge') {
+      if (text !== '-' && text.length > 24)
+        return this.prompt(chatId, 'Бейдж — до 24 символов, либо «-».');
+      draft.badge = text === '-' ? undefined : text;
+      draft.step = 'validUntil';
+      return this.prompt(
+        chatId,
+        'Срок действия, например «до 30.11.2026». Если бессрочно — отправьте «-».',
+      );
+    }
+    if (draft.step === 'validUntil') {
+      if (text.length > 40)
+        return this.prompt(chatId, 'Срок — до 40 символов, либо «-».');
+      draft.validUntil = text === '-' ? 'бессрочно' : text;
+      draft.step = 'image';
+      return this.prompt(
+        chatId,
+        'Отправьте одну фотографию для акции как обычное фото. Максимум 5 МБ.',
+      );
+    }
+    return this.prompt(
+      chatId,
+      'Сейчас нужна фотография. Пришлите её как фото или используйте /cancel.',
+    );
+  }
+
+  private async handlePromotionPhoto(chatId: number, photos: Photo[]) {
+    const draft = this.promotionDrafts.get(chatId);
+    if (
+      !draft ||
+      draft.step !== 'image' ||
+      !draft.title ||
+      !draft.description ||
+      !draft.validUntil
+    )
+      return;
+    const photo = photos[photos.length - 1];
+    if (photo.file_size && photo.file_size > 5 * 1024 * 1024)
+      return this.prompt(chatId, 'Файл больше 5 МБ. Отправьте фото поменьше.');
+    try {
+      const fileResponse = await this.sendTg('getFile', {
+        file_id: photo.file_id,
+      });
+      const fileData = await fileResponse.json();
+      const filePath = fileData.result?.file_path as string | undefined;
+      if (!fileData.ok || !filePath)
+        throw new Error('Telegram did not return a file path');
+      const image = await global.fetch(
+        `https://api.telegram.org/file/bot${this.botToken}/${filePath}`,
+      );
+      const bytes = Buffer.from(await image.arrayBuffer());
+      if (!image.ok || bytes.length > 5 * 1024 * 1024)
+        throw new Error('Image is unavailable or too large');
+      const filename = `${randomUUID()}.jpg`;
+      await mkdir(join(this.uploadsDir, 'promotions'), { recursive: true });
+      await writeFile(join(this.uploadsDir, 'promotions', filename), bytes);
+      await this.promotions.create({
+        title: draft.title,
+        description: draft.description,
+        badge: draft.badge,
+        validUntil: draft.validUntil,
+        imagePath: `/api/uploads/promotions/${filename}`,
+      });
+      this.promotionDrafts.delete(chatId);
+      await this.sendTg('sendMessage', {
+        chat_id: chatId,
+        parse_mode: 'HTML',
+        text: `✅ <b>Акция опубликована</b>\n\n«${this.escapeHtml(draft.title)}» уже видна на странице акций сайта.`,
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🏷 Открыть список акций', callback_data: 'promos_0' }],
+            [{ text: '🎛 В меню', callback_data: 'back_to_menu' }],
+          ],
+        },
+      });
+    } catch (error) {
+      this.logger.error('Promotion image upload failed', error as Error);
+      await this.prompt(
+        chatId,
+        'Не удалось сохранить фото. Отправьте его ещё раз или используйте /cancel.',
+      );
+    }
+  }
+
+  private async prompt(chatId: number, text: string) {
+    return this.sendTg('sendMessage', {
+      chat_id: chatId,
+      text: `${text}\n\n/cancel — отменить`,
+    });
   }
 
   private async sendStatsMessage(chatId: number) {
@@ -327,315 +406,355 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
       CONFIRMED: 0,
       CANCELLED: 0,
     };
-    for (const g of grouped) counts[g.status] = g._count._all;
-    const total = counts.PENDING + counts.CONFIRMED + counts.CANCELLED;
-
+    for (const group of grouped) counts[group.status] = group._count._all;
+    const upcoming = await this.prisma.booking.count({
+      where: { status: { not: 'CANCELLED' }, endDate: { gte: new Date() } },
+    });
     await this.sendTg('sendMessage', {
       chat_id: chatId,
-      text:
-        `📊 <b>Статистика</b>\n` +
-        `━━━━━━━━━━━━━━━━━━\n\n` +
-        `🏠 <b>${this.houseTitle}</b>\n\n` +
-        `Всего записей: <b>${total}</b>\n\n` +
-        `⏳ Ожидают: <b>${counts.PENDING}</b>\n` +
-        `✅ Подтверждены: <b>${counts.CONFIRMED}</b>\n` +
-        `❌ Отменены: <b>${counts.CANCELLED}</b>`,
       parse_mode: 'HTML',
+      text: `📊 <b>Сводка</b>\n\n🔔 Новые заявки: <b>${counts.PENDING}</b>\n📅 Будущие заезды: <b>${upcoming}</b>\n✅ Подтверждено: <b>${counts.CONFIRMED}</b>\n❌ Отменено: <b>${counts.CANCELLED}</b>`,
     });
   }
 
-  // ─────────────────────────── CALLBACKS ───────────────────────────
-
-  private async handleCallbackQuery(callbackQuery: {
-    id: string;
-    data: string;
-    message: { chat: { id: number }; message_id: number; text: string };
-  }) {
-    const data = callbackQuery.data;
-    const chatId = callbackQuery.message.chat.id;
-    const messageId = callbackQuery.message.message_id;
-
-    const answer = async (msg?: string) => {
-      await this.sendTg('answerCallbackQuery', {
-        callback_query_id: callbackQuery.id,
-        text: msg || undefined,
+  private async showBookingPage(
+    chatId: number,
+    messageId: number,
+    kind: 'pending' | 'upcoming',
+    requestedPage: number,
+  ) {
+    const where =
+      kind === 'pending'
+        ? { status: 'PENDING' as BookingStatus }
+        : {
+            status: { not: 'CANCELLED' as BookingStatus },
+            endDate: { gte: new Date() },
+          };
+    const bookings = await this.prisma.booking.findMany({
+      where,
+      orderBy:
+        kind === 'pending' ? { createdAt: 'desc' } : { startDate: 'asc' },
+    });
+    const title = kind === 'pending' ? 'Новые заявки' : 'Ближайшие заезды';
+    if (!bookings.length)
+      return this.sendTg('editMessageText', {
+        chat_id: chatId,
+        message_id: messageId,
+        text: `${kind === 'pending' ? '✨' : '📭'} <b>${title}</b>\n\n${kind === 'pending' ? 'Новых заявок нет.' : 'Предстоящих заездов нет.'}`,
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🎛 В меню', callback_data: 'back_to_menu' }],
+          ],
+        },
       });
-    };
+    const page = Math.max(0, Math.min(requestedPage, bookings.length - 1));
+    const booking = bookings[page];
+    const nav: { text: string; callback_data: string }[] = [];
+    if (page) nav.push({ text: '◀️', callback_data: `${kind}_${page - 1}` });
+    if (page < bookings.length - 1)
+      nav.push({ text: '▶️', callback_data: `${kind}_${page + 1}` });
+    const keyboard: any[][] = nav.length ? [nav] : [];
+    keyboard.push(
+      [
+        {
+          text: 'Открыть заявку',
+          callback_data: `manage_${booking.id}_${kind}_${page}`,
+        },
+      ],
+      [{ text: '🎛 В меню', callback_data: 'back_to_menu' }],
+    );
+    return this.sendTg('editMessageText', {
+      chat_id: chatId,
+      message_id: messageId,
+      parse_mode: 'HTML',
+      text: this.formatBookingCard(booking, {
+        title: `${title} · ${page + 1} из ${bookings.length}`,
+      }),
+      reply_markup: { inline_keyboard: keyboard },
+    });
+  }
 
-    if (!this.adminChatIds.includes(String(chatId))) {
-      await answer('Доступ ограничен');
-      return;
+  private async showCalendar(chatId: number, messageId: number) {
+    const bookings = await this.prisma.booking.findMany({
+      where: { status: { not: 'CANCELLED' }, endDate: { gte: new Date() } },
+      orderBy: { startDate: 'asc' },
+      take: 12,
+    });
+    const lines = bookings.length
+      ? bookings.map(
+          (booking) =>
+            `${this.statusEmoji(booking.status)} ${this.fmtDate(booking.startDate)}–${this.fmtDate(booking.endDate)} · ${this.escapeHtml(booking.customerName)}`,
+        )
+      : ['Свободных бронирований пока нет.'];
+    return this.sendTg('editMessageText', {
+      chat_id: chatId,
+      message_id: messageId,
+      parse_mode: 'HTML',
+      text: `🗓 <b>Занятые даты</b>\n\n${lines.join('\n')}`,
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '📅 Ближайшие заезды', callback_data: 'upcoming_0' }],
+          [{ text: '🎛 В меню', callback_data: 'back_to_menu' }],
+        ],
+      },
+    });
+  }
+
+  private async showPromotions(
+    chatId: number,
+    messageId?: number,
+    requestedPage = 0,
+  ) {
+    const promos = await this.promotions.findAll();
+    if (!promos.length) {
+      const payload = {
+        chat_id: chatId,
+        text: '🏷 <b>Акции</b>\n\nСейчас на сайте нет акций. Добавьте первую — она сразу появится на странице «Акции».',
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '➕ Добавить акцию', callback_data: 'promo_new' }],
+            [{ text: '🎛 В меню', callback_data: 'back_to_menu' }],
+          ],
+        },
+      };
+      return messageId
+        ? this.sendTg('editMessageText', { ...payload, message_id: messageId })
+        : this.sendTg('sendMessage', payload);
     }
+    const page = Math.max(0, Math.min(requestedPage, promos.length - 1));
+    const promo = promos[page];
+    const nav: { text: string; callback_data: string }[] = [];
+    if (page) nav.push({ text: '◀️', callback_data: `promos_${page - 1}` });
+    if (page < promos.length - 1)
+      nav.push({ text: '▶️', callback_data: `promos_${page + 1}` });
+    const keyboard: any[][] = nav.length ? [nav] : [];
+    keyboard.push(
+      [{ text: '➕ Добавить акцию', callback_data: 'promo_new' }],
+      [
+        {
+          text: '🗑 Удалить акцию',
+          callback_data: `promodelask_${promo.id}_${page}`,
+        },
+      ],
+      [{ text: '🎛 В меню', callback_data: 'back_to_menu' }],
+    );
+    const text = `🏷 <b>Акция ${page + 1} из ${promos.length}</b>\n\n<b>${this.escapeHtml(promo.title)}</b>${promo.badge ? ` · ${this.escapeHtml(promo.badge)}` : ''}\n${this.escapeHtml(promo.description)}\n\nСрок: ${this.escapeHtml(promo.validUntil)}`;
+    const payload = {
+      chat_id: chatId,
+      text,
+      parse_mode: 'HTML',
+      reply_markup: { inline_keyboard: keyboard },
+    };
+    return messageId
+      ? this.sendTg('editMessageText', { ...payload, message_id: messageId })
+      : this.sendTg('sendMessage', payload);
+  }
 
+  private async handleCallbackQuery(callback: TelegramCallback) {
+    const { data } = callback;
+    const chatId = callback.message.chat.id;
+    const messageId = callback.message.message_id;
+    const answer = (text?: string) =>
+      this.sendTg('answerCallbackQuery', {
+        callback_query_id: callback.id,
+        text,
+      });
+    if (!this.adminChatIds.includes(String(chatId)))
+      return answer('Доступ ограничен');
     try {
-      switch (true) {
-        case data === 'view_stats': {
-          await answer('Загружаю...');
-          await this.sendStatsMessage(chatId);
-          return;
+      if (data === 'back_to_menu') {
+        await answer();
+        return this.showAdminMenu(chatId, messageId);
+      }
+      if (data === 'view_stats') {
+        await answer();
+        return this.sendStatsMessage(chatId);
+      }
+      if (data === 'calendar') {
+        await answer();
+        return this.showCalendar(chatId, messageId);
+      }
+      if (data.startsWith('pending_')) {
+        await answer();
+        return this.showBookingPage(
+          chatId,
+          messageId,
+          'pending',
+          Number(data.split('_')[1]),
+        );
+      }
+      if (data.startsWith('upcoming_')) {
+        await answer();
+        return this.showBookingPage(
+          chatId,
+          messageId,
+          'upcoming',
+          Number(data.split('_')[1]),
+        );
+      }
+      if (data.startsWith('promos_')) {
+        await answer();
+        return this.showPromotions(
+          chatId,
+          messageId,
+          Number(data.split('_')[1]),
+        );
+      }
+      if (data === 'promo_new') {
+        this.promotionDrafts.set(chatId, { step: 'title' });
+        await answer();
+        return this.prompt(
+          chatId,
+          'Новая акция. Отправьте её короткое название.',
+        );
+      }
+      if (data.startsWith('promodelask_')) {
+        const [, id, page] = data.split('_');
+        await answer();
+        return this.sendTg('editMessageText', {
+          chat_id: chatId,
+          message_id: messageId,
+          text: 'Удалить эту акцию с сайта? Это действие нельзя отменить.',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: 'Да, удалить',
+                  callback_data: `promodel_${id}_${page}`,
+                },
+                { text: 'Не удалять', callback_data: `promos_${page}` },
+              ],
+            ],
+          },
+        });
+      }
+      if (data.startsWith('promodel_')) {
+        const [, id, page] = data.split('_');
+        const promo = await this.promotions.findOne(id);
+        if (!promo) {
+          await answer('Акция уже удалена');
+          return this.showPromotions(chatId, messageId, 0);
         }
-
-        case data === 'back_to_menu': {
-          await answer();
-          await this.sendTg('editMessageText', {
-            chat_id: chatId,
-            message_id: messageId,
-            text: `⚙️ <b>Панель управления</b>\nВыберите раздел:`,
-            parse_mode: 'HTML',
-            reply_markup: this.adminMenuKeyboard(),
-          });
-          return;
+        await this.promotions.remove(id);
+        const filename = promo.imagePath.split('/').pop();
+        if (filename)
+          await unlink(join(this.uploadsDir, 'promotions', filename)).catch(
+            () => undefined,
+          );
+        await answer('Акция удалена');
+        return this.showPromotions(chatId, messageId, Number(page));
+      }
+      if (data.startsWith('manage_')) {
+        const [, id, source, page] = data.split('_');
+        const booking = await this.prisma.booking.findUnique({ where: { id } });
+        if (!booking) {
+          await answer('Заявка не найдена');
+          return this.showBookingPage(
+            chatId,
+            messageId,
+            source === 'pending' ? 'pending' : 'upcoming',
+            Number(page),
+          );
         }
-
-        case data.startsWith('page_'): {
-          await answer();
-          const page = parseInt(data.split('_')[1], 10);
-
-          const allBookings = await this.prisma.booking.findMany({
-            orderBy: { startDate: 'asc' },
-          });
-
-          if (allBookings.length === 0) {
-            await this.sendTg('editMessageText', {
-              chat_id: chatId,
-              message_id: messageId,
-              text: '📭 Актуальных бронирований пока нет.',
-              reply_markup: {
-                inline_keyboard: [
-                  [
-                    {
-                      text: '🎛 В главное меню',
-                      callback_data: 'back_to_menu',
-                    },
-                  ],
-                ],
-              },
-            });
-            return;
-          }
-
-          const total = allBookings.length;
-          const currentPage = page >= total ? total - 1 : page < 0 ? 0 : page;
-          const b = allBookings[currentPage];
-
-          const cardText = this.formatBookingCard(b, {
-            title: `Бронь ${currentPage + 1} из ${total}`,
-          });
-
-          const navRow: { text: string; callback_data: string }[] = [];
-          if (currentPage > 0) {
-            navRow.push({
-              text: '◀️ Назад',
-              callback_data: `page_${currentPage - 1}`,
-            });
-          }
-          if (currentPage < total - 1) {
-            navRow.push({
-              text: 'Вперёд ▶️',
-              callback_data: `page_${currentPage + 1}`,
-            });
-          }
-
-          const inlineKeyboard: any[][] = [];
-          if (navRow.length > 0) inlineKeyboard.push(navRow);
-          inlineKeyboard.push([
+        const buttons: any[][] = [
+          [
+            { text: '📞 Позвонить', url: `tel:${booking.phone}` },
             {
-              text: '⚙️ Управление',
-              callback_data: `manage_${b.id}_${currentPage}`,
+              text: '💬 WhatsApp',
+              url: `https://wa.me/${booking.phone.replace(/\D/g, '')}`,
             },
+          ],
+        ];
+        if (booking.status === 'PENDING')
+          buttons.push([
+            { text: '✅ Подтвердить', callback_data: `approve_${id}` },
+            { text: 'Отменить', callback_data: `cancelask_${id}` },
           ]);
-          inlineKeyboard.push([
-            { text: '🎛 В главное меню', callback_data: 'back_to_menu' },
+        else if (booking.status === 'CONFIRMED')
+          buttons.push([
+            { text: 'Отменить бронь', callback_data: `cancelask_${id}` },
           ]);
-
-          await this.sendTg('editMessageText', {
-            chat_id: chatId,
-            message_id: messageId,
-            text: cardText,
-            parse_mode: 'HTML',
-            reply_markup: { inline_keyboard: inlineKeyboard },
-          });
-          return;
-        }
-
-        case data.startsWith('manage_'): {
-          await answer();
-          const parts = data.split('_');
-          const bId = parts[1];
-          const pageIndex = parts[2] || '0';
-
-          const b = await this.prisma.booking.findUnique({
-            where: { id: bId },
-          });
-
-          if (!b) {
-            await this.sendTg('sendMessage', {
-              chat_id: chatId,
-              text: '❌ Бронирование уже удалено или не найдено.',
-            });
-            return;
-          }
-
-          const cardText = this.formatBookingCard(b, {
-            title: 'Управление бронью',
+        buttons.push([
+          { text: '⬅️ К списку', callback_data: `${source}_${page}` },
+        ]);
+        await answer();
+        return this.sendTg('editMessageText', {
+          chat_id: chatId,
+          message_id: messageId,
+          parse_mode: 'HTML',
+          text: this.formatBookingCard(booking, {
+            title: 'Заявка',
             withPhone: true,
-          });
-
-          const manageButtons: any[][] = [
-            [{ text: '📞 Позвонить гостю', url: `tel:${b.phone}` }],
-          ];
-          if (b.status === 'PENDING') {
-            manageButtons.push([
-              { text: '✅ Подтвердить', callback_data: `approve_${b.id}` },
-              { text: '❌ Отменить', callback_data: `cancel_${b.id}` },
-            ]);
-          } else if (b.status === 'CONFIRMED') {
-            manageButtons.push([
-              { text: '❌ Отменить', callback_data: `cancel_${b.id}` },
-            ]);
-          }
-          manageButtons.push([
-            {
-              text: '🗑 Удалить из базы',
-              callback_data: `forcedel_${b.id}_${pageIndex}`,
-            },
-          ]);
-          manageButtons.push([
-            {
-              text: '⬅️ К списку',
-              callback_data: `page_${pageIndex}`,
-            },
-          ]);
-
-          await this.sendTg('editMessageText', {
-            chat_id: chatId,
-            message_id: messageId,
-            text: cardText,
-            parse_mode: 'HTML',
-            reply_markup: { inline_keyboard: manageButtons },
-          });
-          return;
-        }
-
-        case data.startsWith('forcedel_'): {
-          const parts = data.split('_');
-          const bookingId = parts[1];
-          const pageIndex = parseInt(parts[2], 10);
-
-          await this.prisma.booking.delete({ where: { id: bookingId } });
-          await answer('Бронь удалена');
-
-          const allBookings = await this.prisma.booking.findMany({
-            orderBy: { startDate: 'asc' },
-          });
-
-          if (allBookings.length === 0) {
-            await this.sendTg('editMessageText', {
-              chat_id: chatId,
-              message_id: messageId,
-              text: '📭 Актуальных бронирований больше нет.',
-              reply_markup: {
-                inline_keyboard: [
-                  [
-                    {
-                      text: '🎛 В главное меню',
-                      callback_data: 'back_to_menu',
-                    },
-                  ],
-                ],
-              },
-            });
-            return;
-          }
-
-          const targetPage =
-            pageIndex >= allBookings.length
-              ? allBookings.length - 1
-              : pageIndex;
-          const targetBooking = allBookings[targetPage];
-
-          const navRow: { text: string; callback_data: string }[] = [];
-          if (targetPage > 0)
-            navRow.push({
-              text: '◀️ Назад',
-              callback_data: `page_${targetPage - 1}`,
-            });
-          if (targetPage < allBookings.length - 1)
-            navRow.push({
-              text: 'Вперёд ▶️',
-              callback_data: `page_${targetPage + 1}`,
-            });
-
-          const inlineKeyboard: any[][] = [];
-          if (navRow.length > 0) inlineKeyboard.push(navRow);
-          inlineKeyboard.push([
-            {
-              text: '⚙️ Управление',
-              callback_data: `manage_${targetBooking.id}_${targetPage}`,
-            },
-          ]);
-          inlineKeyboard.push([
-            { text: '🎛 В главное меню', callback_data: 'back_to_menu' },
-          ]);
-
-          await this.sendTg('editMessageText', {
-            chat_id: chatId,
-            message_id: messageId,
-            text: this.formatBookingCard(targetBooking, {
-              title: `Бронь ${targetPage + 1} из ${allBookings.length}`,
-            }),
-            parse_mode: 'HTML',
-            reply_markup: { inline_keyboard: inlineKeyboard },
-          });
-          return;
-        }
-
-        case data.startsWith('approve_') || data.startsWith('cancel_'): {
-          const parts = data.split('_');
-          const action = parts[0];
-          const bookingId = parts[1];
-          let statusLine = '';
-
-          if (action === 'approve') {
-            await this.prisma.booking.update({
-              where: { id: bookingId },
-              data: { status: 'CONFIRMED' },
-            });
-            statusLine = '🟢 Бронирование подтверждено!';
-            await answer('Подтверждено');
-          } else {
-            await this.prisma.booking.update({
-              where: { id: bookingId },
-              data: { status: 'CANCELLED' },
-            });
-            statusLine = '🔴 Бронирование отменено. Даты освобождены.';
-            await answer('Отменено');
-          }
-
-          const originalText = callbackQuery.message.text || '';
-          await this.sendTg('editMessageText', {
-            chat_id: chatId,
-            message_id: messageId,
-            text: `${originalText}\n\n━━━━━━━━━━━━━━━━━━\n${statusLine}`,
-            parse_mode: 'HTML',
-          });
-          return;
-        }
+          }),
+          reply_markup: { inline_keyboard: buttons },
+        });
+      }
+      if (data.startsWith('cancelask_')) {
+        const id = data.split('_')[1];
+        await answer();
+        return this.sendTg('editMessageText', {
+          chat_id: chatId,
+          message_id: messageId,
+          text: 'Отменить бронирование? Даты снова станут доступны на сайте.',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                { text: 'Да, отменить', callback_data: `cancel_${id}` },
+                {
+                  text: 'Не отменять',
+                  callback_data: `manage_${id}_upcoming_0`,
+                },
+              ],
+            ],
+          },
+        });
+      }
+      if (data.startsWith('approve_') || data.startsWith('cancel_')) {
+        const [action, id] = data.split('_');
+        const status: BookingStatus =
+          action === 'approve' ? 'CONFIRMED' : 'CANCELLED';
+        const booking = await this.prisma.booking.update({
+          where: { id },
+          data: { status },
+        });
+        await answer(status === 'CONFIRMED' ? 'Подтверждено' : 'Отменено');
+        return this.sendTg('editMessageText', {
+          chat_id: chatId,
+          message_id: messageId,
+          parse_mode: 'HTML',
+          text: this.formatBookingCard(booking, {
+            title:
+              status === 'CONFIRMED'
+                ? '✅ Бронирование подтверждено'
+                : '❌ Бронирование отменено',
+            withPhone: true,
+          }),
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '🎛 В меню', callback_data: 'back_to_menu' }],
+            ],
+          },
+        });
       }
     } catch (error) {
-      this.logger.error('❌ Ошибка обработки кнопки ТГ', error as Error);
-      await answer('Произошла ошибка');
+      this.logger.error('Telegram callback error', error as Error);
+      await answer('Не удалось выполнить действие');
     }
   }
 
-  // ─────────────────────────── HTTP ───────────────────────────
-
-  private async sendTg(method: string, body: any) {
-    const url = `https://api.telegram.org/bot${this.botToken}/${method}`;
-    return global.fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+  private async sendTg(method: string, body: unknown) {
+    const response = await global.fetch(
+      `https://api.telegram.org/bot${this.botToken}/${method}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      },
+    );
+    if (!response.ok)
+      throw new Error(`Telegram ${method} returned ${response.status}`);
+    return response;
   }
 }

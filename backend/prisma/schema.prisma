@@ -27,3 +27,15 @@ model Booking {
   status       BookingStatus @default(PENDING)
   createdAt    DateTime      @default(now())
 }
+
+// Promotions are managed by the private Telegram admin bot and shown publicly
+// on the website. Images live in the persistent uploads volume.
+model Promotion {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  badge       String?
+  validUntil  String   @default("бессрочно")
+  imagePath   String
+  createdAt   DateTime @default(now())
+}

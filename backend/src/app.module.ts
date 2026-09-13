@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { TelegramModule } from './telegram/telegram.module';
+import { PromotionsModule } from './promotions/promotions.module';
 
 @Module({
   imports: [
@@ -15,11 +16,9 @@ import { TelegramModule } from './telegram/telegram.module';
     PrismaModule,
     TelegramModule,
     BookingsModule,
+    PromotionsModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
-  ],
+  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
