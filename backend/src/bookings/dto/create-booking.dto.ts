@@ -33,13 +33,13 @@ export class CreateBookingDto {
   @IsOptional()
   @IsInt()
   @Min(1, { message: 'Минимум 1 взрослый' })
-  @Max(20, { message: 'Слишком много взрослых' })
+  @Max(8, { message: 'Максимум 8 взрослых' })
   adults?: number;
 
   @IsOptional()
   @IsInt()
   @Min(0)
-  @Max(20)
+  @Max(8)
   children?: number;
 
   // Опциональная доп.услуга — заказ бани к заезду. UI на /booking выводит её

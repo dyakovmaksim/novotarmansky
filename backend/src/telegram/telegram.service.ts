@@ -29,6 +29,8 @@ interface TelegramUpdate {
   message?: TelegramMessage;
   callback_query?: TelegramCallback;
 }
+type TelegramApiResponse<T> = { ok: boolean; result?: T };
+type TelegramFileResult = { file_path?: string };
 type PromotionDraft = {
   step: 'title' | 'description' | 'badge' | 'validUntil' | 'image';
   title?: string;
@@ -80,16 +82,17 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
       this.logger.error('Could not archive finished bookings', err as Error),
     );
     this.archiveTimer = setInterval(
-      () =>
-        this.archiveFinishedBookings().catch((err) =>
+      () => {
+        void this.archiveFinishedBookings().catch((err) =>
           this.logger.error(
             'Could not archive finished bookings',
             err as Error,
           ),
-        ),
+        );
+      },
       6 * 60 * 60 * 1000,
     );
-    this.startTelegramListener();
+    void this.startTelegramListener();
   }
 
   onApplicationShutdown(signal?: string) {
@@ -127,6 +130,27 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
       /[&<>]/g,
       (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[char] as string,
     );
+  }
+
+  private isJpeg(bytes: Buffer) {
+    return (
+      bytes.length >= 4 &&
+      bytes[0] === 0xff &&
+      bytes[1] === 0xd8 &&
+      bytes[2] === 0xff
+    );
+  }
+
+  private async readTelegramResponse<T>(response: Response) {
+    const data: unknown = await response.json();
+    if (
+      !data ||
+      typeof data !== 'object' ||
+      !('ok' in data) ||
+      typeof data.ok !== 'boolean'
+    )
+      throw new Error('Telegram returned an invalid response');
+    return data as TelegramApiResponse<T>;
   }
 
   private statusEmoji(status: BookingStatus) {
@@ -269,9 +293,10 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
         const response = await global.fetch(
           `https://api.telegram.org/bot${this.botToken}/getUpdates?offset=${this.lastUpdateId + 1}&timeout=30`,
         );
-        const data = await response.json();
+        const data =
+          await this.readTelegramResponse<TelegramUpdate[]>(response);
         if (data.ok && Array.isArray(data.result))
-          for (const update of data.result as TelegramUpdate[]) {
+          for (const update of data.result) {
             this.lastUpdateId = update.update_id;
             if (update.message) await this.handleMessage(update.message);
             if (update.callback_query)
@@ -415,15 +440,16 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
       const fileResponse = await this.sendTg('getFile', {
         file_id: photo.file_id,
       });
-      const fileData = await fileResponse.json();
-      const filePath = fileData.result?.file_path as string | undefined;
+      const fileData =
+        await this.readTelegramResponse<TelegramFileResult>(fileResponse);
+      const filePath = fileData.result?.file_path;
       if (!fileData.ok || !filePath)
         throw new Error('Telegram did not return a file path');
       const image = await global.fetch(
         `https://api.telegram.org/file/bot${this.botToken}/${filePath}`,
       );
       const bytes = Buffer.from(await image.arrayBuffer());
-      if (!image.ok || bytes.length > 5 * 1024 * 1024)
+      if (!image.ok || bytes.length > 5 * 1024 * 1024 || !this.isJpeg(bytes))
         throw new Error('Image is unavailable or too large');
       const filename = `${randomUUID()}.jpg`;
       await mkdir(join(this.uploadsDir, 'promotions'), { recursive: true });
@@ -849,15 +875,16 @@ export class TelegramService implements OnModuleInit, OnApplicationShutdown {
       const fileResponse = await this.sendTg('getFile', {
         file_id: photo.file_id,
       });
-      const fileData = await fileResponse.json();
-      const filePath = fileData.result?.file_path as string | undefined;
+      const fileData =
+        await this.readTelegramResponse<TelegramFileResult>(fileResponse);
+      const filePath = fileData.result?.file_path;
       if (!fileData.ok || !filePath)
         throw new Error('Telegram did not return a file path');
       const image = await global.fetch(
         `https://api.telegram.org/file/bot${this.botToken}/${filePath}`,
       );
       const bytes = Buffer.from(await image.arrayBuffer());
-      if (!image.ok || bytes.length > 5 * 1024 * 1024)
+      if (!image.ok || bytes.length > 5 * 1024 * 1024 || !this.isJpeg(bytes))
         throw new Error('Image is unavailable or too large');
       const filename = `${randomUUID()}.jpg`;
       await mkdir(join(this.uploadsDir, 'gallery'), { recursive: true });

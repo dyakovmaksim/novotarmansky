@@ -1,8 +1,15 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
-import { UpdateBookingDto } from './dto/update-booking.dto';
+
+const MAX_GUESTS = 8;
+const MAX_STAY_NIGHTS = 31;
 
 @Injectable()
 export class BookingsService {
@@ -19,6 +26,18 @@ export class BookingsService {
 
     if (endDate <= startDate) {
       throw new ConflictException('endDate должна быть позже startDate.');
+    }
+    const guests = (dto.adults ?? 1) + (dto.children ?? 0);
+    if (guests > MAX_GUESTS) {
+      throw new BadRequestException(`Максимум гостей — ${MAX_GUESTS}.`);
+    }
+    const nights = Math.ceil(
+      (endDate.getTime() - startDate.getTime()) / 86_400_000,
+    );
+    if (nights > MAX_STAY_NIGHTS) {
+      throw new BadRequestException(
+        `Максимальная длительность бронирования — ${MAX_STAY_NIGHTS} ночь.`,
+      );
     }
 
     // Cancelled bookings free their dates up again — don't count them.
@@ -54,29 +73,9 @@ export class BookingsService {
       .notifyNewBooking(booking)
       .catch((err) => this.logger.error('Ошибка отправки в TG', err));
 
-    return booking;
-  }
-
-  findAll() {
-    return this.prisma.booking.findMany({
-      where: { archivedAt: null },
-      orderBy: { startDate: 'asc' },
-    });
-  }
-
-  findOne(id: string) {
-    return this.prisma.booking.findUnique({ where: { id } });
-  }
-
-  remove(id: string) {
-    return this.prisma.booking.delete({ where: { id } });
-  }
-
-  update(id: string, dto: UpdateBookingDto) {
-    const data: any = { ...dto };
-    if (dto.startDate) data.startDate = new Date(dto.startDate);
-    if (dto.endDate) data.endDate = new Date(dto.endDate);
-    return this.prisma.booking.update({ where: { id }, data });
+    // The browser only needs a confirmation that its request was accepted.
+    // Never echo personal data (phone/name) back into a public API response.
+    return { id: booking.id, status: booking.status };
   }
 
   // Returns an array of YYYY-MM-DD strings the calendar should disable.

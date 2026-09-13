@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   css: ["~/assets/style/main.scss"],
   compatibilityDate: "2024-11-01",
-  devtools: { enabled: true },
+  devtools: { enabled: process.env.NODE_ENV !== "production" },
   modules: ["@nuxt/eslint", "@nuxt/image"],
 
   runtimeConfig: {

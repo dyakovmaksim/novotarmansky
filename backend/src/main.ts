@@ -8,6 +8,9 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // Hide the underlying framework from public responses. Nginx applies the
+  // remaining browser-facing security headers at the trusted edge.
+  app.getHttpAdapter().getInstance().disable('x-powered-by');
   const uploadsDir =
     process.env.PROMOTIONS_UPLOAD_DIR ?? join(process.cwd(), 'uploads');
   await Promise.all([
@@ -37,10 +40,9 @@ async function bootstrap() {
 
   app.enableCors({
     origin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
+    methods: 'GET,HEAD,POST',
   });
 
   await app.listen(process.env.PORT ?? 3001);
 }
-bootstrap();
+void bootstrap();
